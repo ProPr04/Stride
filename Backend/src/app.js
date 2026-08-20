@@ -6,6 +6,7 @@ import morgan from 'morgan';
 // 1. Import Routes
 import authRoutes from './routes/authRoutes.js';
 import profileRoutes from './routes/profileRoutes.js';
+import opportunityRoutes from './routes/opportunityRoutes.js';
 
 // Initialize Express app
 const app = express();
@@ -29,10 +30,10 @@ app.get('/api/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 
 app.use('/api/profiles', profileRoutes);
-// --- Future Routes (Leave commented out for now) ---
 
-// import opportunityRoutes from './routes/opportunityRoutes.js';
-// app.use('/api/opportunities', opportunityRoutes);
+app.use('/api/opportunities', opportunityRoutes);
+
+
 
 
 // 3. Unhandled Route 404 Catcher (Updated Fix)
