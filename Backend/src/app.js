@@ -7,6 +7,7 @@ import morgan from 'morgan';
 import authRoutes from './routes/authRoutes.js';
 import profileRoutes from './routes/profileRoutes.js';
 import opportunityRoutes from './routes/opportunityRoutes.js';
+import agreementRoutes from './routes/agreementRoutes.js'
 
 // Initialize Express app
 const app = express();
@@ -32,6 +33,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/profiles', profileRoutes);
 
 app.use('/api/opportunities', opportunityRoutes);
+
+app.use('/api/agreements', agreementRoutes);
 
 
 
