@@ -5,6 +5,7 @@ import morgan from 'morgan';
 
 // 1. Import Routes
 import authRoutes from './routes/authRoutes.js';
+import profileRoutes from './routes/profileRoutes.js';
 
 // Initialize Express app
 const app = express();
@@ -27,9 +28,9 @@ app.get('/api/health', (req, res) => {
 // 2. Mount Routes
 app.use('/api/auth', authRoutes);
 
+app.use('/api/profiles', profileRoutes);
 // --- Future Routes (Leave commented out for now) ---
-// import profileRoutes from './routes/profileRoutes.js';
-// app.use('/api/profiles', profileRoutes);
+
 // import opportunityRoutes from './routes/opportunityRoutes.js';
 // app.use('/api/opportunities', opportunityRoutes);
 

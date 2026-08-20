@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
 import userModel from '../models/userModel.js';
-import { generateToken } from '../utills/tokenUtils.js';
+import { generateToken } from '../utils/tokenUtils.js';
 
 /**
  * Handles new user registration (Athletes and Academies).
