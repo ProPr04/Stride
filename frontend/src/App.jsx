@@ -2,7 +2,20 @@ import { BrowserRouter as Router, Routes, Route, useNavigate, Navigate } from 'r
 import Login from './pages/Login';
 import SignUp from './pages/SignUp';
 import AthleteDashboard from './pages/AthleteDashboard';
+import HowItWorks from './components/HowItWorks';
+import Trust from './components/Trust';
+import Footer from './components/Footer';
 import './App.css';
+
+function LandingPage() {
+  return (
+    <>
+      <HowItWorks />
+      <Trust />
+      <Footer />
+    </>
+  );
+}
 
 function AppRoutes() {
   const navigate = useNavigate();
@@ -11,7 +24,7 @@ function AppRoutes() {
     <Routes>
       <Route
         path="/"
-        element={<Navigate to="/login" replace />}
+        element={<LandingPage />}
       />
 
       <Route
@@ -46,10 +59,10 @@ function AppRoutes() {
         }
       />
 
-      {/* Fallback to /dashboard if unknown path */}
+      {/* Fallback to / if unknown path */}
       <Route
         path="*"
-        element={<Navigate to="/login" replace />}
+        element={<Navigate to="/" replace />}
       />
     </Routes>
   );
@@ -64,6 +77,3 @@ function App() {
 }
 
 export default App;
-
-
-

@@ -20,15 +20,30 @@
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  --stride-dark: #07130d;
+  --stride-lime: #f2ff65;
+  --stride-blue: #3d45c7;
+  --stride-red: #d96f57;
+  --stride-cream: #f7f5ed;
 }
 
 * {
   box-sizing: border-box;
+}
+
+html {
+  width: 100%;
+  min-width: 320px;
   margin: 0;
   padding: 0;
+  scroll-behavior: smooth;
 }
 
 body {
+  width: 100%;
+  min-width: 320px;
+  min-height: 100vh;
   margin: 0;
   padding: 0;
   background-color: var(--dark-green);
@@ -91,8 +106,5 @@ h4, .h4 {
 #root {
   width: 100%;
   min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
 }
 
