@@ -1,11 +1,14 @@
-import Login from './pages/Login';
-import './App.css';
+import HowItWorks from "./components/HowItWorks";
+import Trust from "./components/Trust";
+import Footer from "./components/Footer";
 
 function App() {
   return (
-    <div className="app-container">
-      <Login />
-    </div>
+    <>
+      <HowItWorks />
+      <Trust />
+      <Footer />
+    </>
   );
 }
 

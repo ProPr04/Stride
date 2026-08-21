@@ -1,32 +1,45 @@
 @import "tailwindcss";
 
 :root {
-  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-family: "Plus Jakarta Sans", Inter, system-ui, sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  --stride-dark: #07130d;
+  --stride-lime: #f2ff65;
+  --stride-blue: #3d45c7;
+  --stride-red: #d96f57;
+  --stride-cream: #f7f5ed;
 }
 
 * {
   box-sizing: border-box;
+}
+
+html {
+  width: 100%;
+  min-width: 320px;
   margin: 0;
   padding: 0;
+  scroll-behavior: smooth;
 }
 
 body {
+  width: 100%;
+  min-width: 320px;
+  min-height: 100vh;
   margin: 0;
   padding: 0;
-  background-color: #f6f8fa;
-  color: #0f172a;
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  background: var(--stride-dark);
+  color: var(--stride-cream);
+  overflow-x: hidden;
 }
 
 #root {
   width: 100%;
   min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  margin: 0;
+  padding: 0;
 }
