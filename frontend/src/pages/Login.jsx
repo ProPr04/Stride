@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Eye, EyeOff, Check } from 'lucide-react';
 
-export default function Login() {
+export default function Login({ onSwitchToSignUp }) {
   const [emailOrPhone, setEmailOrPhone] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -30,7 +30,7 @@ export default function Login() {
       <div className="login-card">
         {/* Top Tag Header */}
         <div className="login-tag">
-          <span className="tag-symbol">*</span> 07. LOGIN
+          <span className="tag-symbol"></span>LOGIN
         </div>
 
         {/* Welcome Text */}
@@ -126,7 +126,14 @@ export default function Login() {
           {/* Sign Up Footer */}
           <div className="form-footer">
             <span className="footer-text">Don't have an account? </span>
-            <a href="#signup" className="signup-link" onClick={(e) => { e.preventDefault(); alert('Redirecting to Sign Up page...'); }}>
+            <a
+              href="#signup"
+              className="signup-link"
+              onClick={(e) => {
+                e.preventDefault();
+                if (onSwitchToSignUp) onSwitchToSignUp();
+              }}
+            >
               Sign up
             </a>
           </div>

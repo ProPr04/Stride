@@ -1,9 +1,23 @@
 @import "tailwindcss";
 
 :root {
-  font-family: "Plus Jakarta Sans", Inter, system-ui, sans-serif;
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
+  /* Color Palette */
+  --primary-green: #2A3C2E;
+  --dark-green: #1F2F23;
+  --navy-blue: #0F172A;
+  --sport-blue: #2C337F;
+  --accent-yellow: #F2FF05;
+  --accent-orange: #95402F;
+  --teal: #0083A4;
+  --light-grey: #E5E7EB;
+  --off-white: #F7F7F7;
+  --white: #FFFFFF;
+
+  /* Typography */
+  --font-heading: 'Poppins', sans-serif;
+  --font-body: 'Inter', sans-serif;
+
+  font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
@@ -32,14 +46,68 @@ body {
   min-height: 100vh;
   margin: 0;
   padding: 0;
-  background: var(--stride-dark);
-  color: var(--stride-cream);
-  overflow-x: hidden;
+  background-color: var(--dark-green);
+  color: var(--off-white);
+  min-height: 100vh;
+  font-family: var(--font-body);
+}
+
+/* Heading Styles */
+h1, .h1 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 48px;
+  line-height: 56px;
+}
+
+h2, .h2 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 32px;
+  line-height: 40px;
+}
+
+h3, .h3 {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 24px;
+  line-height: 32px;
+}
+
+h4, .h4 {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 18px;
+  line-height: 28px;
+}
+
+/* Body Text Styles */
+.text-body {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.text-small {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.text-caption {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 16px;
 }
 
 #root {
   width: 100%;
   min-height: 100vh;
-  margin: 0;
-  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
+
