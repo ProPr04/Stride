@@ -10,14 +10,6 @@ function App() {
       <HowItWorks />
       <Trust />
       <Footer />
-
-      <div className="app-container">
-        {currentView === "login" ? (
-          <Login onSwitchToSignUp={() => setCurrentView("signup")} />
-        ) : (
-          <SignUp onSwitchToLogin={() => setCurrentView("login")} />
-        )}
-      </div>
     </>
   );
 }
