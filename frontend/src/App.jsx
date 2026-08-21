@@ -33,7 +33,7 @@ function AppRoutes() {
           <div className="app-container">
             <Login
               onSwitchToSignUp={() => navigate('/signup')}
-              onLoginSuccess={() => navigate('/dashboard')}
+              onLoginSuccess={() => navigate('/athlete')}
             />
           </div>
         }
@@ -50,8 +50,9 @@ function AppRoutes() {
         }
       />
 
+      {/* Athlete Dashboard Route - Visible ONLY at /athlete */}
       <Route
-        path="/dashboard"
+        path="/athlete"
         element={
           <AthleteDashboard
             onLogout={() => navigate('/login')}

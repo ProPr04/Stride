@@ -1,17 +1,25 @@
 @import "tailwindcss";
 
 :root {
-  /* Color Palette */
+  /* Match Point Exact Color Palette */
   --primary-green: #2A3C2E;
   --dark-green: #1F2F23;
   --navy-blue: #0F172A;
   --sport-blue: #2C337F;
-  --accent-yellow: #F2FF05;
+  --accent-yellow: #F2FF65;
   --accent-orange: #95402F;
+  --court-line-green: #315038;
   --teal: #0083A4;
   --light-grey: #E5E7EB;
   --off-white: #F7F7F7;
   --white: #FFFFFF;
+
+  /* Stride Match Point Extended Palette */
+  --stride-dark: #07130d;
+  --stride-lime: #f2ff65;
+  --stride-blue: #2c337f;
+  --stride-clay: #95402f;
+  --stride-court-line: #315038;
 
   /* Typography */
   --font-heading: 'Poppins', sans-serif;
@@ -20,12 +28,6 @@
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-
-  --stride-dark: #07130d;
-  --stride-lime: #f2ff65;
-  --stride-blue: #3d45c7;
-  --stride-red: #d96f57;
-  --stride-cream: #f7f5ed;
 }
 
 * {
