@@ -1,27 +1,52 @@
 import React from "react";
 
-const trustFeatures = [
+const athleteFeatures = [
   {
     number: "01",
-    title: "Verified Profile",
-    description:
-      "Show the experience, skills and details that make you credible.",
+    title: "EARN",
+    description: "Get paid for sport-specific work that fits around your training.",
   },
   {
     number: "02",
-    title: "Two-Sided Reviews",
-    description:
-      "Build trust through clear, honest feedback after every role.",
+    title: "LEARN",
+    description: "Gain practical experience from coaches, academics and real sporting environments.",
   },
   {
     number: "03",
-    title: "Reputation History",
-    description:
-      "Keep a visible record of the work and relationships you earn.",
+    title: "PROVE",
+    description: "Build a verified record of your experience, skills, and achievements.",
+  },
+  {
+    number: "04",
+    title: "GROW",
+    description: "Use your experience to unlock better opportunities as your career develops.",
   },
 ];
 
-function TrustPanel({ audience, colorClass }) {
+const academyFeatures = [
+  {
+    number: "01",
+    title: "DISCOVER",
+    description: "Find athletes through structured sporting profiles, skills, and experience.",
+  },
+  {
+    number: "02",
+    title: "ENGAGE",
+    description: "Post flexible opportunities and connect with athletes who fit your needs.",
+  },
+  {
+    number: "03",
+    title: "DEVELOP",
+    description: "Create meaningful sporting experiences that help athletes grow.",
+  },
+  {
+    number: "04",
+    title: "BUILD YOUR POOL",
+    description: "Stay connected with promising athletes for future opportunities.",
+  },
+];
+
+function TrustPanel({ audience, colorClass, features }) {
   return (
     <article
       className={`group relative flex min-h-[390px] flex-col overflow-hidden p-7 sm:p-9 md:min-h-[410px] ${colorClass}`}
@@ -38,8 +63,8 @@ function TrustPanel({ audience, colorClass }) {
       </div>
 
       {/* Features */}
-      <div className="space-y-7">
-        {trustFeatures.map((feature) => (
+      <div className="space-y-6">
+        {features.map((feature) => (
           <div
             key={feature.number}
             className="group/feature flex gap-4 transition-transform duration-300 hover:translate-x-1"
@@ -53,7 +78,7 @@ function TrustPanel({ audience, colorClass }) {
                 {feature.title}
               </h4>
 
-              <p className="mt-1.5 max-w-sm text-sm font-light leading-relaxed text-[#f5f0e7]/80">
+              <p className="mt-1 max-w-sm text-sm font-light leading-relaxed text-[#f5f0e7]/80">
                 {feature.description}
               </p>
             </div>
@@ -74,11 +99,11 @@ export default function Trust() {
         {/* Header */}
         <header className="mb-10 sm:mb-12">
           <p className="mb-3 text-[11px] font-semibold tracking-[0.22em] text-[#f2ff65]/70">
-            TRUST, BUILT IN
+            HOW IT WORKS
           </p>
 
           <h2 className="text-4xl font-extrabold leading-none tracking-[-0.055em] text-[#f2ff65] sm:text-5xl">
-            Every interaction builds a reputation
+            Built for athletes and academies
           </h2>
 
           <div className="mt-7 h-px w-full bg-[#f2ff65]/80" />
@@ -88,14 +113,16 @@ export default function Trust() {
         <div className="grid grid-cols-1 md:grid-cols-2">
           {/* Athlete */}
           <TrustPanel
-            audience="ATHLETE"
+            audience="ATHLETES"
             colorClass="bg-[#95402f]"
+            features={athleteFeatures}
           />
 
           {/* Academy */}
           <TrustPanel
-            audience="ACADEMY"
+            audience="ACADEMIES"
             colorClass="bg-[#2c337f] md:border-l md:border-[#f2ff65]"
+            features={academyFeatures}
           />
         </div>
       </div>
