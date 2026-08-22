@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Eye, EyeOff, Check } from 'lucide-react';
 
-export default function Login({ onSwitchToSignUp }) {
+export default function Login({ onSwitchToSignUp, onLoginSuccess }) {
   const [emailOrPhone, setEmailOrPhone] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -22,6 +22,9 @@ export default function Login({ onSwitchToSignUp }) {
     setTimeout(() => {
       setIsSubmitting(false);
       setMessage({ type: 'success', text: 'Successfully logged in!' });
+      setTimeout(() => {
+        if (onLoginSuccess) onLoginSuccess();
+      }, 500);
     }, 1000);
   };
 
