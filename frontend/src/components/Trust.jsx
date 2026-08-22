@@ -49,7 +49,7 @@ const academyFeatures = [
 function TrustPanel({ audience, colorClass, features }) {
   return (
     <article
-      className={`group relative flex min-h-[390px] flex-col overflow-hidden p-7 sm:p-9 md:min-h-[410px] ${colorClass}`}
+      className={`group relative flex min-h-[390px] flex-col overflow-hidden p-7 sm:p-9 md:min-h-[410px] ${colorClass} font-['Poppins',sans-serif]`}
     >
       {/* Audience */}
       <div className="mb-8 border-b border-[#f2ff65]/70 pb-6">
@@ -67,7 +67,7 @@ function TrustPanel({ audience, colorClass, features }) {
         {features.map((feature) => (
           <div
             key={feature.number}
-            className="group/feature flex gap-4 transition-transform duration-300 hover:translate-x-1"
+            className="group/feature flex gap-4 transition-transform duration-300 hover:translate-x-1 font-['Inter',sans-serif]"
           >
             <span className="w-11 shrink-0 text-3xl font-extrabold leading-none tracking-[-0.08em] text-[#f2ff65]/25">
               {feature.number}

@@ -29,7 +29,7 @@ const steps = [
 
 export default function HowItWorks() {
   return (
-    <section className="w-full bg-[#2a3c2e] px-6 py-14 sm:px-10 md:py-16 lg:px-16 xl:px-20">
+    <section className="w-full bg-[#2a3c2e] px-6 py-14 sm:px-10 md:py-16 lg:px-16 xl:px-20 font-['Poppins',sans-serif]">
       <div className="mx-auto w-full max-w-[1200px]">
         <div className="mb-9 flex items-end justify-between gap-6 sm:mb-11">
           <div>
@@ -48,7 +48,7 @@ export default function HowItWorks() {
           {steps.map((step) => (
             <article
               key={step.number}
-              className={`group relative flex min-h-[260px] flex-col overflow-hidden border border-[#315038] p-7 transition-transform duration-300 ease-out hover:-translate-y-1 sm:min-h-[280px] sm:p-8 ${step.color}`}
+              className={`group relative flex min-h-[260px] flex-col overflow-hidden border border-[#315038] p-7 transition-transform duration-300 ease-out hover:-translate-y-1 sm:min-h-[280px] sm:p-8 ${step.color} font-['Inter',sans-serif]`}
             >
               <div className="pointer-events-none absolute right-5 top-3 text-[7rem] font-extrabold leading-none tracking-[-0.1em] text-[#f2ff65]/[0.07] sm:right-7 sm:text-[8rem]">
                 {step.number}
