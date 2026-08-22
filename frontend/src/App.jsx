@@ -27,45 +27,51 @@ function AppRoutes() {
 
   return (
     <Routes>
-      <Route
-        path="/"
-        element={<LandingPage />}
-      />
+      {/* Landing Page */}
+      <Route path="/" element={<LandingPage />} />
 
+      {/* Login */}
       <Route
         path="/login"
         element={
           <div className="app-container">
             <Login
-              onSwitchToSignUp={() => navigate('/signup')}
-              onLoginSuccess={() => navigate('/athlete')}
+              onSwitchToSignUp={() => navigate("/signup")}
+              onLoginSuccess={() => navigate("/athlete")}
             />
           </div>
         }
       />
 
+      {/* Sign Up */}
       <Route
         path="/signup"
         element={
           <div className="app-container">
             <SignUp
-              onSwitchToLogin={() => navigate('/login')}
+              onSwitchToLogin={() => navigate("/login")}
             />
           </div>
         }
       />
 
-      {/* Athlete Dashboard Route - Visible ONLY at /athlete */}
+      {/* Athlete Dashboard */}
       <Route
         path="/athlete"
         element={
           <AthleteDashboard
-            onLogout={() => navigate('/login')}
+            onLogout={() => navigate("/login")}
           />
         }
       />
 
-      {/* Fallback to / if unknown path */}
+      {/* Academy Dashboard */}
+      <Route
+        path="/academy"
+        element={<AcademyDashboard />}
+      />
+
+      {/* Unknown routes */}
       <Route
         path="*"
         element={<Navigate to="/" replace />}
@@ -75,11 +81,7 @@ function AppRoutes() {
 }
 
 function App() {
-  return (
-    <Router>
-      <AppRoutes />
-    </Router>
-  );
+  return <AppRoutes />;
 }
 
 export default App;
