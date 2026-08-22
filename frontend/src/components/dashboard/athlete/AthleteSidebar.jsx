@@ -16,40 +16,48 @@ export default function AthleteSidebar({ activeTab, setActiveTab, onLogout }) {
   ];
 
   return (
-    <aside className="athlete-sidebar">
+    <aside className="athlete-sidebar bg-[#17241a] border-r border-[#2A3C2E]">
       {/* Sidebar Top Brand Header */}
-      <div className="sidebar-brand-box">
-        <div className="sidebar-brand-title">
-          <span className="brand-symbol">✳</span> STRIDE
+      <div className="sidebar-brand-box pb-5 mb-6 border-b border-[#2A3C2E]">
+        <div className="font-['Poppins',sans-serif] font-bold text-2xl tracking-tight text-white flex items-center">
+          STRIDE<span className="text-[#F2FF65]">.</span>
         </div>
-        <span className="sidebar-sub-tag">PERFORMANCE HUB</span>
+        <span className="text-[10px] font-mono font-bold tracking-widest text-[#F2FF65]/70 uppercase mt-1 block">
+          ATHLETE PERFORMANCE HUB
+        </span>
       </div>
 
       {/* Navigation Links */}
-      <nav className="sidebar-nav-list">
+      <nav className="sidebar-nav-list space-y-1.5 flex-1">
         {navItems.map((item, idx) => {
           const Icon = item.icon;
           const isActive = activeTab === item.id;
           return (
             <button
               key={item.id}
-              className={`matchpoint-nav-btn ${isActive ? 'active' : ''}`}
               onClick={() => setActiveTab(item.id)}
+              className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-['Poppins',sans-serif] font-bold tracking-wide uppercase transition-all cursor-pointer ${
+                isActive
+                  ? 'bg-[#141F16] text-[#F2FF65] border border-[#F2FF65]/60 shadow-lg shadow-black/20'
+                  : 'text-gray-300 hover:text-white hover:bg-[#141F16]/50 border border-transparent'
+              }`}
             >
-              <span className="nav-step-index">0{idx + 1}</span>
-              <Icon size={17} className="nav-icon" />
-              <span className="nav-btn-text">{item.label}</span>
+              <span className="text-[11px] font-mono text-[#F2FF65]/50">0{idx + 1}</span>
+              <Icon size={16} className={isActive ? 'text-[#F2FF65]' : 'text-gray-400'} />
+              <span>{item.label}</span>
             </button>
           );
         })}
       </nav>
 
       {/* Footer Logout Button */}
-      <div className="sidebar-footer-box">
-        <div className="court-line-divider" />
-        <button className="matchpoint-nav-btn logout-btn" onClick={onLogout}>
-          <LogOut size={17} className="nav-icon" />
-          <span className="nav-btn-text">Logout</span>
+      <div className="pt-4 border-t border-[#2A3C2E]">
+        <button
+          onClick={onLogout}
+          className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-['Poppins',sans-serif] font-bold tracking-wide uppercase text-gray-400 hover:text-rose-400 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/20 transition-all cursor-pointer"
+        >
+          <LogOut size={16} />
+          <span>Logout</span>
         </button>
       </div>
     </aside>

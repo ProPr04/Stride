@@ -166,17 +166,17 @@ export default function AthleteEngagementsSection() {
     <div className="engagements-pane matchpoint-fade-in max-w-5xl mx-auto space-y-5 pb-16">
       {/* Title Header */}
       <div className="flex items-center justify-between pt-1">
-        <h1 className="text-2xl font-black font-mono tracking-widest text-white uppercase">
+        <h1 className="text-2xl font-black font-['Poppins',sans-serif] tracking-wider text-white uppercase">
           ENGAGEMENTS
         </h1>
-        <span className="text-xs font-mono bg-[#F2FF65]/10 text-[#F2FF65] border border-[#F2FF65]/20 px-3 py-1 rounded-md font-bold flex items-center gap-1.5">
+        <span className="text-xs font-mono bg-[#F2FF65]/10 text-[#F2FF65] border border-[#F2FF65]/20 px-3 py-1 rounded-xl font-bold flex items-center gap-1.5">
           <Zap size={13} className="fill-[#F2FF65]" />
           <span>{filteredEngagements.length} ACTIVE OPPORTUNITIES</span>
         </span>
       </div>
 
       {/* Search Bar */}
-      <div className="bg-[#141F16] border border-[#2A3C2E] rounded-xl p-4">
+      <div className="bg-[#141F16] border border-[#2A3C2E] rounded-2xl p-4 shadow-lg">
         <div className="relative">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
           <input
@@ -187,90 +187,96 @@ export default function AthleteEngagementsSection() {
               setSearchTerm(e.target.value);
               setVisibleCount(6);
             }}
-            className="w-full pl-10 pr-4 py-2 bg-[#0B120D] border border-[#2A3C2E] rounded-lg text-xs text-white placeholder-gray-500 focus:outline-none focus:border-[#F2FF65] transition-colors font-['Inter',sans-serif]"
+            className="w-full pl-10 pr-4 py-2 bg-[#0B120D] border border-[#2A3C2E] rounded-xl text-xs text-white placeholder-gray-500 focus:outline-none focus:border-[#F2FF65] transition-colors font-['Inter',sans-serif]"
           />
         </div>
       </div>
 
       {/* Active Engagements 2-Column Cards Grid */}
       {filteredEngagements.length === 0 ? (
-        <div className="bg-[#141F16] border border-[#2A3C2E] rounded-xl p-10 text-center text-gray-400">
+        <div className="bg-[#141F16] border border-[#2A3C2E] rounded-2xl p-10 text-center text-gray-400">
           <p className="text-sm font-semibold text-white">No active engagements found</p>
           <p className="text-xs mt-1">Try searching or applying to new opportunities.</p>
         </div>
       ) : (
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {displayedEngagements.map((eng) => (
-              <article
-                key={eng.id}
-                className="bg-[#141F16] border border-[#2A3C2E] rounded-xl p-5 text-[#F7F8FA] font-['Inter',sans-serif] space-y-4 shadow-lg hover:border-[#3A503F] transition-all flex flex-col justify-between"
-              >
-                {/* Header: Title & Active Status */}
-                <div className="space-y-3">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="space-y-1">
-                      <h3 className="text-base font-bold font-mono tracking-wide text-white uppercase">
-                        {eng.title}
-                      </h3>
-                      <p className="text-xs sm:text-sm font-semibold text-gray-300">
-                        {eng.academy}
+            {displayedEngagements.map((eng, idx) => {
+              const cardBgColors = [
+                'bg-[#95402f] border-[#b24f3c]/40',
+                'bg-[#2C337F] border-[#3a44a6]/40',
+                'bg-[#141F16] border-[#2A3C2E]'
+              ];
+              const cardStyle = cardBgColors[idx % cardBgColors.length];
+
+              return (
+                <article
+                  key={eng.id}
+                  className={`${cardStyle} border rounded-2xl p-5 text-[#F7F8FA] font-['Inter',sans-serif] space-y-4 shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between`}
+                >
+                  {/* Header: Title & Active Status */}
+                  <div className="space-y-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="space-y-1">
+                        <h3 className="text-base font-bold font-mono tracking-wide text-white uppercase">
+                          {eng.title}
+                        </h3>
+                        <p className="text-xs sm:text-sm font-semibold text-gray-300">
+                          {eng.academy}
+                        </p>
+                      </div>
+
+                      <span className="px-2.5 py-1 text-xs font-mono font-bold rounded-md bg-black/20 text-white/80 border border-white/10 flex items-center gap-1.5 shrink-0">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        <span>{eng.status.toUpperCase()}</span>
+                      </span>
+                    </div>
+
+                    {/* Location Tag */}
+                    <div className="flex items-center gap-1.5 text-xs text-[#F2FF65]">
+                      <MapPin size={14} />
+                      <span>{eng.location}</span>
+                    </div>
+
+                    {/* Days Remaining & Active Badge */}
+                    <div className="flex items-center justify-between text-xs text-gray-300 font-mono pt-1">
+                      <span className="text-gray-400">Time Remaining:</span>
+                      <p className="text-[#F2FF65] font-bold">
+                        ⏳ {eng.daysLeft}
                       </p>
                     </div>
 
-                    <span className="px-2.5 py-1 text-xs font-mono font-bold rounded-md bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5 shrink-0">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                      <span>{eng.status.toUpperCase()}</span>
-                    </span>
-                  </div>
-
-                  {/* Location Tag */}
-                  <div className="flex items-center gap-1.5 text-xs text-[#F2FF65]">
-                    <MapPin size={14} />
-                    <span>{eng.location}</span>
-                  </div>
-
-                  {/* Active Timeline & Days Remaining */}
-                  <div className="space-y-1 bg-[#0B120D] p-2.5 rounded-lg border border-[#2A3C2E]">
-                    <div className="flex items-center gap-1.5 text-xs text-sky-400 font-mono font-semibold">
-                      <Clock size={13} />
-                      <span>Active: {eng.timeline}</span>
+                    {/* Compensation */}
+                    <div className="text-sm sm:text-base font-bold font-mono text-white">
+                      {eng.compensation}
                     </div>
-                    <p className="text-[11px] text-gray-400 font-mono pl-4">
-                      ⏳ {eng.daysLeft}
-                    </p>
+
+                    {/* Schedule & Timings */}
+                    <div className="space-y-1 text-xs text-gray-200 font-mono">
+                      <p className="font-medium">{eng.type}</p>
+                      <p className="text-gray-400">{eng.timings}</p>
+                    </div>
+
+                    {/* Next Session Note */}
+                    <div className="text-xs bg-black/20 p-2 rounded border border-white/10 text-emerald-300 flex items-center gap-1.5">
+                      <CheckCircle2 size={13} className="shrink-0 text-emerald-400" />
+                      <span className="truncate">Next: {eng.nextSession}</span>
+                    </div>
                   </div>
 
-                  {/* Compensation */}
-                  <div className="text-sm sm:text-base font-bold font-mono text-[#F2FF65]">
-                    {eng.compensation}
+                  {/* Footer Action: ONLY View Hub button (Message button removed) */}
+                  <div className="pt-3 border-t border-white/10 mt-2">
+                    <button
+                      onClick={() => setActiveModalEngagement(eng)}
+                      className="w-full py-2 bg-[#F2FF65] hover:bg-[#e2ef4f] text-[#141F16] rounded-lg text-xs font-mono font-bold uppercase flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-md"
+                    >
+                      <span>VIEW HUB</span>
+                      <ExternalLink size={14} />
+                    </button>
                   </div>
-
-                  {/* Schedule & Timings */}
-                  <div className="space-y-1 text-xs text-gray-200 font-mono">
-                    <p className="font-medium">{eng.type}</p>
-                    <p className="text-gray-400">{eng.timings}</p>
-                  </div>
-
-                  {/* Next Session Note */}
-                  <div className="text-xs bg-[#17241A] p-2 rounded border border-[#2A3C2E] text-emerald-300 flex items-center gap-1.5">
-                    <CheckCircle2 size={13} className="shrink-0 text-emerald-400" />
-                    <span className="truncate">Next: {eng.nextSession}</span>
-                  </div>
-                </div>
-
-                {/* Footer Action: ONLY View Hub button (Message button removed) */}
-                <div className="pt-3 border-t border-[#2A3C2E] mt-2">
-                  <button
-                    onClick={() => setActiveModalEngagement(eng)}
-                    className="w-full py-2 bg-[#F2FF65] hover:bg-[#e2ef4f] text-[#141F16] rounded-lg text-xs font-mono font-bold uppercase flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-md"
-                  >
-                    <span>VIEW HUB</span>
-                    <ExternalLink size={14} />
-                  </button>
-                </div>
-              </article>
-            ))}
+                </article>
+              );
+            })}
           </div>
 
           {/* Show More Button */}

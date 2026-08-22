@@ -217,16 +217,16 @@ export default function AthleteApplicationsSection() {
     <div className="applications-pane matchpoint-fade-in max-w-5xl mx-auto space-y-5 pb-16">
       {/* Title Header */}
       <div className="flex items-center justify-between pt-1">
-        <h1 className="text-2xl font-black font-mono tracking-widest text-white uppercase">
+        <h1 className="text-2xl font-black font-['Poppins',sans-serif] tracking-wider text-white uppercase">
           APPLICATIONS
         </h1>
-        <span className="text-xs font-mono bg-[#F2FF65]/10 text-[#F2FF65] border border-[#F2FF65]/20 px-3 py-1 rounded-md font-bold">
+        <span className="text-xs font-mono bg-[#F2FF65]/10 text-[#F2FF65] border border-[#F2FF65]/20 px-3 py-1 rounded-xl font-bold">
           {filteredApplications.length} APPLIED
         </span>
       </div>
 
       {/* Search & Status Filter Bar */}
-      <div className="bg-[#141F16] border border-[#2A3C2E] rounded-xl p-4 space-y-3">
+      <div className="bg-[#141F16] border border-[#2A3C2E] rounded-2xl p-4 space-y-3 shadow-lg">
         <div className="relative">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
           <input
@@ -234,7 +234,7 @@ export default function AthleteApplicationsSection() {
             placeholder="Search applied opportunity title, academy, or location..."
             value={searchTerm}
             onChange={handleSearchChange}
-            className="w-full pl-10 pr-4 py-2 bg-[#0B120D] border border-[#2A3C2E] rounded-lg text-xs text-white placeholder-gray-500 focus:outline-none focus:border-[#F2FF65] transition-colors font-['Inter',sans-serif]"
+            className="w-full pl-10 pr-4 py-2 bg-[#0B120D] border border-[#2A3C2E] rounded-xl text-xs text-white placeholder-gray-500 focus:outline-none focus:border-[#F2FF65] transition-colors font-['Inter',sans-serif]"
           />
         </div>
 
@@ -245,9 +245,9 @@ export default function AthleteApplicationsSection() {
             <button
               key={st}
               onClick={() => handleStatusChange(st)}
-              className={`px-3 py-1 rounded-md text-xs font-mono font-bold tracking-wider uppercase transition-all shrink-0 cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-['Poppins',sans-serif] font-bold tracking-wider uppercase transition-all shrink-0 cursor-pointer ${
                 selectedStatus === st
-                  ? 'bg-[#F2FF65] text-[#141F16]'
+                  ? 'bg-[#F2FF65] text-[#141F16] shadow-sm'
                   : 'bg-[#0B120D] text-gray-300 hover:text-white border border-[#2A3C2E]'
               }`}
             >
@@ -259,18 +259,26 @@ export default function AthleteApplicationsSection() {
 
       {/* Applied Cards 2-Column Grid */}
       {filteredApplications.length === 0 ? (
-        <div className="bg-[#141F16] border border-[#2A3C2E] rounded-xl p-10 text-center text-gray-400">
+        <div className="bg-[#141F16] border border-[#2A3C2E] rounded-2xl p-10 text-center text-gray-400">
           <p className="text-sm font-semibold text-white">No applications found</p>
           <p className="text-xs mt-1">Try adjusting your filters.</p>
         </div>
       ) : (
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {displayedApplications.map((app) => (
-              <article
-                key={app.id}
-                className="bg-[#141F16] border border-[#2A3C2E] rounded-xl p-5 text-[#F7F8FA] font-['Inter',sans-serif] space-y-4 shadow-lg hover:border-[#3A503F] transition-all flex flex-col justify-between"
-              >
+            {displayedApplications.map((app, idx) => {
+              const cardBgColors = [
+                'bg-[#95402f] border-[#b24f3c]/40',
+                'bg-[#2C337F] border-[#3a44a6]/40',
+                'bg-[#141F16] border-[#2A3C2E]'
+              ];
+              const cardStyle = cardBgColors[idx % cardBgColors.length];
+
+              return (
+                <article
+                  key={app.id}
+                  className={`${cardStyle} border rounded-2xl p-5 text-[#F7F8FA] font-['Inter',sans-serif] space-y-4 shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between`}
+                >
                 {/* Header: Title & Status */}
                 <div className="space-y-3">
                   <div className="flex items-start justify-between gap-3">
@@ -324,8 +332,9 @@ export default function AthleteApplicationsSection() {
                   </button>
                 </div>
               </article>
-            ))}
-          </div>
+            );
+          })}
+        </div>
 
           {/* Show More Button (Loads 6 more cards each click) */}
           {visibleCount < filteredApplications.length && (

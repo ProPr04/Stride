@@ -43,7 +43,7 @@ export const Navbar = ({ onOpenLogin, onOpenSignUp }) => {
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         isScrolled
-          ? 'bg-[#1A1F1E]/80 backdrop-blur-md border-b border-white/10 py-3.5 shadow-lg shadow-black/20'
+          ? 'bg-[#17241a]/85 backdrop-blur-md border-b border-[#2A3C2E] py-3.5 shadow-lg shadow-black/20'
           : 'bg-transparent py-5'
       }`}
     >

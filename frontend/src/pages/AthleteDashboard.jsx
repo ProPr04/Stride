@@ -9,7 +9,7 @@ export default function AthleteDashboard({ onLogout }) {
   const [activeTab, setActiveTab] = useState('opportunities');
 
   return (
-    <div className="matchpoint-dashboard-layout">
+    <div className="matchpoint-dashboard-layout bg-[#17241a] font-['Inter',sans-serif]">
       {/* Sidebar Navigation */}
       <AthleteSidebar
         activeTab={activeTab}
@@ -18,8 +18,8 @@ export default function AthleteDashboard({ onLogout }) {
       />
 
       {/* Main Panel Content */}
-      <div className="matchpoint-dashboard-main">
-        <main className="matchpoint-content-viewport">
+      <div className="matchpoint-dashboard-main bg-[#17241a]">
+        <main className="matchpoint-content-viewport p-6 sm:p-8">
           {activeTab === 'opportunities' && <AthleteOpportunitiesSection />}
           {activeTab === 'applications' && <AthleteApplicationsSection />}
           {activeTab === 'engagements' && <AthleteEngagementsSection />}
