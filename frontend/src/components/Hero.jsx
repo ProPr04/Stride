@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FaArrowRight } from 'react-icons/fa';
+import { ArrowRight } from 'lucide-react';
 import HeroImage from '../assets/images/hero-court-basketball.jpg';
 
 export const Hero = () => {
@@ -47,7 +47,7 @@ export const Hero = () => {
               className="inline-flex items-center justify-center gap-3 px-8 py-3.5 rounded-xl bg-[#F2FF65] text-[#0F172A] font-['Poppins',sans-serif] font-bold text-sm sm:text-base hover:bg-[#e2ef4f] transition-colors duration-200 cursor-pointer shadow-md shadow-black/20"
             >
               <span>Explore Opportunities</span>
-              <FaArrowRight className="text-xs" />
+              <ArrowRight size={16} />
             </button>
 
             <button
