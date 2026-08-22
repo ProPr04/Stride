@@ -48,7 +48,6 @@ export const Navbar = ({ onOpenLogin, onOpenSignUp }) => {
       }`}
     >
       <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 flex items-center justify-between">
-        {/* Brand Logo */}
         <a href="/" className="flex items-center gap-2.5 group">
           <span className="font-['Poppins',sans-serif] font-bold text-xl sm:text-2xl tracking-tight text-white">
             STRIDE<span className="text-[#F2FF65]">.</span>
@@ -56,7 +55,7 @@ export const Navbar = ({ onOpenLogin, onOpenSignUp }) => {
         </a>
 
         {/* Desktop Navigation Links */}
-        <nav className="hidden md:flex items-center gap-8">
+        <nav className="hidden md:flex items-center gap-8 ">
           {navLinks.map((link) => (
             <a
               key={link.name}
