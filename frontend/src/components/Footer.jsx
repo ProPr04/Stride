@@ -1,13 +1,14 @@
 import React from "react";
+import { Link } from "react-router-dom"; // Make sure to import Link
 
 const navigation = [
-  "About",
-  "How It Works",
-  "Athletes",
-  "Academies",
-  "Opportunities",
-  "Login",
-  "Register",
+  { name: "About", path: "/#about" },
+  { name: "How It Works", path: "/#how-it-works" },
+  { name: "Athletes", path: "/#athletes" },
+  { name: "Academies", path: "/academy" }, // Dedicated page route
+  { name: "Opportunities", path: "/#opportunities" },
+  { name: "Login", path: "/login" },
+  { name: "Register", path: "/register" },
 ];
 
 export default function Footer() {
@@ -50,19 +51,19 @@ export default function Footer() {
               <nav aria-label="Footer navigation">
                 <ul className="grid grid-cols-2 gap-x-6 gap-y-3">
                   {navigation.map((item) => (
-                    <li key={item}>
-                      <a
-                        href={`#${item.toLowerCase().replace(/\s+/g, "-")}`}
+                    <li key={item.name}>
+                      <Link
+                        to={item.path}
                         className="group inline-flex items-center gap-1 text-sm text-[#f7f5ed]/80 transition-colors duration-300 hover:text-[#f2ff65]"
                       >
                         <span className="relative">
-                          {item}
+                          {item.name}
                           <span className="absolute -bottom-1 left-0 h-px w-0 bg-[#f2ff65] transition-all duration-300 group-hover:w-full" />
                         </span>
                         <span className="translate-x-0 opacity-0 transition-all duration-300 group-hover:translate-x-1 group-hover:opacity-100">
                           →
                         </span>
-                      </a>
+                      </Link>
                     </li>
                   ))}
                 </ul>
