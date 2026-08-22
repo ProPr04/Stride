@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import AthleteSidebar from '../components/dashboard/athlete/AthleteSidebar';
 import AthleteOpportunitiesSection from '../components/dashboard/athlete/AthleteOpportunitiesSection';
+import AthleteSavedSection from '../components/dashboard/athlete/AthleteSavedSection';
 import AthleteApplicationsSection from '../components/dashboard/athlete/AthleteApplicationsSection';
 import AthleteEngagementsSection from '../components/dashboard/athlete/AthleteEngagementsSection';
 import AthleteProfileSection from '../components/dashboard/athlete/AthleteProfileSection';
@@ -21,6 +22,9 @@ export default function AthleteDashboard({ onLogout }) {
       <div className="matchpoint-dashboard-main bg-[#17241a]">
         <main className="matchpoint-content-viewport p-6 sm:p-8">
           {activeTab === 'opportunities' && <AthleteOpportunitiesSection />}
+          {activeTab === 'saved' && (
+            <AthleteSavedSection onNavigateToOpportunities={() => setActiveTab('opportunities')} />
+          )}
           {activeTab === 'applications' && <AthleteApplicationsSection />}
           {activeTab === 'engagements' && <AthleteEngagementsSection />}
           {activeTab === 'profile' && <AthleteProfileSection />}

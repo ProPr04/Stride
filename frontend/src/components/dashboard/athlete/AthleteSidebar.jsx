@@ -1,6 +1,7 @@
 import React from 'react';
 import {
   Search,
+  Bookmark,
   FileText,
   Handshake,
   User,
@@ -10,6 +11,7 @@ import {
 export default function AthleteSidebar({ activeTab, setActiveTab, onLogout }) {
   const navItems = [
     { id: 'opportunities', label: 'Opportunities', icon: Search },
+    { id: 'saved', label: 'Saved', icon: Bookmark },
     { id: 'applications', label: 'Applications', icon: FileText },
     { id: 'engagements', label: 'Engagements', icon: Handshake },
     { id: 'profile', label: 'Profile', icon: User },
