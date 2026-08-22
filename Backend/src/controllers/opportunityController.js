@@ -73,7 +73,67 @@ export const getActiveOpportunities = async (req, res, next) => {
   }
 };
 
+/**
+ * Retrieves all opportunities posted by the currently logged-in academy,
+ * including the total number of applications received for each.
+ */
+export const getMyPostedOpportunities = async (req, res, next) => {
+  try {
+    const academyId = req.user.id;
+    const opportunities = await opportunityModel.getOpportunitiesByAcademy(academyId);
+
+    res.status(200).json({
+      status: 'success',
+      results: opportunities.length,
+      data: {
+        opportunities,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Updates an opportunity's status (active vs closed).
+ * Restricted to the owning academy.
+ */
+export const updateOpportunityStatus = async (req, res, next) => {
+  try {
+    const academyId = req.user.id;
+    const { id } = req.params;
+    const { status } = req.body;
+
+    if (!['active', 'closed'].includes(status)) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Invalid status. Must be either "active" or "closed".',
+      });
+    }
+
+    const updated = await opportunityModel.updateOpportunityStatus(id, academyId, status);
+
+    if (!updated) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'Opportunity not found or you do not have permission to modify it.',
+      });
+    }
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        opportunity: updated,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export default {
   createOpportunity,
   getActiveOpportunities,
-};
+  getMyPostedOpportunities,
+  updateOpportunityStatus,
+};

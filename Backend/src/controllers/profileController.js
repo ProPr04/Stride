@@ -62,7 +62,35 @@ export const updateMyProfile = async (req, res, next) => {
   }
 };
 
+/**
+ * Retrieves the full public dossier/profile of a specific athlete by user ID.
+ */
+export const getAthleteProfileById = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+
+    const profile = await profileModel.getPublicAthleteProfileByUserId(userId);
+
+    if (!profile) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'Athlete profile not found.',
+      });
+    }
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        profile,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export default {
   getMyProfile,
   updateMyProfile,
-};
+  getAthleteProfileById,
+};

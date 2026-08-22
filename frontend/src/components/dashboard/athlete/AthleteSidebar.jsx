@@ -19,10 +19,13 @@ export default function AthleteSidebar({ activeTab, setActiveTab, onLogout }) {
     <aside className="athlete-sidebar">
       {/* Sidebar Top Brand Header */}
       <div className="sidebar-brand-box">
-        <div className="sidebar-brand-title">
-          <span className="brand-symbol">✳</span> STRIDE
-        </div>
-        <span className="sidebar-sub-tag">PERFORMANCE HUB</span>
+        <a href="/" className="flex items-center gap-2.5 group">
+          <span className="font-['Poppins',sans-serif] font-bold text-xl sm:text-3xl tracking-tight text-white">
+            STRIDE<span className="text-[#F2FF65]">.</span>
+          </span>
+        </a>
+        <span className="sidebar-sub-tag">Let's Grab It!
+        </span>
       </div>
 
       {/* Navigation Links */}
@@ -36,7 +39,6 @@ export default function AthleteSidebar({ activeTab, setActiveTab, onLogout }) {
               className={`matchpoint-nav-btn ${isActive ? 'active' : ''}`}
               onClick={() => setActiveTab(item.id)}
             >
-              <span className="nav-step-index">0{idx + 1}</span>
               <Icon size={17} className="nav-icon" />
               <span className="nav-btn-text">{item.label}</span>
             </button>

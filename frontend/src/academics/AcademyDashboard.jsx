@@ -872,13 +872,12 @@ function Sidebar({
       >
         {/* Stride wordmark */}
 
-        <Link
-          to="/academy"
-          onClick={() => setOpen(false)}
-          className="font-['Poppins'] text-3xl font-bold tracking-[-0.07em] text-[#f2ff65]"
-        >
-          Stride
-        </Link>
+          <a href="/" className="flex items-center gap-2.5 group">
+              <span className="font-['Poppins',sans-serif] font-bold text-xl sm:text-4xl tracking-tight text-white">
+                  STRIDE<span className="text-[#F2FF65]">.</span>
+              </span>
+          </a>
+
 
         <p className="mt-1 text-[9px] font-semibold uppercase tracking-[0.2em] text-[#f7f5ed]/40">
           Academy

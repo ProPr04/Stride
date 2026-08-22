@@ -39,32 +39,76 @@ export const createOpportunity = async (academyId, opportunityData) => {
 
 /**
  * Retrieves a list of active opportunities, with optional filtering for the athlete discovery feed.
+ * Joins academy profile details so athletes can see the academy's name and location.
  */
 export const getActiveOpportunities = async (filters = {}) => {
-  let queryText = `SELECT * FROM opportunities WHERE status = 'active'`;
+  let queryText = `
+    SELECT 
+      o.*,
+      COALESCE(ap.academy_name, 'Partner Academy') AS academy_name,
+      ap.location AS academy_location,
+      ap.facilities AS academy_facilities
+    FROM opportunities o
+    LEFT JOIN academy_profiles ap ON o.academy_id = ap.user_id
+    WHERE o.status = 'active'
+  `;
   const values = [];
   let queryIndex = 1;
 
   // Apply faceted filters if provided
   if (filters.sport) {
-    queryText += ` AND sport ILIKE $${queryIndex}`;
+    queryText += ` AND o.sport ILIKE $${queryIndex}`;
     values.push(`%${filters.sport}%`);
     queryIndex++;
   }
 
   if (filters.role) {
-    queryText += ` AND role ILIKE $${queryIndex}`;
+    queryText += ` AND o.role ILIKE $${queryIndex}`;
     values.push(`%${filters.role}%`);
     queryIndex++;
   }
 
-  queryText += ` ORDER BY created_at DESC;`;
+  queryText += ` ORDER BY o.created_at DESC;`;
   const { rows } = await pool.query(queryText, values);
   return rows;
+};
+
+/**
+ * Retrieves all opportunities posted by a specific academy, along with the count of received applications.
+ */
+export const getOpportunitiesByAcademy = async (academyId) => {
+  const queryText = `
+    SELECT 
+      o.*,
+      COUNT(a.id)::INTEGER AS applications_count
+    FROM opportunities o
+    LEFT JOIN agreements a ON o.id = a.opportunity_id
+    WHERE o.academy_id = $1
+    GROUP BY o.id
+    ORDER BY o.created_at DESC;
+  `;
+  const { rows } = await pool.query(queryText, [academyId]);
+  return rows;
+};
+
+/**
+ * Updates the status of an opportunity (e.g., active -> closed).
+ */
+export const updateOpportunityStatus = async (opportunityId, academyId, status) => {
+  const queryText = `
+    UPDATE opportunities
+    SET status = $1, updated_at = CURRENT_TIMESTAMP
+    WHERE id = $2 AND academy_id = $3
+    RETURNING *;
+  `;
+  const { rows } = await pool.query(queryText, [status, opportunityId, academyId]);
+  return rows[0] || null;
 };
 
 export default {
   createOpportunityTable,
   createOpportunity,
   getActiveOpportunities,
-};
+  getOpportunitiesByAcademy,
+  updateOpportunityStatus,
+};
