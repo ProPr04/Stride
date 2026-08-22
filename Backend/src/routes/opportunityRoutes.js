@@ -21,4 +21,18 @@ router.post('/', authorize('academy'), opportunityController.createOpportunity);
  */
 router.get('/', opportunityController.getActiveOpportunities);
 
-export default router;
+/**
+ * @route   GET /api/opportunities/my
+ * @desc    Retrieve all opportunities posted by the authenticated academy with application counts
+ * @access  Private (Academy Only)
+ */
+router.get('/my', authorize('academy'), opportunityController.getMyPostedOpportunities);
+
+/**
+ * @route   PATCH /api/opportunities/:id/status
+ * @desc    Update opportunity status (active or closed)
+ * @access  Private (Academy Only)
+ */
+router.patch('/:id/status', authorize('academy'), opportunityController.updateOpportunityStatus);
+
+export default router;

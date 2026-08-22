@@ -19,9 +19,11 @@ export default function AthleteSidebar({ activeTab, setActiveTab, onLogout }) {
     <aside className="athlete-sidebar bg-[#17241a] border-r border-[#2A3C2E]">
       {/* Sidebar Top Brand Header */}
       <div className="sidebar-brand-box pb-5 mb-6 border-b border-[#2A3C2E]">
-        <div className="font-['Poppins',sans-serif] font-bold text-2xl tracking-tight text-white flex items-center">
-          STRIDE<span className="text-[#F2FF65]">.</span>
-        </div>
+        <a href="/" className="flex items-center gap-2.5 group">
+          <span className="font-['Poppins',sans-serif] font-bold text-2xl tracking-tight text-white">
+            STRIDE<span className="text-[#F2FF65]">.</span>
+          </span>
+        </a>
         <span className="text-[10px] font-mono font-bold tracking-widest text-[#F2FF65]/70 uppercase mt-1 block">
           ATHLETE PERFORMANCE HUB
         </span>

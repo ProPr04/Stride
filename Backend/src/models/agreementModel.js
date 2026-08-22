@@ -43,17 +43,51 @@ export const getAgreementsByUser = async (userId, role) => {
   
   if (role === 'athlete') {
     queryText = `
-      SELECT a.*, o.title, o.role, o.sport, o.compensation_cash 
+      SELECT 
+        a.id AS id,
+        a.id AS agreement_id,
+        a.opportunity_id,
+        a.athlete_id,
+        a.academy_id,
+        a.status,
+        a.created_at,
+        a.updated_at,
+        o.title,
+        o.role,
+        o.sport,
+        o.compensation_cash,
+        COALESCE(ap.academy_name, 'Partner Academy') AS academy_name,
+        ap.location AS academy_location
       FROM agreements a
       JOIN opportunities o ON a.opportunity_id = o.id
+      LEFT JOIN academy_profiles ap ON a.academy_id = ap.user_id
       WHERE a.athlete_id = $1
       ORDER BY a.created_at DESC;
     `;
   } else if (role === 'academy') {
     queryText = `
-      SELECT a.*, o.title, o.role, o.sport 
+      SELECT 
+        a.id AS id,
+        a.id AS agreement_id,
+        a.opportunity_id,
+        a.athlete_id,
+        a.academy_id,
+        a.status,
+        a.created_at,
+        a.updated_at,
+        o.title AS opportunity_title,
+        o.role AS opportunity_role,
+        o.sport AS opportunity_sport,
+        u.email AS athlete_email,
+        ath.sport AS athlete_sport,
+        ath.playing_level AS athlete_playing_level,
+        ath.skills AS athlete_skills,
+        ath.bio AS athlete_bio,
+        ath.verification_level AS athlete_verification_level
       FROM agreements a
       JOIN opportunities o ON a.opportunity_id = o.id
+      JOIN users u ON a.athlete_id = u.id
+      LEFT JOIN athlete_profiles ath ON a.athlete_id = ath.user_id
       WHERE a.academy_id = $1
       ORDER BY a.created_at DESC;
     `;
