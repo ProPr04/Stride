@@ -5,11 +5,16 @@ import AthleteDashboard from './pages/AthleteDashboard';
 import HowItWorks from './components/HowItWorks';
 import Trust from './components/Trust';
 import Footer from './components/Footer';
+import Hero from './components/Hero';
+import Navbar from './components/Navbar';
 import './App.css';
 
 function LandingPage() {
   return (
     <>
+      <Navbar/>
+      <Hero />
+
       <HowItWorks />
       <Trust />
       <Footer />

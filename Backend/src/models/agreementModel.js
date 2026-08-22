@@ -1,6 +1,6 @@
 import pool from '../config/db.js';
 
-/**
+/*
  * Initializes the agreements table in PostgreSQL.
  * Links opportunities, athletes, and academies together.
  */
@@ -23,6 +23,7 @@ export const createAgreementTable = async () => {
 /**
  * Creates a new agreement (e.g., an athlete applying for an opportunity).
  */
+
 export const createAgreement = async (opportunityId, athleteId, academyId) => {
   const queryText = `
     INSERT INTO agreements (opportunity_id, athlete_id, academy_id)
