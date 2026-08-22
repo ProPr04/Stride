@@ -9,7 +9,8 @@ import {
   Check,
   CheckCircle2,
   Filter,
-  ChevronDown
+  ChevronDown,
+  Clock
 } from 'lucide-react';
 
 export default function AthleteOpportunitiesSection() {
@@ -46,6 +47,7 @@ export default function AthleteOpportunitiesSection() {
         academy: 'Delhi Sports Academy',
         location: 'Delhi',
         status: 'Active Opportunity',
+        timeline: 'Aug 15 – Sep 15, 2026 (Active for 30 Days)',
         role: 'Assistant Cricket Coach',
         whatYouWillDo: 'Support academy training sessions and assist senior coaches during trial matches, tactical video breakdowns, and player fitness tracking.',
         requirements: [
@@ -71,6 +73,7 @@ export default function AthleteOpportunitiesSection() {
         academy: 'National High Performance Center',
         location: 'Bengaluru, KA',
         status: 'Active Opportunity',
+        timeline: 'Aug 10 – Sep 10, 2026 (Active for 30 Days)',
         role: 'Track Athlete (100m / 200m)',
         whatYouWillDo: 'Complete daily sprint drills, bi-weekly time trials, and represent the academy in national meets.',
         requirements: [
@@ -96,6 +99,7 @@ export default function AthleteOpportunitiesSection() {
         academy: 'Premier Football Development Hub',
         location: 'Mumbai, MH',
         status: 'Active Opportunity',
+        timeline: 'Aug 01 – Aug 31, 2026 (Active for 30 Days)',
         role: 'Forward / Striker',
         whatYouWillDo: 'Participate in league fixtures, tactical team breakdowns, and conditioning sessions.',
         requirements: [
@@ -121,6 +125,7 @@ export default function AthleteOpportunitiesSection() {
         academy: 'Apex Tennis Foundation',
         location: 'Hyderabad, TS',
         status: 'Active Opportunity',
+        timeline: 'Jul 25 – Aug 25, 2026 (Active for 30 Days)',
         role: 'Tennis Assistant Trainer',
         whatYouWillDo: 'Conduct junior academy warm-ups, feed balls during drill sets, and log player performance.',
         requirements: [
@@ -299,7 +304,7 @@ export default function AthleteOpportunitiesSection() {
                   </div>
                 )}
 
-                {/* 4. Structured Opportunity Details (Inspiration Matching Layout) */}
+                {/* 4. Structured Opportunity Details */}
                 <div className="p-4 sm:p-5 bg-[#0B120D] border-t border-b border-[#2A3C2E] space-y-4">
                   {/* Opportunity Title & Status */}
                   <div className="space-y-1">
@@ -316,6 +321,19 @@ export default function AthleteOpportunitiesSection() {
                         {opp.status}
                       </span>
                     </div>
+                  </div>
+
+                  <hr className="border-t border-[#2A3C2E]" />
+
+                  {/* ACTIVE TIMELINE */}
+                  <div className="space-y-1">
+                    <span className="text-[10px] font-mono font-bold tracking-widest text-gray-400 uppercase">
+                      ACTIVE TIMELINE
+                    </span>
+                    <p className="text-xs sm:text-sm text-sky-400 font-mono font-semibold flex items-center gap-1.5">
+                      <Clock size={14} />
+                      <span>{opp.timeline}</span>
+                    </p>
                   </div>
 
                   <hr className="border-t border-[#2A3C2E]" />
