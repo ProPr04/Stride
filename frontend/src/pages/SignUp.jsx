@@ -1,7 +1,9 @@
 import { useState } from 'react';
-import { Eye, EyeOff, Check } from 'lucide-react';
+import { Eye, EyeOff, Check, User, Building2 } from 'lucide-react';
+import { api, authStorage, isAuthEnabled } from '../services/api';
 
 export default function SignUp({ onSwitchToLogin }) {
+  const [role, setRole] = useState('athlete'); // 'athlete' | 'academy'
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -13,8 +15,20 @@ export default function SignUp({ onSwitchToLogin }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState(null);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!isAuthEnabled()) {
+      setIsSubmitting(true);
+      authStorage.setUser({ email: email || `${role}@stride.com`, role, name: fullName || 'User' });
+      setMessage({ type: 'success', text: 'Account created! Redirecting to login...' });
+      setTimeout(() => {
+        setIsSubmitting(false);
+        if (onSwitchToLogin) onSwitchToLogin();
+      }, 500);
+      return;
+    }
+
     if (!fullName || !email || !password || !confirmPassword) {
       setMessage({ type: 'error', text: 'Please fill in all required fields.' });
       return;
@@ -22,6 +36,11 @@ export default function SignUp({ onSwitchToLogin }) {
 
     if (password !== confirmPassword) {
       setMessage({ type: 'error', text: 'Passwords do not match.' });
+      return;
+    }
+
+    if (password.length < 6) {
+      setMessage({ type: 'error', text: 'Password must be at least 6 characters long.' });
       return;
     }
 
@@ -33,14 +52,33 @@ export default function SignUp({ onSwitchToLogin }) {
     setIsSubmitting(true);
     setMessage(null);
 
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      // Call Backend Register API
+      await api.auth.register({
+        email: email.trim().toLowerCase(),
+        password,
+        role,
+        fullName: fullName.trim()
+      });
+
       setMessage({ type: 'success', text: 'Account created successfully! Redirecting to login...' });
       setTimeout(() => {
+        setIsSubmitting(false);
         if (onSwitchToLogin) onSwitchToLogin();
       }, 1200);
-    }, 1000);
+    } catch (err) {
+      setIsSubmitting(false);
+      let errorText = err.message || 'Failed to create account.';
+      if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
+        errorText = 'Cannot connect to backend server at http://localhost:5000. Please ensure the backend is running.';
+      }
+      setMessage({
+        type: 'error',
+        text: errorText
+      });
+    }
   };
+
 
   return (
     <div className="login-wrapper">
@@ -55,6 +93,28 @@ export default function SignUp({ onSwitchToLogin }) {
           <h1 className="login-title">Create Account</h1>
           <p className="login-subtitle">Join us today by filling in your details below.</p>
         </div>
+
+        {/* Role Selector Dual Toggle Pill */}
+        <div className="role-toggle-container">
+          <button
+            type="button"
+            className={`role-toggle-btn ${role === 'athlete' ? 'active' : ''}`}
+            onClick={() => setRole('athlete')}
+          >
+            <User size={16} />
+            <span>ATHLETE</span>
+          </button>
+
+          <button
+            type="button"
+            className={`role-toggle-btn ${role === 'academy' ? 'active' : ''}`}
+            onClick={() => setRole('academy')}
+          >
+            <Building2 size={16} />
+            <span>ACADEMY</span>
+          </button>
+        </div>
+
 
         {/* Feedback Message */}
         {message && (

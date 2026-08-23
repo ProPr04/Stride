@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Eye, EyeOff, Check, User, Building2, X } from 'lucide-react';
+import { api, authStorage, isAuthEnabled } from '../services/api';
 
 export default function Login({ onSwitchToSignUp, onLoginSuccess, onClose, isModal = false }) {
   const [role, setRole] = useState('athlete'); // 'athlete' | 'academy'
@@ -10,30 +11,55 @@ export default function Login({ onSwitchToSignUp, onLoginSuccess, onClose, isMod
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState(null);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!emailOrPhone || !password) {
-      setMessage({ type: 'error', text: 'Please fill in all required fields.' });
-      return;
+
+    const loginEmail = (emailOrPhone || '').trim().toLowerCase();
+    const loginPassword = password || '';
+
+    // If both fields empty and auth is not disabled, prompt user
+    if (!loginEmail || !loginPassword) {
+      if (isAuthEnabled()) {
+        setMessage({ type: 'error', text: 'Please fill in both email and password.' });
+        return;
+      }
     }
 
     setIsSubmitting(true);
     setMessage(null);
 
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      // Call Backend Login API
+      const res = await api.auth.login(loginEmail || `${role}@stride.com`, loginPassword || 'dev123', role);
+      const user = res?.data?.user;
+      const authenticatedRole = user?.role || role;
+
       setMessage({
         type: 'success',
-        text: `Successfully logged in as ${role === 'athlete' ? 'Athlete' : 'Academy'}!`
+        text: `Successfully logged in as ${authenticatedRole === 'athlete' ? 'Athlete' : 'Academy'}!`
       });
 
       setTimeout(() => {
+        setIsSubmitting(false);
         if (onLoginSuccess) {
-          onLoginSuccess(role);
+          onLoginSuccess(authenticatedRole);
         }
-      }, 500);
-    }, 800);
+      }, 350);
+    } catch (err) {
+      setIsSubmitting(false);
+      let errorText = err.message || 'Login failed. Please check your credentials.';
+      if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
+        errorText = 'Cannot connect to backend server at http://localhost:5000. Please ensure the backend is running.';
+      }
+      setMessage({
+        type: 'error',
+        text: errorText
+      });
+    }
   };
+
+
+
 
   const loginCardContent = (
     <div className="login-card relative" onClick={(e) => e.stopPropagation()}>

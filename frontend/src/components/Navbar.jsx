@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, LogOut, LayoutDashboard } from 'lucide-react';
+import { authStorage, api } from '../services/api';
 
 export const Navbar = ({ onOpenLogin, onOpenSignUp }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isAuth, setIsAuth] = useState(authStorage.isAuthenticated());
+  const [user, setUser] = useState(authStorage.getUser());
 
   useEffect(() => {
     const handleScroll = () => {
@@ -12,6 +15,11 @@ export const Navbar = ({ onOpenLogin, onOpenSignUp }) => {
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    setIsAuth(authStorage.isAuthenticated());
+    setUser(authStorage.getUser());
   }, []);
 
   const navLinks = [
@@ -38,6 +46,15 @@ export const Navbar = ({ onOpenLogin, onOpenSignUp }) => {
       window.location.href = '/signup';
     }
   };
+
+  const handleLogout = () => {
+    api.auth.logout();
+    setIsAuth(false);
+    setUser(null);
+    window.location.href = '/';
+  };
+
+  const dashboardPath = user?.role === 'academy' ? '/academy' : '/athlete';
 
   return (
     <header
@@ -69,20 +86,42 @@ export const Navbar = ({ onOpenLogin, onOpenSignUp }) => {
 
         {/* Desktop Action Buttons */}
         <div className="hidden md:flex items-center gap-4">
-          <button
-            type="button"
-            onClick={handleLoginClick}
-            className="text-sm font-semibold text-[#F7F8FA] hover:text-white px-3 py-2 transition-colors duration-200 font-['Poppins',sans-serif] cursor-pointer"
-          >
-            Log In
-          </button>
-          <button
-            type="button"
-            onClick={handleSignUpClick}
-            className="px-5 py-2.5 rounded-xl bg-[#F2FF65] text-[#0F172A] font-['Poppins',sans-serif] font-bold text-sm hover:bg-[#e2ef4f] transition-all duration-200 shadow-sm shadow-[#F2FF65]/10 cursor-pointer"
-          >
-            Get Started
-          </button>
+          {isAuth ? (
+            <>
+              <a
+                href={dashboardPath}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#F2FF65] text-[#0F172A] font-['Poppins',sans-serif] font-bold text-sm hover:bg-[#e2ef4f] transition-all duration-200 shadow-sm shadow-[#F2FF65]/10 cursor-pointer"
+              >
+                <LayoutDashboard size={16} />
+                Dashboard
+              </a>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#fca5a5] hover:text-red-400 px-3 py-2 transition-colors duration-200 font-['Poppins',sans-serif] cursor-pointer"
+              >
+                <LogOut size={16} />
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={handleLoginClick}
+                className="text-sm font-semibold text-[#F7F8FA] hover:text-white px-3 py-2 transition-colors duration-200 font-['Poppins',sans-serif] cursor-pointer"
+              >
+                Log In
+              </button>
+              <button
+                type="button"
+                onClick={handleSignUpClick}
+                className="px-5 py-2.5 rounded-xl bg-[#F2FF65] text-[#0F172A] font-['Poppins',sans-serif] font-bold text-sm hover:bg-[#e2ef4f] transition-all duration-200 shadow-sm shadow-[#F2FF65]/10 cursor-pointer"
+              >
+                Get Started
+              </button>
+            </>
+          )}
         </div>
 
         {/* Mobile Hamburger Toggle */}
@@ -120,26 +159,49 @@ export const Navbar = ({ onOpenLogin, onOpenSignUp }) => {
             </nav>
 
             <div className="pt-4 border-t border-white/10 flex flex-col gap-3">
-              <button
-                type="button"
-                onClick={(e) => {
-                  setMobileMenuOpen(false);
-                  handleLoginClick(e);
-                }}
-                className="w-full text-center py-2.5 rounded-xl border border-white/10 text-white font-['Poppins',sans-serif] font-semibold text-sm hover:bg-white/5 transition-colors cursor-pointer"
-              >
-                Log In
-              </button>
-              <button
-                type="button"
-                onClick={(e) => {
-                  setMobileMenuOpen(false);
-                  handleSignUpClick(e);
-                }}
-                className="w-full text-center py-2.5 rounded-xl bg-[#F2FF65] text-[#0F172A] font-['Poppins',sans-serif] font-bold text-sm hover:bg-[#e2ef4f] transition-colors cursor-pointer"
-              >
-                Get Started
-              </button>
+              {isAuth ? (
+                <>
+                  <a
+                    href={dashboardPath}
+                    className="w-full text-center py-2.5 rounded-xl bg-[#F2FF65] text-[#0F172A] font-['Poppins',sans-serif] font-bold text-sm hover:bg-[#e2ef4f] transition-colors cursor-pointer"
+                  >
+                    Go to Dashboard
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      handleLogout();
+                    }}
+                    className="w-full text-center py-2.5 rounded-xl border border-red-500/30 text-red-300 font-['Poppins',sans-serif] font-semibold text-sm hover:bg-red-500/10 transition-colors cursor-pointer"
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      setMobileMenuOpen(false);
+                      handleLoginClick(e);
+                    }}
+                    className="w-full text-center py-2.5 rounded-xl border border-white/10 text-white font-['Poppins',sans-serif] font-semibold text-sm hover:bg-white/5 transition-colors cursor-pointer"
+                  >
+                    Log In
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      setMobileMenuOpen(false);
+                      handleSignUpClick(e);
+                    }}
+                    className="w-full text-center py-2.5 rounded-xl bg-[#F2FF65] text-[#0F172A] font-['Poppins',sans-serif] font-bold text-sm hover:bg-[#e2ef4f] transition-colors cursor-pointer"
+                  >
+                    Get Started
+                  </button>
+                </>
+              )}
             </div>
           </motion.div>
         )}
@@ -148,4 +210,4 @@ export const Navbar = ({ onOpenLogin, onOpenSignUp }) => {
   );
 };
 
-export default Navbar;
+export default Navbar;

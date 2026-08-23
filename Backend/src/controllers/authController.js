@@ -1,5 +1,6 @@
 import bcrypt from 'bcrypt';
 import userModel from '../models/userModel.js';
+import profileModel from '../models/profileModel.js';
 import { generateToken } from '../utils/tokenUtils.js';
 
 /**
@@ -7,7 +8,27 @@ import { generateToken } from '../utils/tokenUtils.js';
  */
 export const registerUser = async (req, res, next) => {
   try {
-    const { email, password, role } = req.body;
+    const { email, password, role, fullName, name, sport } = req.body;
+
+    // Dev bypass when ENABLE_AUTH=false
+    if (process.env.ENABLE_AUTH === 'false' || process.env.DISABLE_AUTH === 'true') {
+      const selectedRole = role || 'athlete';
+      const displayName = fullName || name || (selectedRole === 'academy' ? 'Partner Academy' : 'Athlete');
+      const devUser = {
+        id: Math.floor(Math.random() * 1000) + 1,
+        email: email ? email.toLowerCase().trim() : 'dev@stride.com',
+        role: selectedRole,
+        name: displayName,
+      };
+      const token = generateToken(devUser.id, devUser.role);
+      return res.status(201).json({
+        status: 'success',
+        token,
+        data: {
+          user: devUser,
+        },
+      });
+    }
 
     // 1. Validate inputs
     if (!email || !password || !role) {
@@ -24,12 +45,19 @@ export const registerUser = async (req, res, next) => {
       });
     }
 
+    if (password.length < 6) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Password must be at least 6 characters long.',
+      });
+    }
+
     // 2. Check if user already exists
     const existingUser = await userModel.findUserByEmail(email);
     if (existingUser) {
       return res.status(409).json({
         status: 'fail',
-        message: 'Email is already registered.',
+        message: 'Email is already registered. Please login.',
       });
     }
 
@@ -44,15 +72,44 @@ export const registerUser = async (req, res, next) => {
       role,
     });
 
-    // 5. Generate JWT
+    // 5. Initialize profile for athlete or academy
+    const displayName = fullName || name || (role === 'academy' ? 'Partner Academy' : 'Athlete');
+    try {
+      if (role === 'athlete') {
+        await profileModel.upsertAthleteProfile(newUser.id, {
+          sport: sport || 'General Sports',
+          playing_level: 'Amateur',
+          skills: [],
+          availability: {},
+          bio: `Athlete profile for ${displayName}`,
+        });
+      } else if (role === 'academy') {
+        await profileModel.upsertAcademyProfile(newUser.id, {
+          academy_name: displayName,
+          location: 'Pune, Maharashtra',
+          sports_offered: ['Football', 'Cricket', 'Athletics'],
+          facilities: 'Standard Training Grounds & Facilities',
+          compensation_structure: {},
+        });
+      }
+    } catch (profileErr) {
+      console.warn('Initial profile creation notice:', profileErr.message);
+    }
+
+    // 6. Generate JWT
     const token = generateToken(newUser.id, newUser.role);
 
-    // 6. Send response
+    // 7. Send response
     res.status(201).json({
       status: 'success',
       token,
       data: {
-        user: newUser,
+        user: {
+          id: newUser.id,
+          email: newUser.email,
+          role: newUser.role,
+          name: displayName,
+        },
       },
     });
   } catch (error) {
@@ -65,7 +122,26 @@ export const registerUser = async (req, res, next) => {
  */
 export const loginUser = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, role } = req.body;
+
+    // Dev bypass when ENABLE_AUTH=false
+    if (process.env.ENABLE_AUTH === 'false' || process.env.DISABLE_AUTH === 'true') {
+      const selectedRole = role || (email && email.includes('academy') ? 'academy' : 'athlete');
+      const devUser = {
+        id: 1,
+        email: email ? email.toLowerCase().trim() : 'dev@stride.com',
+        role: selectedRole,
+        name: selectedRole === 'academy' ? 'Partner Academy' : 'Athlete',
+      };
+      const token = generateToken(devUser.id, devUser.role);
+      return res.status(200).json({
+        status: 'success',
+        token,
+        data: {
+          user: devUser,
+        },
+      });
+    }
 
     // 1. Validate inputs
     if (!email || !password) {
@@ -116,4 +192,4 @@ export const loginUser = async (req, res, next) => {
 export default {
   registerUser,
   loginUser,
-};
+};

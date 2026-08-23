@@ -9,9 +9,29 @@ import Trust from './components/Trust';
 import Footer from './components/Footer';
 import Hero from './components/Hero';
 import Navbar from './components/Navbar';
+import { api, authStorage } from './services/api';
 import './App.css';
 
+/**
+ * Route Guard: Ensures user has a valid, non-expired JWT token and correct role
+ */
+function ProtectedRoute({ children, requiredRole }) {
+  const isAuth = authStorage.isAuthenticated();
+  const user = authStorage.getUser();
+
+  if (!isAuth) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (requiredRole && user?.role && user.role !== requiredRole) {
+    return <Navigate to={user.role === 'academy' ? '/academy' : '/athlete'} replace />;
+  }
+
+  return children;
+}
+
 function LandingPage({ initialLoginOpen = false }) {
+
   const [isLoginOpen, setIsLoginOpen] = useState(initialLoginOpen);
   const navigate = useNavigate();
 
@@ -85,21 +105,37 @@ function AppRoutes() {
         }
       />
 
-      {/* Athlete Dashboard Route */}
+      {/* Athlete Dashboard Route (Protected) */}
       <Route
         path="/athlete"
         element={
-          <AthleteDashboard
-            onLogout={() => navigate('/')}
-          />
+          <ProtectedRoute requiredRole="athlete">
+            <AthleteDashboard
+              onLogout={() => {
+                api.auth.logout();
+                navigate('/login');
+              }}
+            />
+          </ProtectedRoute>
         }
       />
 
-      {/* Academy Dashboard Route */}
+      {/* Academy Dashboard Route (Protected) */}
       <Route
-        path="/academy"
-        element={<AcademyDashboard />}
+        path="/academy/*"
+        element={
+          <ProtectedRoute requiredRole="academy">
+            <AcademyDashboard
+              onLogout={() => {
+                api.auth.logout();
+                navigate('/login');
+              }}
+            />
+          </ProtectedRoute>
+        }
       />
+
+
 
       {/* Unknown routes fallback to / */}
       <Route

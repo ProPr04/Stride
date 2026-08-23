@@ -18,8 +18,10 @@ import {
   X,
 } from "lucide-react";
 import { Link, NavLink, Route, Routes, useNavigate } from "react-router-dom";
+import { api } from "../services/api";
 
 const AcademyContext = createContext(null);
+
 
 /* =========================================================
    STRIDE ACADEMY — UI MOCK DATA
@@ -957,6 +959,7 @@ export default function AcademyDashboard({
   );
 
   const logout = () => {
+    api.auth.logout();
     if (onLogout) {
       onLogout();
       return;
@@ -964,6 +967,7 @@ export default function AcademyDashboard({
 
     window.location.assign("/login");
   };
+
 
   return (
     <AcademyContext.Provider value={contextValue}>
