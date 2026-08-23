@@ -35,6 +35,11 @@ export const unsaveOpportunity = async (athleteId, opportunityId) => {
 };
 
 export const getSavedOpportunities = async (athleteId) => {
+  const numericAthleteId = parseInt(athleteId, 10);
+  if (!numericAthleteId || isNaN(numericAthleteId)) {
+    return [];
+  }
+
   const queryText = `
     SELECT 
       o.*,
@@ -49,7 +54,7 @@ export const getSavedOpportunities = async (athleteId) => {
     WHERE s.athlete_id = $1
     ORDER BY s.created_at DESC;
   `;
-  const { rows } = await pool.query(queryText, [athleteId]);
+  const { rows } = await pool.query(queryText, [numericAthleteId]);
   return rows;
 };
 
