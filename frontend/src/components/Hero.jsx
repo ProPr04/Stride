@@ -25,6 +25,7 @@ export const Hero = ({ onOpenOpportunities, onOpenAcademies }) => {
       {/* 1. Background Court Asset with Minimal Vignette */}
       <div className="absolute inset-0 z-0">
         <img
+        
           src={HeroImage}
           alt="Basketball on court sideline"
           className="h-full w-full object-cover object-left md:object-center"
