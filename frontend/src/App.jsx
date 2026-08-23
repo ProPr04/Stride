@@ -1,16 +1,20 @@
-import { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, useNavigate, Navigate } from 'react-router-dom';
-import Login from './pages/Login';
-import SignUp from './pages/SignUp';
-import AthleteDashboard from './pages/AthleteDashboard';
-import AcademyDashboard from './pages/AcademyDashboard';
-import HowItWorks from './components/HowItWorks';
-import Trust from './components/Trust';
-import Footer from './components/Footer';
+import { useState, lazy, Suspense } from 'react';
+import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
 import Hero from './components/Hero';
 import Navbar from './components/Navbar';
 import { api, authStorage } from './services/api';
 import './App.css';
+
+// Lazy-loaded below-the-fold components (code splitting for reduced initial JS)
+const HowItWorks = lazy(() => import('./components/HowItWorks'));
+const Trust = lazy(() => import('./components/Trust'));
+const Footer = lazy(() => import('./components/Footer'));
+const Login = lazy(() => import('./pages/Login'));
+
+// Lazy-loaded route-level components
+const SignUp = lazy(() => import('./pages/SignUp'));
+const AthleteDashboard = lazy(() => import('./pages/AthleteDashboard'));
+const AcademyDashboard = lazy(() => import('./pages/AcademyDashboard'));
 
 /**
  * Route Guard: Ensures user has a valid, non-expired JWT token and correct role
@@ -61,25 +65,29 @@ function LandingPage({ initialLoginOpen = false, initialRole = 'athlete' }) {
         onOpenOpportunities={() => handleOpenLogin('athlete')}
         onOpenAcademies={() => handleOpenLogin('academy')}
       />
-      <HowItWorks />
-      <Trust />
-      <Footer
-        onOpenOpportunities={() => handleOpenLogin('athlete')}
-        onOpenAcademies={() => handleOpenLogin('academy')}
-      />
+      <Suspense fallback={null}>
+        <HowItWorks />
+        <Trust />
+        <Footer
+          onOpenOpportunities={() => handleOpenLogin('athlete')}
+          onOpenAcademies={() => handleOpenLogin('academy')}
+        />
+      </Suspense>
 
       {/* Blurred Background Login Modal */}
       {isLoginOpen && (
-        <Login
-          isModal={true}
-          initialRole={loginRole}
-          onClose={() => setIsLoginOpen(false)}
-          onSwitchToSignUp={() => {
-            setIsLoginOpen(false);
-            navigate('/signup');
-          }}
-          onLoginSuccess={handleLoginSuccess}
-        />
+        <Suspense fallback={null}>
+          <Login
+            isModal={true}
+            initialRole={loginRole}
+            onClose={() => setIsLoginOpen(false)}
+            onSwitchToSignUp={() => {
+              setIsLoginOpen(false);
+              navigate('/signup');
+            }}
+            onLoginSuccess={handleLoginSuccess}
+          />
+        </Suspense>
       )}
     </>
   );
@@ -111,12 +119,14 @@ function AppRoutes() {
       <Route
         path="/signup"
         element={
-          <div className="app-container">
-            <SignUp
-              onClose={() => navigate('/')}
-              onSwitchToLogin={() => navigate('/login')}
-            />
-          </div>
+          <Suspense fallback={null}>
+            <div className="app-container">
+              <SignUp
+                onClose={() => navigate('/')}
+                onSwitchToLogin={() => navigate('/login')}
+              />
+            </div>
+          </Suspense>
         }
       />
 
@@ -125,12 +135,14 @@ function AppRoutes() {
         path="/athlete"
         element={
           <ProtectedRoute requiredRole="athlete">
-            <AthleteDashboard
-              onLogout={() => {
-                api.auth.logout();
-                navigate('/login');
-              }}
-            />
+            <Suspense fallback={null}>
+              <AthleteDashboard
+                onLogout={() => {
+                  api.auth.logout();
+                  navigate('/login');
+                }}
+              />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -140,12 +152,14 @@ function AppRoutes() {
         path="/academy/*"
         element={
           <ProtectedRoute requiredRole="academy">
-            <AcademyDashboard
-              onLogout={() => {
-                api.auth.logout();
-                navigate('/login');
-              }}
-            />
+            <Suspense fallback={null}>
+              <AcademyDashboard
+                onLogout={() => {
+                  api.auth.logout();
+                  navigate('/login');
+                }}
+              />
+            </Suspense>
           </ProtectedRoute>
         }
       />

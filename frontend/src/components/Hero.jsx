@@ -1,7 +1,10 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
-import HeroImage from '../assets/images/hero-court-basketball.jpg';
+import HeroImage from '../assets/images/hero-court-basketball.webp';
+
+// Detect mobile viewport for performance optimizations
+const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
 export const Hero = ({ onOpenOpportunities, onOpenAcademies }) => {
   const handleOpportunitiesClick = () => {
@@ -25,13 +28,18 @@ export const Hero = ({ onOpenOpportunities, onOpenAcademies }) => {
       {/* 1. Background Court Asset with Minimal Vignette */}
       <div className="absolute inset-0 z-0">
         <img
-        
           src={HeroImage}
           alt="Basketball on court sideline"
           className="h-full w-full object-cover object-left md:object-center"
+          fetchpriority="high"
+          width="1200"
+          height="800"
+          decoding="async"
         />
-        {/* Soft directional gradient to protect text contrast on the right while keeping the ball clear */}
-        <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-l from-[#17241a] via-[#17241a]/75 to-transparent" />
+        {/* Soft directional gradient — hidden on mobile to reduce paint cost */}
+        <div className="absolute inset-0 hidden md:block bg-gradient-to-l from-[#17241a] via-[#17241a]/75 to-transparent" />
+        {/* Mobile-only simpler gradient (top-to-bottom, single layer) */}
+        <div className="absolute inset-0 md:hidden bg-gradient-to-t from-[#17241a] via-[#17241a]/80 to-transparent" />
         <div className="absolute inset-0 bg-black/25" />
         <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-b from-transparent to-[#17241a] pointer-events-none" />
       </div>
@@ -40,14 +48,14 @@ export const Hero = ({ onOpenOpportunities, onOpenAcademies }) => {
       <div className="relative z-10 max-w-7xl w-full mx-auto px-6 sm:px-8 lg:px-12 py-20 flex justify-end">
         <motion.div 
           className="w-full md:max-w-xl lg:max-w-2xl flex flex-col items-start space-y-6 md:space-y-8"
-          initial={{ opacity: 0, x: 30 }}
+          initial={isMobile ? { opacity: 1, x: 0 } : { opacity: 0, x: 30 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          transition={isMobile ? { duration: 0 } : { duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         >
 
           {/* Headline */}
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold font-['Poppins',sans-serif] text-white tracking-tight leading-[1.15]">
-            Don’t fund the dream. <br />
+            Don't fund the dream. <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#A3E635] to-[#F2FF65]">
               Earn your way forward
             </span> through sport.
