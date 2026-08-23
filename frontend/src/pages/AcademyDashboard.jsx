@@ -137,10 +137,10 @@ export default function AcademyDashboard({ onLogout }) {
 
       {/* MAIN AREA */}
       <div className="matchpoint-dashboard-main min-w-0 lg:ml-[308px]">
-        <AcademyHeader
+        {/* <AcademyHeader
           academy={academy}
           onProfileClick={() => setActiveTab('profile')}
-        />
+        /> */}
 
         {/* PAGE CONTENT */}
         <main className="matchpoint-content-viewport min-w-0 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-7">
