@@ -39,6 +39,11 @@ export const createAgreement = async (opportunityId, athleteId, academyId) => {
  * Retrieves agreements for a specific user (either an athlete or an academy).
  */
 export const getAgreementsByUser = async (userId, role) => {
+  const numericUserId = parseInt(userId, 10);
+  if (!numericUserId || isNaN(numericUserId)) {
+    return [];
+  }
+
   let queryText = '';
   
   if (role === 'athlete') {
@@ -104,9 +109,11 @@ export const getAgreementsByUser = async (userId, role) => {
       WHERE a.academy_id = $1
       ORDER BY a.created_at DESC;
     `;
+  } else {
+    return [];
   }
 
-  const { rows } = await pool.query(queryText, [userId]);
+  const { rows } = await pool.query(queryText, [numericUserId]);
   return rows;
 };
 

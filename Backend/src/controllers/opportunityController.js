@@ -130,7 +130,17 @@ export const getActiveOpportunities = async (req, res, next) => {
  */
 export const getMyPostedOpportunities = async (req, res, next) => {
   try {
-    const academyId = req.user.id;
+    const academyId = req.user?.id || req.user?.userId;
+    if (!academyId) {
+      return res.status(200).json({
+        status: 'success',
+        results: 0,
+        data: {
+          opportunities: [],
+        },
+      });
+    }
+
     const opportunities = await opportunityModel.getOpportunitiesByAcademy(academyId);
 
     res.status(200).json({

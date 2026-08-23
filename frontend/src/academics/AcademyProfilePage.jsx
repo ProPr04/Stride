@@ -1,9 +1,10 @@
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect, useRef } from "react";
 import {
   Award,
   BadgeCheck,
   Building2,
+  Camera,
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
@@ -15,14 +16,18 @@ import {
   MapPin,
   Medal,
   Plus,
+  RefreshCw,
   Save,
   ShieldCheck,
   Star,
+  Trash2,
   Trophy,
+  Upload,
   UserRound,
   Users,
   X,
 } from "lucide-react";
+import api from "../services/api";
 
 const fallbackVerification = [];
 
@@ -293,15 +298,18 @@ function CollectionModal({
 ========================================================= */
 
 function EditProfileModal({
-  academy,
+  academy = {},
   onClose,
   onSave,
 }) {
+  const fileInputRef = useRef(null);
+
   const [form, setForm] = useState({
     name:
-      academy.name ||
+      academy.academy_name ||
       academy.academyName ||
-      "Metro Track Academy",
+      academy.name ||
+      "Partner Sports Academy",
 
     tagline:
       academy.tagline ||
@@ -311,41 +319,46 @@ function EditProfileModal({
     location:
       academy.location ||
       academy.city ||
-      "Mumbai, India",
+      "Pune, Maharashtra",
 
     primarySports:
-      academy.primarySports ||
-      academy.sports?.join(", ") ||
-      "Athletics, Performance",
+      Array.isArray(academy.primary_sports) && academy.primary_sports.length
+        ? academy.primary_sports.join(", ")
+        : Array.isArray(academy.sports_offered) && academy.sports_offered.length
+        ? academy.sports_offered.join(", ")
+        : academy.primary_sports ||
+          academy.primarySports ||
+          academy.sports_offered ||
+          "Cricket, Football, Tennis",
 
     image:
+      academy.logo_url ||
       academy.logo ||
       academy.avatar ||
       academy.image ||
       "",
 
     programs:
-      academy.programs?.length
+      Array.isArray(academy.programs) && academy.programs.length
         ? academy.programs
         : fallbackPrograms,
 
     achievements:
-      academy.recentAchievements?.length
+      Array.isArray(academy.recentAchievements) && academy.recentAchievements.length
         ? academy.recentAchievements
+        : Array.isArray(academy.achievements) && academy.achievements.length
+        ? academy.achievements
         : [
             {
-              title:
-                "Four athletes reached national qualifying standards",
+              title: "Four athletes reached national qualifying standards",
               date: "THIS SEASON",
             },
             {
-              title:
-                "Sprint squad achieved seven verified personal bests",
+              title: "Sprint squad achieved seven verified personal bests",
               date: "LAST 30 DAYS",
             },
             {
-              title:
-                "Academy athletes secured three competition medals",
+              title: "Academy athletes secured three competition medals",
               date: "RECENT EVENT",
             },
           ],
@@ -356,6 +369,30 @@ function EditProfileModal({
       ...previous,
       [field]: value,
     }));
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const res = await api.upload.image(file);
+      if (res.data?.url) {
+        if (form.image && form.image.includes('/uploads/')) {
+          api.upload.deleteImage(form.image);
+        }
+        updateField("image", res.data.url);
+      }
+    } catch (err) {
+      alert("Failed to upload logo: " + err.message);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    if (form.image && form.image.includes('/uploads/')) {
+      api.upload.deleteImage(form.image);
+    }
+    updateField("image", "");
   };
 
   const updateProgram = (index, field, value) => {
@@ -445,23 +482,27 @@ function EditProfileModal({
   };
 
   const handleSave = () => {
+    const sportsList = form.primarySports
+      ? form.primarySports.split(',').map((s) => s.trim()).filter(Boolean)
+      : ['General Sports'];
+
     onSave?.({
       ...academy,
-      academy_name: form.name,
-      name: form.name,
-      academyName: form.name,
-      tagline: form.tagline,
-      description: form.tagline,
-      location: form.location,
-      city: form.location,
-      primary_sports: [form.primarySports],
+      academy_name: form.name.trim(),
+      name: form.name.trim(),
+      academyName: form.name.trim(),
+      tagline: form.tagline.trim(),
+      description: form.tagline.trim(),
+      location: form.location.trim(),
+      city: form.location.trim(),
+      primary_sports: sportsList,
+      sports_offered: sportsList,
       primarySports: form.primarySports,
       logo_url: form.image,
       logo: form.image,
       image: form.image,
       programs: form.programs,
-      recentAchievements:
-        form.achievements,
+      recentAchievements: form.achievements,
     });
 
     onClose();
@@ -544,14 +585,57 @@ function EditProfileModal({
                 }
               />
 
-              <EditField
-                label="Profile Image URL"
-                value={form.image}
-                onChange={(value) =>
-                  updateField("image", value)
-                }
-                icon={ImageIcon}
-              />
+              <div className="flex flex-col gap-2">
+                <span className="flex items-center gap-1.5 font-mono text-[8px] font-bold tracking-[0.12em] text-lime/55">
+                  <ImageIcon size={11} />
+                  ACADEMY LOGO / IMAGE
+                </span>
+                <div className="flex items-center gap-3 rounded-md border border-lime/15 bg-[#2A3C2E] p-2.5">
+                  <div className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-lg border border-lime/20 bg-[#16251B]">
+                    {form.image ? (
+                      <img src={form.image} alt="Logo Preview" className="h-full w-full object-cover" />
+                    ) : (
+                      <Building2 size={20} className="text-lime/60" />
+                    )}
+                  </div>
+                  <div className="flex flex-1 flex-col gap-1.5">
+                    <input
+                      type="text"
+                      placeholder="Paste Image URL or Upload File"
+                      value={form.image}
+                      onChange={(e) => updateField("image", e.target.value)}
+                      className="w-full rounded border border-lime/15 bg-[#1F2E24] px-2.5 py-1.5 text-xs text-[#F7F5ED] outline-none focus:border-lime/50"
+                    />
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="inline-flex items-center gap-1 rounded bg-lime/15 px-2.5 py-1 font-mono text-[9px] font-bold text-lime hover:bg-lime/25"
+                      >
+                        <Camera size={11} />
+                        Upload File
+                      </button>
+                      {form.image && (
+                        <button
+                          type="button"
+                          onClick={handleRemoveImage}
+                          className="inline-flex items-center gap-1 rounded bg-red-500/15 px-2.5 py-1 font-mono text-[9px] font-bold text-red-400 hover:bg-red-500/25"
+                        >
+                          <Trash2 size={11} />
+                          Remove
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                </div>
+              </div>
 
               <div className="md:col-span-2">
                 <EditField
@@ -837,47 +921,71 @@ export default function AcademyProfilePage({
   onViewOpportunity,
   onSaveProfile,
 }) {
-  const [localAcademy, setLocalAcademy] =
-    useState(academy);
+  const [localAcademy, setLocalAcademy] = useState(academy || {});
+  const [loadingProfile, setLoadingProfile] = useState(!academy || Object.keys(academy).length === 0);
 
-  const [showEditModal, setShowEditModal] =
-    useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [collectionModal, setCollectionModal] = useState(null);
 
-  const [collectionModal, setCollectionModal] =
-    useState(null);
+  const loadProfile = async () => {
+    try {
+      setLoadingProfile(true);
+      const res = await api.profiles.getMyProfile();
+      if (res?.data?.profile) {
+        setLocalAcademy(res.data.profile);
+      }
+    } catch (err) {
+      console.warn('Could not fetch academy profile:', err.message);
+    } finally {
+      setLoadingProfile(false);
+    }
+  };
 
   /*
-   * Keep local state synchronized when a parent
-   * provides a different academy.
+   * Keep local state synchronized when a parent provides academy data or on mount
    */
-  React.useEffect(() => {
-    setLocalAcademy(academy);
+  useEffect(() => {
+    if (academy && Object.keys(academy).length > 0 && (academy.academy_name || academy.name)) {
+      setLocalAcademy(academy);
+    } else {
+      loadProfile();
+    }
   }, [academy]);
 
   const name =
-    localAcademy.name ||
+    localAcademy.academy_name ||
     localAcademy.academyName ||
-    "Metro Track Academy";
+    localAcademy.name ||
+    "Partner Sports Academy";
 
   const tagline =
     localAcademy.tagline ||
     localAcademy.description ||
-    "Building confident athletes through verified coaching, disciplined training and competition-ready performance.";
+    "Dedicated sports academy providing elite athletic training, coaching, and championship development programs.";
 
   const location =
     localAcademy.location ||
     localAcademy.city ||
-    "Mumbai, India";
+    "Pune, Maharashtra";
 
   const academyId =
-    localAcademy.academyId ||
-    localAcademy.id ||
-    "STR-ACD-00842";
+    localAcademy.id ? `STR-ACD-${String(localAcademy.id).padStart(5, '0')}` : "STR-ACD-00001";
 
   const avatar =
+    localAcademy.logo_url ||
     localAcademy.logo ||
     localAcademy.avatar ||
     localAcademy.image;
+
+  const primarySports =
+    Array.isArray(localAcademy.primary_sports) && localAcademy.primary_sports.length
+      ? localAcademy.primary_sports.join(", ")
+      : Array.isArray(localAcademy.sports_offered) && localAcademy.sports_offered.length
+      ? localAcademy.sports_offered.join(", ")
+      : localAcademy.primary_sports ||
+        localAcademy.primarySports ||
+        localAcademy.sports_offered ||
+        "Football, Cricket, Athletics";
 
   const verificationLevel =
     localAcademy.verificationLevel ||
@@ -889,17 +997,17 @@ export default function AcademyProfilePage({
     fallbackVerification;
 
   const coaches =
-    localAcademy.coaches?.length
+    Array.isArray(localAcademy.coaches) && localAcademy.coaches.length
       ? localAcademy.coaches
       : fallbackCoaches;
 
   const programs =
-    localAcademy.programs?.length
+    Array.isArray(localAcademy.programs) && localAcademy.programs.length
       ? localAcademy.programs
       : fallbackPrograms;
 
   const opportunities =
-    localAcademy.opportunities?.length
+    Array.isArray(localAcademy.opportunities) && localAcademy.opportunities.length
       ? localAcademy.opportunities
       : fallbackOpportunities;
 
@@ -907,28 +1015,26 @@ export default function AcademyProfilePage({
     {
       label: "ACTIVE ATHLETES",
       value:
-        localAcademy.activeAthletes ?? 84,
+        localAcademy.activeAthletes ?? (localAcademy.stats?.active_athletes ?? 48),
       icon: Users,
     },
     {
       label: "VERIFIED COACHES",
       value:
         localAcademy.verifiedCoaches ??
-        coaches.filter(
-          (coach) => coach.verified
-        ).length,
+        coaches.filter((coach) => coach.verified).length,
       icon: ShieldCheck,
     },
     {
       label: "NATIONAL QUALIFIERS",
       value:
-        localAcademy.nationalQualifiers ?? 11,
+        localAcademy.nationalQualifiers ?? (localAcademy.stats?.national_qualifiers ?? 11),
       icon: Trophy,
     },
     {
       label: "ATHLETE PERSONAL BESTS",
       value:
-        localAcademy.personalBests ?? 27,
+        localAcademy.personalBests ?? (localAcademy.stats?.personal_bests ?? 27),
       icon: Star,
     },
   ];
@@ -936,28 +1042,24 @@ export default function AcademyProfilePage({
   const overview = [
     [
       "Founded",
-      localAcademy.founded || "2012",
+      localAcademy.founded || "2018",
     ],
     ["Location", location],
     [
       "Primary Sports",
-      localAcademy.primarySports ||
-        localAcademy.sports?.join(", ") ||
-        "Athletics, Performance",
+      primarySports,
     ],
     [
       "Active Athletes",
-      localAcademy.activeAthletes ?? 84,
+      localAcademy.activeAthletes ?? (localAcademy.stats?.active_athletes ?? 48),
     ],
     [
       "Training Programs",
-      localAcademy.trainingPrograms ??
-        programs.length,
+      programs.length,
     ],
     [
       "Competitive Level",
-      localAcademy.competitiveLevel ||
-        "National",
+      localAcademy.competitiveLevel || "National / State",
     ],
   ];
 

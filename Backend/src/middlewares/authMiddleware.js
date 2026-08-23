@@ -44,7 +44,12 @@ export const protect = (req, res, next) => {
     const decoded = verifyToken(token);
 
     // Attach the decoded user payload (id, role) to the request object
-    req.user = decoded;
+    const userId = decoded.id || decoded.userId;
+    req.user = {
+      ...decoded,
+      id: userId ? parseInt(userId, 10) : undefined,
+      userId: userId ? parseInt(userId, 10) : undefined,
+    };
     next();
   } catch (error) {
     if (error.name === 'TokenExpiredError') {

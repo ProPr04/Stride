@@ -208,6 +208,11 @@ export const getActiveOpportunities = async (filters = {}) => {
  * Retrieves all opportunities posted by a specific academy, along with the count of received applications.
  */
 export const getOpportunitiesByAcademy = async (academyId) => {
+  const numericAcademyId = parseInt(academyId, 10);
+  if (!numericAcademyId || isNaN(numericAcademyId)) {
+    return [];
+  }
+
   const queryText = `
     SELECT 
       o.*,
@@ -218,7 +223,7 @@ export const getOpportunitiesByAcademy = async (academyId) => {
     GROUP BY o.id
     ORDER BY o.created_at DESC;
   `;
-  const { rows } = await pool.query(queryText, [academyId]);
+  const { rows } = await pool.query(queryText, [numericAcademyId]);
   return rows;
 };
 
