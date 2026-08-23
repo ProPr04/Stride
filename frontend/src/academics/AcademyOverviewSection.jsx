@@ -491,7 +491,7 @@ export default function AcademyOverviewSection({
   });
 
   return (
-    <section className="min-h-full w-full bg-[#2A3C2E] font-['Inter'] text-[#F7F5ED]">
+    <section className="min-h-full w-full bg-[#14241A] font-['Inter'] text-[#F7F5ED]">
       {/* =====================================================
           HERO
       ===================================================== */}

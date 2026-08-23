@@ -326,7 +326,7 @@ export default function AcademyAthletesSection({
   };
 
   return (
-    <section className="min-h-full w-full bg-[#2A3C2E] font-['Inter'] text-[#F7F5ED]">
+    <section className="min-h-full w-full bg-[#14241A] font-['Inter'] text-[#F7F5ED]">
       {/* SEARCH */}
       <div className="mb-8 flex items-center gap-3">
         <label className="relative block flex-1">
