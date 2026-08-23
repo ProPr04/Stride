@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, useNavigate, Navigate } from 'r
 import Login from './pages/Login';
 import SignUp from './pages/SignUp';
 import AthleteDashboard from './pages/AthleteDashboard';
-import AcademyDashboard from './academics/AcademyDashboard';
+import AcademyDashboard from './pages/AcademyDashboard';
 import HowItWorks from './components/HowItWorks';
 import Trust from './components/Trust';
 import Footer from './components/Footer';

@@ -91,7 +91,7 @@ export default function AthleteProfileSection() {
     <div className="profile-pane matchpoint-fade-in max-w-5xl mx-auto space-y-6 pb-16 font-['Inter',sans-serif]">
       {/* Title Header */}
       <div className="flex items-center justify-between pt-1">
-        <h1 className="text-2xl font-black font-mono tracking-widest text-white uppercase">
+        <h1 className="text-2xl font-black font-['Poppins',sans-serif] tracking-wider text-white uppercase">
           MY SPORTING PROFILE
         </h1>
         <div className="flex items-center gap-2">
@@ -100,14 +100,14 @@ export default function AthleteProfileSection() {
               navigator.clipboard.writeText(window.location.href);
               alert('Profile link copied to clipboard!');
             }}
-            className="px-3 py-1.5 bg-[#141F16] border border-[#2A3C2E] text-gray-300 hover:text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-colors"
+            className="px-3.5 py-2 bg-[#141F16] border border-[#2A3C2E] text-gray-300 hover:text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-colors"
           >
             <Share2 size={14} />
             <span>Share</span>
           </button>
           <button
             onClick={handleOpenEditModal}
-            className="px-3.5 py-1.5 bg-[#F2FF65] text-[#141F16] font-mono font-bold rounded-lg text-xs uppercase flex items-center gap-1.5 hover:bg-[#e2ef4f] cursor-pointer transition-all shadow-md"
+            className="px-4 py-2 bg-[#F2FF65] text-[#141F16] font-['Poppins',sans-serif] font-bold rounded-xl text-xs uppercase flex items-center gap-1.5 hover:bg-[#e2ef4f] cursor-pointer transition-all shadow-md"
           >
             <Edit3 size={14} />
             <span>Edit Profile</span>
@@ -116,7 +116,7 @@ export default function AthleteProfileSection() {
       </div>
 
       {/* Main Profile Header Banner Card */}
-      <div className="bg-[#141F16] border border-[#2A3C2E] rounded-xl overflow-hidden shadow-lg">
+      <div className="bg-[#141F16] border border-[#2A3C2E] rounded-2xl overflow-hidden shadow-xl">
         {/* Cover Photo */}
         <div className="h-44 sm:h-52 w-full relative bg-[#0B120D]">
           <img src={athleteData.cover} alt="Cover" className="w-full h-full object-cover opacity-60" />

@@ -49,7 +49,7 @@ const academyFeatures = [
 function TrustPanel({ audience, colorClass, features }) {
   return (
     <article
-      className={`group relative flex min-h-[390px] flex-col overflow-hidden p-7 sm:p-9 md:min-h-[410px] ${colorClass} font-['Poppins',sans-serif]`}
+      className={`group relative flex min-h-[390px] flex-col overflow-hidden rounded-2xl border border-[#f2ff65]/20 shadow-xl p-7 sm:p-9 md:min-h-[410px] ${colorClass} font-['Poppins',sans-serif]`}
     >
       {/* Audience */}
       <div className="mb-8 border-b border-[#f2ff65]/70 pb-6">
@@ -94,7 +94,7 @@ function TrustPanel({ audience, colorClass, features }) {
 
 export default function Trust() {
   return (
-    <section className="w-full bg-[#2a3c2e] px-6 py-16 sm:px-10 md:py-20 lg:px-16 xl:px-20">
+    <section id="about" className="w-full bg-[#17241a] px-6 py-16 sm:px-10 md:py-20 lg:px-16 xl:px-20 scroll-mt-20">
       <div className="mx-auto w-full max-w-[1200px]">
         {/* Header */}
         <header className="mb-10 sm:mb-12">
@@ -110,7 +110,7 @@ export default function Trust() {
         </header>
 
         {/* Two-sided panels */}
-        <div className="grid grid-cols-1 md:grid-cols-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
           {/* Athlete */}
           <TrustPanel
             audience="ATHLETES"
@@ -121,7 +121,7 @@ export default function Trust() {
           {/* Academy */}
           <TrustPanel
             audience="ACADEMIES"
-            colorClass="bg-[#2c337f] md:border-l md:border-[#f2ff65]"
+            colorClass="bg-[#2c337f]"
             features={academyFeatures}
           />
         </div>

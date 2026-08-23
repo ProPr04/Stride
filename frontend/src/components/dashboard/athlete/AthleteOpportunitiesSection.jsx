@@ -192,13 +192,13 @@ export default function AthleteOpportunitiesSection() {
     <div className="opportunities-pane matchpoint-fade-in max-w-2xl mx-auto space-y-5 pb-16">
       {/* Opportunities Section Title Header */}
       <div className="flex items-center justify-between pt-1">
-        <h1 className="text-2xl font-black font-mono tracking-widest text-white uppercase">
+        <h1 className="text-2xl font-black font-['Poppins',sans-serif] tracking-wider text-white uppercase">
           OPPORTUNITIES
         </h1>
       </div>
 
       {/* Sleek Search & Category Bar */}
-      <div className="bg-[#141F16] border border-[#2A3C2E] rounded-xl p-4 space-y-3">
+      <div className="bg-[#141F16] border border-[#2A3C2E] rounded-2xl p-4 space-y-3 shadow-lg">
         {/* Search Bar */}
         <div className="relative">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
@@ -207,7 +207,7 @@ export default function AthleteOpportunitiesSection() {
             placeholder="Search opportunity title, academy, or location..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-[#0B120D] border border-[#2A3C2E] rounded-lg text-xs text-white placeholder-gray-500 focus:outline-none focus:border-[#F2FF65] transition-colors font-['Inter',sans-serif]"
+            className="w-full pl-10 pr-4 py-2 bg-[#0B120D] border border-[#2A3C2E] rounded-xl text-xs text-white placeholder-gray-500 focus:outline-none focus:border-[#F2FF65] transition-colors font-['Inter',sans-serif]"
           />
         </div>
 
@@ -218,9 +218,9 @@ export default function AthleteOpportunitiesSection() {
             <button
               key={sport}
               onClick={() => setSelectedSport(sport)}
-              className={`px-3 py-1 rounded-md text-xs font-mono font-bold tracking-wider uppercase transition-all shrink-0 cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-['Poppins',sans-serif] font-bold tracking-wider uppercase transition-all shrink-0 cursor-pointer ${
                 selectedSport === sport
-                  ? 'bg-[#F2FF65] text-[#141F16]'
+                  ? 'bg-[#F2FF65] text-[#141F16] shadow-sm'
                   : 'bg-[#0B120D] text-gray-300 hover:text-white border border-[#2A3C2E]'
               }`}
             >
@@ -233,12 +233,12 @@ export default function AthleteOpportunitiesSection() {
       {/* Feed Stream */}
       <div className="space-y-6">
         {filteredPosts.length === 0 ? (
-          <div className="bg-[#141F16] border border-[#2A3C2E] rounded-xl p-10 text-center text-gray-400">
+          <div className="bg-[#141F16] border border-[#2A3C2E] rounded-2xl p-10 text-center text-gray-400">
             <p className="text-sm font-semibold text-white">No opportunities found</p>
             <p className="text-xs mt-1">Try adjusting your filters.</p>
           </div>
         ) : (
-          filteredPosts.map((post) => {
+          filteredPosts.map((post, idx) => {
             const opp = post.opportunityDetails;
             const isApplied = appliedIds.includes(post.id);
             const isSaved = savedIds.includes(post.id);
@@ -247,11 +247,19 @@ export default function AthleteOpportunitiesSection() {
             const displaySavedCount = isSaved ? post.savedCount + 1 : post.savedCount;
 
             const isCaptionLong = post.caption.length > 100;
+            
+            // Alternate Red (#95402f), Blue (#2C337F), and Dark Green (#141F16)
+            const cardBgColors = [
+              'bg-[#95402f] border-[#b24f3c]/40',
+              'bg-[#2C337F] border-[#3a44a6]/40',
+              'bg-[#141F16] border-[#2A3C2E]'
+            ];
+            const cardStyle = cardBgColors[idx % cardBgColors.length];
 
             return (
               <article
                 key={post.id}
-                className="bg-[#141F16] border border-[#2A3C2E] rounded-xl overflow-hidden text-[#F7F8FA] font-['Inter',sans-serif] shadow-lg"
+                className={`${cardStyle} border rounded-2xl overflow-hidden text-[#F7F8FA] font-['Inter',sans-serif] shadow-xl hover:-translate-y-1 transition-all duration-300`}
               >
                 {/* 1. Academy Header */}
                 <div className="p-4 sm:p-5 flex items-center justify-between">

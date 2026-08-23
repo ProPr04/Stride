@@ -210,4 +210,4 @@ export const Navbar = ({ onOpenLogin, onOpenSignUp }) => {
   );
 };
 
-export default Navbar;
+export default Navbar;
