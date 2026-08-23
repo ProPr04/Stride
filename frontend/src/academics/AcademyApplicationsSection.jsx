@@ -85,7 +85,7 @@ function ApplicationCard({
   const cardColors = [
     "bg-[#95402F] border-[#B24F3C]/40",
     "bg-[#2C337F] border-[#3A44A6]/40",
-    "bg-[#141F16] border-[#2A3C2E]",
+    "bg-[#315038] border-[#2A3C2E]",
   ];
 
   const colorIndex =

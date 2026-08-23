@@ -76,7 +76,7 @@ function EngagementCard({ engagement, onClick, index }) {
   const cardBackgrounds = [
     "bg-[#95402f] border-[#b24f3c]/40",
     "bg-[#2C337F] border-[#3a44a6]/40",
-    "bg-[#141F16] border-[#2A3C2E]",
+    "bg-[#315038] border-[#2A3C2E]",
   ];
 
   const cardStyle =
