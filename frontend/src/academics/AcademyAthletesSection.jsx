@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import { api } from "../services/api";
+import VerificationBadge from "../components/common/VerificationBadge";
+
 
 function AthleteCard({ athlete, onViewProfile }) {
   const image =
@@ -47,19 +49,11 @@ function AthleteCard({ athlete, onViewProfile }) {
 
             {/* PLAYER NAME */}
             <div className="min-w-0">
-              <div className="flex items-center gap-1.5">
-                <h3 className="truncate font-['Poppins'] text-[5px] font-semibold tracking-[-0.02em] text-[#F7F5ED]">
+              <div className="flex flex-wrap items-center gap-1.5">
+                <h3 className="truncate font-['Poppins'] text-sm font-semibold tracking-[-0.02em] text-[#F7F5ED]">
                   {athlete.name}
                 </h3>
-
-                {(athlete.verified ?? true) && (
-                  <BadgeCheck
-                    size={14}
-                    className="shrink-0 text-[#3B82F6]"
-                    fill="currentColor"
-                    strokeWidth={2.2}
-                  />
-                )}
+                <VerificationBadge level={athlete.verification_level || 1} type="athlete" size="sm" />
               </div>
 
               <p className="mt-1 text-[11px] text-[#F7F5ED]/55">
@@ -184,19 +178,12 @@ function AthleteProfileModal({ athlete, onClose }) {
               </div>
 
               <div>
-                <div className="flex items-center gap-1.5">
+                <div className="flex flex-wrap items-center gap-2">
                   <h2 className="font-['Poppins'] text-base font-semibold tracking-[-0.03em] text-[#F7F5ED] sm:text-lg">
                     {athlete.name}
                   </h2>
 
-                  {(athlete.verified ?? true) && (
-                    <BadgeCheck
-                      size={17}
-                      className="text-[#3B82F6]"
-                      fill="currentColor"
-                      strokeWidth={2.25}
-                    />
-                  )}
+                  <VerificationBadge level={athlete.verification_level || 1} type="athlete" size="sm" />
                 </div>
 
                 <p className="mt-1 text-[11px] text-[#F7F5ED]/55">
@@ -207,6 +194,7 @@ function AthleteProfileModal({ athlete, onClose }) {
                 </p>
               </div>
             </div>
+
 
             <button
               onClick={onClose}

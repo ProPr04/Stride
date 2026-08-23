@@ -28,6 +28,8 @@ import {
   Eye
 } from 'lucide-react';
 import { api } from '../../../services/api';
+import VerificationBadge from '../../common/VerificationBadge';
+import VerificationRoadCard from '../../common/VerificationRoadCard';
 
 const DEFAULT_COVER = 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=1200&auto=format&fit=crop&q=80';
 
@@ -39,6 +41,7 @@ export default function AthleteProfileSection() {
   const [error, setError] = useState(null);
   const [feedbackMessage, setFeedbackMessage] = useState(null);
   const [copiedProfile, setCopiedProfile] = useState(false);
+  const [verificationData, setVerificationData] = useState(null);
 
   const avatarInputRef = useRef(null);
   const coverInputRef = useRef(null);
@@ -59,6 +62,7 @@ export default function AthleteProfileSection() {
     name: 'Athlete Profile',
     sport: 'General Sports',
     playing_level: 'Amateur',
+    verification_level: 1,
     role: 'Sports Competitor',
     location: 'India',
     verified: true,
@@ -79,21 +83,29 @@ export default function AthleteProfileSection() {
     setLoading(true);
     setError(null);
     try {
-      const res = await api.profiles.getMyProfile();
-      const p = res?.data?.profile || {};
+      const [profileRes, verifRes] = await Promise.allSettled([
+        api.profiles.getMyProfile(),
+        api.verifications.getMyStatus()
+      ]);
+
+      const p = profileRes.status === 'fulfilled' ? (profileRes.value?.data?.profile || {}) : {};
+      const verif = verifRes.status === 'fulfilled' ? (verifRes.value?.data?.verification || null) : null;
+      setVerificationData(verif);
 
       const profileName = p.full_name || p.name || 'Athlete Profile';
       const sportName = p.sport || 'Track & Field';
       const playingLevel = p.playing_level || 'Competitor';
       const headline = `${sportName} • ${playingLevel}`;
+      const level = verif?.currentLevel || p.verification_level || 1;
 
       const loadedData = {
         name: profileName,
         sport: sportName,
         playing_level: playingLevel,
+        verification_level: level,
         role: headline,
         location: p.location || 'India',
-        verified: (p.verification_level || 1) >= 1,
+        verified: level >= 1,
         age: p.age || '21 Yrs',
         avatar: p.avatar_url || '',
         cover: p.cover_url || DEFAULT_COVER,
@@ -119,6 +131,7 @@ export default function AthleteProfileSection() {
       setLoading(false);
     }
   };
+
 
   useEffect(() => {
     fetchProfile();
@@ -445,14 +458,12 @@ export default function AthleteProfileSection() {
               )}
             </div>
 
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
+            <div className="space-y-1.5">
+              <div className="flex flex-wrap items-center gap-2.5">
                 <h2 className="text-xl sm:text-2xl font-bold font-mono tracking-wide text-white">
                   {athleteData.name}
                 </h2>
-                {athleteData.verified && (
-                  <CheckCircle2 size={18} className="text-[#F2FF65]" />
-                )}
+                <VerificationBadge level={athleteData.verification_level || 1} type="athlete" size="md" />
               </div>
               <p className="text-xs sm:text-sm font-semibold text-[#F2FF65]">{athleteData.role}</p>
               <div className="flex items-center gap-3 text-xs text-gray-400 pt-0.5">
@@ -483,7 +494,7 @@ export default function AthleteProfileSection() {
 
       {/* Profile Navigation Tabs */}
       <div className="flex border-b border-[#2A3C2E] gap-6 text-xs font-mono font-bold uppercase overflow-x-auto scrollbar-none">
-        {['overview', 'achievements', 'certifications'].map((tab) => (
+        {['overview', 'verification', 'achievements', 'certifications'].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -500,11 +511,30 @@ export default function AthleteProfileSection() {
 
       {/* Tab Contents */}
       <div className="space-y-6">
+        {/* VERIFICATION TAB */}
+        {activeTab === 'verification' && (
+          <VerificationRoadCard
+            level={athleteData.verification_level || 1}
+            type="athlete"
+            metrics={verificationData?.metrics || {}}
+            logs={verificationData?.logs || []}
+          />
+        )}
+
         {/* OVERVIEW TAB */}
         {activeTab === 'overview' && (
           <div className="space-y-6">
+            {/* Verification Pathway Summary Widget */}
+            <VerificationRoadCard
+              level={athleteData.verification_level || 1}
+              type="athlete"
+              metrics={verificationData?.metrics || {}}
+              logs={verificationData?.logs || []}
+            />
+
             {/* Bio Card (Terracotta Red) */}
             <div className="bg-[#95402f] border border-[#b24f3c]/40 rounded-xl p-5 space-y-3 shadow-lg">
+
               <h3 className="text-xs font-mono font-bold tracking-widest text-[#F2FF65] uppercase">
                 ATHLETE BIO & BACKGROUND
               </h3>

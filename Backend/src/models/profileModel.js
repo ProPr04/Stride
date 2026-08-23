@@ -201,6 +201,35 @@ export const getAthleteProfileByUserId = async (userId) => {
  * @param {number} userId - The ID from the users table.
  */
 export const getAcademyProfileByUserId = async (userId) => {
+  const numericId = parseInt(userId, 10);
+  if (!numericId || isNaN(numericId)) return null;
+
+  // Auto-sync verification level based on live application & recruited counts
+  try {
+    const statsRes = await pool.query(
+      `SELECT 
+         COUNT(*) AS total_applications,
+         COUNT(*) FILTER (WHERE status IN ('accepted', 'completed')) AS recruited_count
+       FROM agreements
+       WHERE academy_id = $1;`,
+      [numericId]
+    );
+    const totalApps = parseInt(statsRes.rows[0]?.total_applications, 10) || 0;
+    const recruitedCount = parseInt(statsRes.rows[0]?.recruited_count, 10) || 0;
+
+    let qualifiedLevel = 1;
+    if (recruitedCount >= 5) qualifiedLevel = 4;
+    else if (recruitedCount >= 2) qualifiedLevel = 3;
+    else if (totalApps >= 1) qualifiedLevel = 2;
+
+    await pool.query(
+      'UPDATE academy_profiles SET verification_level = GREATEST(COALESCE(verification_level, 1), $1) WHERE user_id = $2;',
+      [qualifiedLevel, numericId]
+    );
+  } catch (err) {
+    // Non-blocking sync
+  }
+
   const queryText = `
     SELECT 
       ap.*,
@@ -211,9 +240,10 @@ export const getAcademyProfileByUserId = async (userId) => {
     JOIN users u ON ap.user_id = u.id
     WHERE ap.user_id = $1;
   `;
-  const { rows } = await pool.query(queryText, [userId]);
+  const { rows } = await pool.query(queryText, [numericId]);
   return rows[0] || null;
 };
+
 
 /**
  * Creates or updates an athlete profile.

@@ -96,4 +96,15 @@ export const authorize = (...roles) => {
 
     next();
   };
-};
+};
+
+export const authenticateToken = protect;
+export const restrictTo = authorize;
+
+export default {
+  protect,
+  authorize,
+  authenticateToken,
+  restrictTo,
+};
+

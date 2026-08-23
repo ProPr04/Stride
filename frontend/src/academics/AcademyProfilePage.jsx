@@ -28,6 +28,10 @@ import {
   X,
 } from "lucide-react";
 import api from "../services/api";
+import VerificationBadge from "../components/common/VerificationBadge";
+import VerificationRoadCard from "../components/common/VerificationRoadCard";
+
+
 
 const fallbackVerification = [];
 
@@ -923,6 +927,7 @@ export default function AcademyProfilePage({
 }) {
   const [localAcademy, setLocalAcademy] = useState(academy || {});
   const [loadingProfile, setLoadingProfile] = useState(!academy || Object.keys(academy).length === 0);
+  const [verificationData, setVerificationData] = useState(null);
 
   const [showEditModal, setShowEditModal] = useState(false);
   const [collectionModal, setCollectionModal] = useState(null);
@@ -930,12 +935,19 @@ export default function AcademyProfilePage({
   const loadProfile = async () => {
     try {
       setLoadingProfile(true);
-      const res = await api.profiles.getMyProfile();
-      if (res?.data?.profile) {
-        setLocalAcademy(res.data.profile);
+      const [res, verifRes] = await Promise.allSettled([
+        api.profiles.getMyProfile(),
+        api.verifications.getMyStatus()
+      ]);
+
+      if (res.status === 'fulfilled' && res.value?.data?.profile) {
+        setLocalAcademy(res.value.data.profile);
+      }
+      if (verifRes.status === 'fulfilled' && verifRes.value?.data?.verification) {
+        setVerificationData(verifRes.value.data.verification);
       }
     } catch (err) {
-      console.warn('Could not fetch academy profile:', err.message);
+      console.warn('Could not fetch academy profile/verification:', err.message);
     } finally {
       setLoadingProfile(false);
     }
@@ -947,10 +959,10 @@ export default function AcademyProfilePage({
   useEffect(() => {
     if (academy && Object.keys(academy).length > 0 && (academy.academy_name || academy.name)) {
       setLocalAcademy(academy);
-    } else {
-      loadProfile();
     }
+    loadProfile();
   }, [academy]);
+
 
   const name =
     localAcademy.academy_name ||
@@ -1178,13 +1190,14 @@ export default function AcademyProfilePage({
           <div className="profile-identity">
             <div className="profile-badge-row">
               <span className="matchpoint-badge-lime">
-                VERIFIED ACADEMY
+                ACADEMY PROFILE
               </span>
 
-              <span className="matchpoint-badge-verified">
-                <CheckCircle2 size={13} />
-                {verificationLevel}
-              </span>
+              <VerificationBadge
+                level={verificationData?.currentLevel || localAcademy.verification_level || 1}
+                type="academy"
+                size="md"
+              />
             </div>
 
             <h1 className="profile-hero-name">
@@ -1259,7 +1272,7 @@ export default function AcademyProfilePage({
       </div>
 
       {/* =====================================================
-          TAGLINE / BIO
+          TAGLINE / BIO & VERIFICATION ROAD
       ====================================================== */}
 
       <div className="matchpoint-main-cols mt-24">
@@ -1295,67 +1308,19 @@ export default function AcademyProfilePage({
         </GlassPanel>
 
         {/* =====================================================
-            VERIFICATION
+            VERIFICATION ROADWAY CARD
         ====================================================== */}
 
-        <GlassPanel>
-          <SectionHeader
-            eyebrow="TRUST FRAMEWORK"
-            title="VERIFICATION STATUS"
-            icon={ShieldCheck}
+        <div>
+          <VerificationRoadCard
+            level={verificationData?.currentLevel || localAcademy.verification_level || 1}
+            type="academy"
+            metrics={verificationData?.metrics || {}}
+            logs={verificationData?.logs || []}
           />
-
-          <div className="space-y-3">
-            {verification.map(
-              (item, index) => {
-                const verified =
-                  String(
-                    item.status || ""
-                  ).toUpperCase() ===
-                  "VERIFIED";
-
-                return (
-                  <div
-                    key={`${item.level}-${item.title}`}
-                    className={`flex items-center justify-between gap-3 border-b border-lime/10 pb-3 ${
-                      !verified
-                        ? "opacity-50"
-                        : ""
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="grid h-8 w-8 place-items-center border border-lime/20 bg-white/5 font-mono text-[9px] font-bold text-lime">
-                        {String(
-                          index + 1
-                        ).padStart(2, "0")}
-                      </span>
-
-                      <div>
-                        <p className="font-mono text-[9px] font-bold tracking-[0.1em] text-lime/55">
-                          {item.level}
-                        </p>
-
-                        <p className="mt-1 text-xs font-semibold text-[#F7F5ED]">
-                          {item.title}
-                        </p>
-                      </div>
-                    </div>
-
-                    <StatusBadge
-                      verified={verified}
-                    >
-                      {item.status ||
-                        "PENDING"}
-                    </StatusBadge>
-                  </div>
-                );
-              }
-            )}
-          </div>
-
-          {/* VIEW FULL RECORD REMOVED FOR MVP */}
-        </GlassPanel>
+        </div>
       </div>
+
 
       {/* =====================================================
           ACADEMY IMPACT

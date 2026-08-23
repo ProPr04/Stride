@@ -10,8 +10,10 @@ import opportunityRoutes from './routes/opportunityRoutes.js';
 import agreementRoutes from './routes/agreementRoutes.js';
 import savedRoutes from './routes/savedRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
+import verificationRoutes from './routes/verificationRoutes.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
+
 
 // Initialize Express app
 const app = express();
@@ -51,6 +53,9 @@ app.use('/api/agreements', agreementRoutes);
 app.use('/api/saved', savedRoutes);
 
 app.use('/api/upload', uploadRoutes);
+
+app.use('/api/verifications', verificationRoutes);
+
 
 // 3. Unhandled Route 404 Catcher (Updated Fix)
 app.use((req, res, next) => {

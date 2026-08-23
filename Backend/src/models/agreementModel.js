@@ -1,4 +1,8 @@
 import pool from '../config/db.js';
+import {
+  evaluateAcademyVerificationLevel,
+  evaluateAthleteVerificationLevel
+} from './verificationModel.js';
 
 /*
  * Initializes the agreements table in PostgreSQL.
@@ -23,7 +27,6 @@ export const createAgreementTable = async () => {
 /**
  * Creates a new agreement (e.g., an athlete applying for an opportunity).
  */
-
 export const createAgreement = async (opportunityId, athleteId, academyId) => {
   const queryText = `
     INSERT INTO agreements (opportunity_id, athlete_id, academy_id)
@@ -32,8 +35,20 @@ export const createAgreement = async (opportunityId, athleteId, academyId) => {
   `;
   const values = [opportunityId, athleteId, academyId];
   const { rows } = await pool.query(queryText, values);
-  return rows[0];
+  const newAgreement = rows[0];
+
+  // Auto-evaluate Academy verification level on receiving an application (promotes to L2 on >= 1 application)
+  if (academyId) {
+    try {
+      await evaluateAcademyVerificationLevel(academyId);
+    } catch (err) {
+      console.warn('Could not evaluate academy level on application:', err.message);
+    }
+  }
+
+  return newAgreement;
 };
+
 
 /**
  * Retrieves agreements for a specific user (either an athlete or an academy).
@@ -130,7 +145,28 @@ export const updateAgreementStatus = async (agreementId, academyId, newStatus) =
   `;
   const values = [newStatus, agreementId, academyId];
   const { rows } = await pool.query(queryText, values);
-  return rows[0];
+  const updatedAgreement = rows[0];
+
+  // If status is 'accepted' or 'completed', trigger verification evaluation for both parties
+  if (updatedAgreement && ['accepted', 'completed'].includes(newStatus.toLowerCase())) {
+    try {
+      // 1. Evaluate Academy (counts total recruited players -> L3 on >=2, L4 on >=5)
+      await evaluateAcademyVerificationLevel(academyId);
+
+      // 2. Evaluate Athlete (promotes to L2 or L3 based on Academy's level)
+      if (updatedAgreement.athlete_id) {
+        await evaluateAthleteVerificationLevel(
+          updatedAgreement.athlete_id,
+          academyId,
+          updatedAgreement.id
+        );
+      }
+    } catch (err) {
+      console.warn('Verification evaluation error during status update:', err.message);
+    }
+  }
+
+  return updatedAgreement;
 };
 
 export default {
@@ -139,3 +175,4 @@ export default {
   getAgreementsByUser,
   updateAgreementStatus,
 };
+

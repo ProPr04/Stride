@@ -310,7 +310,18 @@ export const api = {
         console.warn('Failed to delete image on server:', err.message);
       }
     }
+  },
+
+  // Verification & Reputation System
+  verifications: {
+    getMyStatus: async () => apiFetch('/verifications/my-status'),
+    getUserStatus: async (userId, role = 'athlete') => apiFetch(`/verifications/user/${userId}?role=${role}`),
+    promoteAthlete: async ({ athleteUserId, tenureReason }) => apiFetch('/verifications/promote', {
+      method: 'POST',
+      body: JSON.stringify({ athleteUserId, tenureReason }),
+    }),
   }
 };
 
 export default api;
+
