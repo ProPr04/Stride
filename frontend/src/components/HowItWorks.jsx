@@ -29,7 +29,7 @@ const steps = [
 
 export default function HowItWorks() {
   return (
-    <section className="w-full bg-[#17241a] px-6 py-14 sm:px-10 md:py-16 lg:px-16 xl:px-20 font-['Poppins',sans-serif]">
+    <section id="how-it-works" className="w-full bg-[#17241a] px-6 py-14 sm:px-10 md:py-16 lg:px-16 xl:px-20 font-['Poppins',sans-serif]">
       <div className="mx-auto w-full max-w-[1200px]">
         <div className="mb-9 flex items-end justify-between gap-6 sm:mb-11">
           <div>

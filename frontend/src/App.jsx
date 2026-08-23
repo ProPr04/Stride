@@ -30,10 +30,15 @@ function ProtectedRoute({ children, requiredRole }) {
   return children;
 }
 
-function LandingPage({ initialLoginOpen = false }) {
-
+function LandingPage({ initialLoginOpen = false, initialRole = 'athlete' }) {
   const [isLoginOpen, setIsLoginOpen] = useState(initialLoginOpen);
+  const [loginRole, setLoginRole] = useState(initialRole);
   const navigate = useNavigate();
+
+  const handleOpenLogin = (role = 'athlete') => {
+    setLoginRole(role);
+    setIsLoginOpen(true);
+  };
 
   const handleLoginSuccess = (role) => {
     setIsLoginOpen(false);
@@ -47,18 +52,27 @@ function LandingPage({ initialLoginOpen = false }) {
   return (
     <>
       <Navbar
-        onOpenLogin={() => setIsLoginOpen(true)}
+        onOpenLogin={(role = 'athlete') => handleOpenLogin(role)}
         onOpenSignUp={() => navigate('/signup')}
+        onOpenOpportunities={() => handleOpenLogin('athlete')}
+        onOpenAcademies={() => handleOpenLogin('academy')}
       />
-      <Hero />
+      <Hero
+        onOpenOpportunities={() => handleOpenLogin('athlete')}
+        onOpenAcademies={() => handleOpenLogin('academy')}
+      />
       <HowItWorks />
       <Trust />
-      <Footer />
+      <Footer
+        onOpenOpportunities={() => handleOpenLogin('athlete')}
+        onOpenAcademies={() => handleOpenLogin('academy')}
+      />
 
       {/* Blurred Background Login Modal */}
       {isLoginOpen && (
         <Login
           isModal={true}
+          initialRole={loginRole}
           onClose={() => setIsLoginOpen(false)}
           onSwitchToSignUp={() => {
             setIsLoginOpen(false);
@@ -99,6 +113,7 @@ function AppRoutes() {
         element={
           <div className="app-container">
             <SignUp
+              onClose={() => navigate('/')}
               onSwitchToLogin={() => navigate('/login')}
             />
           </div>

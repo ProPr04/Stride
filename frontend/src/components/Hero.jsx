@@ -3,7 +3,23 @@ import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import HeroImage from '../assets/images/hero-court-basketball.jpg';
 
-export const Hero = () => {
+export const Hero = ({ onOpenOpportunities, onOpenAcademies }) => {
+  const handleOpportunitiesClick = () => {
+    if (onOpenOpportunities) {
+      onOpenOpportunities();
+    } else {
+      window.location.href = '/login?role=athlete';
+    }
+  };
+
+  const handleAcademiesClick = () => {
+    if (onOpenAcademies) {
+      onOpenAcademies();
+    } else {
+      window.location.href = '/login?role=academy';
+    }
+  };
+
   return (
     <section className="relative min-h-[90vh] lg:min-h-screen w-full flex items-center justify-end overflow-hidden bg-[#17241a] text-[#F7F8FA] font-['Inter',sans-serif]">
       {/* 1. Background Court Asset with Minimal Vignette */}
@@ -45,6 +61,7 @@ export const Hero = () => {
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2 w-full sm:w-auto">
             <button
               type="button"
+              onClick={handleOpportunitiesClick}
               className="inline-flex items-center justify-center gap-3 px-8 py-3.5 rounded-xl bg-[#F2FF65] text-[#0F172A] font-['Poppins',sans-serif] font-bold text-sm sm:text-base hover:bg-[#e2ef4f] transition-colors duration-200 cursor-pointer shadow-md shadow-black/20"
             >
               <span>Explore Opportunities</span>
@@ -53,6 +70,7 @@ export const Hero = () => {
 
             <button
               type="button"
+              onClick={handleAcademiesClick}
               className="inline-flex items-center justify-center px-7 py-3.5 rounded-xl bg-[#0F2F23]/60 border border-white/20 text-[#F7F8FA] font-['Poppins',sans-serif] font-semibold text-sm sm:text-base backdrop-blur-sm hover:bg-white/10 hover:border-white/40 transition-colors duration-200 cursor-pointer"
             >
               <span>For Academies</span>

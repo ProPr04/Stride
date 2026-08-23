@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Eye, EyeOff, Check, User, Building2 } from 'lucide-react';
+import { Eye, EyeOff, Check, User, Building2, X } from 'lucide-react';
 import { api, authStorage, isAuthEnabled } from '../services/api';
 
-export default function SignUp({ onSwitchToLogin }) {
+export default function SignUp({ onSwitchToLogin, onClose }) {
   const [role, setRole] = useState('athlete'); // 'athlete' | 'academy'
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
@@ -14,6 +14,16 @@ export default function SignUp({ onSwitchToLogin }) {
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState(null);
+
+  const handleClose = () => {
+    if (onClose) {
+      onClose();
+    } else if (onSwitchToLogin) {
+      onSwitchToLogin();
+    } else {
+      window.location.href = '/';
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -82,11 +92,16 @@ export default function SignUp({ onSwitchToLogin }) {
 
   return (
     <div className="login-wrapper">
-      <div className="login-card">
-        {/* Top Tag Header */}
-        <div className="login-tag">
-          <span className="tag-symbol"></span>08. SIGN UP
-        </div>
+      <div className="login-card relative">
+        {/* Cancel / Close Button */}
+        <button
+          type="button"
+          onClick={handleClose}
+          className="absolute top-4 right-4 text-gray-400 hover:text-white p-1.5 rounded-full hover:bg-white/10 transition-colors cursor-pointer"
+          aria-label="Close sign up"
+        >
+          <X size={20} />
+        </button>
 
         {/* Welcome Text */}
         <div className="login-header">

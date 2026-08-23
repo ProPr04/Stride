@@ -5,14 +5,19 @@
 .app-container {
   width: 100%;
   min-height: 100vh;
-  padding: 24px;
+  padding: 32px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background-color: var(--dark-green);
   background-image: 
     radial-gradient(circle at 15% 20%, rgba(0, 131, 164, 0.15) 0%, transparent 40%),
     radial-gradient(circle at 85% 80%, rgba(44, 51, 127, 0.25) 0%, transparent 45%),
     linear-gradient(135deg, var(--dark-green) 0%, var(--navy-blue) 100%);
   position: relative;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
+  box-sizing: border-box;
 }
 
 /* Background overlay decoration */
@@ -34,14 +39,16 @@
   width: 100%;
   max-width: 540px;
   display: flex;
+  align-items: center;
   justify-content: center;
   z-index: 1;
+  margin: auto;
 }
 
 .login-card {
-  width: 60%;
+  width: 100%;
   max-width: 540px;
-  min-width: 340px;
+  min-width: 320px;
   background: rgba(15, 23, 42, 0.85);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
@@ -53,6 +60,7 @@
     0 0 25px rgba(0, 131, 164, 0.1);
   position: relative;
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease;
+  box-sizing: border-box;
 }
 
 .login-card:hover {
@@ -1892,7 +1900,7 @@
 }
 
 .matchpoint-modal-backdrop .login-card {
-  width: 60%;
+  width: 100%;
   max-width: 520px;
   min-width: 320px;
   box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(242, 255, 101, 0.15);

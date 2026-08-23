@@ -112,11 +112,13 @@ export default function Trust() {
         {/* Two-sided panels */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
           {/* Athlete */}
-          <TrustPanel
-            audience="ATHLETES"
-            colorClass="bg-[#95402f]"
-            features={athleteFeatures}
-          />
+          <div id="athletes" className="scroll-mt-20">
+            <TrustPanel
+              audience="ATHLETES"
+              colorClass="bg-[#95402f]"
+              features={athleteFeatures}
+            />
+          </div>
 
           {/* Academy */}
           <TrustPanel

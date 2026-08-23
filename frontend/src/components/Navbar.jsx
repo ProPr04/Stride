@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, LogOut, LayoutDashboard } from 'lucide-react';
 import { authStorage, api } from '../services/api';
 
-export const Navbar = ({ onOpenLogin, onOpenSignUp }) => {
+export const Navbar = ({ onOpenLogin, onOpenSignUp, onOpenOpportunities, onOpenAcademies }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isAuth, setIsAuth] = useState(authStorage.isAuthenticated());
@@ -25,16 +25,46 @@ export const Navbar = ({ onOpenLogin, onOpenSignUp }) => {
   const navLinks = [
     { name: 'Opportunities', href: '#opportunities' },
     { name: 'For Academies', href: '#academies' },
-    { name: 'Verification', href: '#verification' },
+    { name: 'How It Works', href: '#how-it-works' },
     { name: 'About', href: '#about' },
   ];
+
+  const handleNavClick = (e, link) => {
+    if (link.name === 'Opportunities') {
+      e.preventDefault();
+      if (onOpenOpportunities) {
+        onOpenOpportunities();
+      } else if (onOpenLogin) {
+        onOpenLogin('athlete');
+      } else {
+        window.location.href = '/login?role=athlete';
+      }
+    } else if (link.name === 'For Academies' || link.name === 'For Academics') {
+      e.preventDefault();
+      if (onOpenAcademies) {
+        onOpenAcademies();
+      } else if (onOpenLogin) {
+        onOpenLogin('academy');
+      } else {
+        window.location.href = '/login?role=academy';
+      }
+    } else if (link.name === 'How It Works') {
+      e.preventDefault();
+      const element = document.getElementById('how-it-works');
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        window.location.href = '/#how-it-works';
+      }
+    }
+  };
 
   const handleLoginClick = (e) => {
     e.preventDefault();
     if (onOpenLogin) {
-      onOpenLogin();
+      onOpenLogin('athlete');
     } else {
-      window.location.href = '/login';
+      window.location.href = '/login?role=athlete';
     }
   };
 
@@ -77,6 +107,7 @@ export const Navbar = ({ onOpenLogin, onOpenSignUp }) => {
             <a
               key={link.name}
               href={link.href}
+              onClick={(e) => handleNavClick(e, link)}
               className="text-sm font-medium text-[#E5E7EB] hover:text-[#F2FF65] transition-colors duration-200 font-['Inter',sans-serif]"
             >
               {link.name}
@@ -150,7 +181,10 @@ export const Navbar = ({ onOpenLogin, onOpenSignUp }) => {
                 <a
                   key={link.name}
                   href={link.href}
-                  onClick={() => setMobileMenuOpen(false)}
+                  onClick={(e) => {
+                    setMobileMenuOpen(false);
+                    handleNavClick(e, link);
+                  }}
                   className="text-base font-medium text-[#E5E7EB] hover:text-[#F2FF65] transition-colors py-1"
                 >
                   {link.name}

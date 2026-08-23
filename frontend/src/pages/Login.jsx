@@ -1,10 +1,21 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Eye, EyeOff, Check, User, Building2, X } from 'lucide-react';
 import { api, authStorage, isAuthEnabled } from '../services/api';
 
-export default function Login({ onSwitchToSignUp, onLoginSuccess, onClose, isModal = false }) {
-  const [role, setRole] = useState('athlete'); // 'athlete' | 'academy'
+export default function Login({ onSwitchToSignUp, onLoginSuccess, onClose, isModal = false, initialRole = 'athlete' }) {
+  const [searchParams] = useSearchParams();
+  const urlRole = searchParams.get('role');
+  const activeInitialRole = urlRole || initialRole || 'athlete';
+
+  const [role, setRole] = useState(activeInitialRole);
   const [emailOrPhone, setEmailOrPhone] = useState('');
+
+  useEffect(() => {
+    if (activeInitialRole) {
+      setRole(activeInitialRole);
+    }
+  }, [activeInitialRole]);
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
