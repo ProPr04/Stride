@@ -121,9 +121,6 @@ export default function AthleteApplicationsSection() {
         <div>
           <h1 className="text-2xl font-black font-['Poppins',sans-serif] tracking-wider text-white uppercase flex items-center gap-2">
             APPLICATIONS
-            <span className="text-xs px-2 py-0.5 rounded-full bg-[#F2FF65]/20 text-[#F2FF65] font-mono font-bold tracking-normal uppercase">
-              LIVE STATUS
-            </span>
           </h1>
           <p className="text-xs text-gray-400 mt-0.5 font-['Inter',sans-serif]">
             Track the real-time review status of all your submitted academy applications
@@ -134,13 +131,6 @@ export default function AthleteApplicationsSection() {
           <span className="text-xs font-mono bg-[#F2FF65]/10 text-[#F2FF65] border border-[#F2FF65]/20 px-3 py-1.5 rounded-xl font-bold">
             {filteredApplications.length} APPLIED
           </span>
-          <button
-            onClick={fetchApplications}
-            className="p-2 text-gray-400 hover:text-[#F2FF65] bg-[#141F16] border border-[#2A3C2E] rounded-xl transition-colors cursor-pointer"
-            title="Refresh Applications"
-          >
-            <RefreshCw size={15} className={loading ? 'animate-spin text-[#F2FF65]' : ''} />
-          </button>
         </div>
       </div>
 
@@ -205,10 +195,11 @@ export default function AthleteApplicationsSection() {
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {displayedApplications.map((app, idx) => {
+              // Distinct card colors (Red, Blue, Dark Green) matching Saved/Engagements sections
               const cardBgColors = [
-                'bg-[#141F16] border-[#2A3C2E]',
-                'bg-[#18261b] border-[#2f4a34]/60',
-                'bg-[#111c13] border-[#243627]'
+                'bg-[#95402f] border-[#b24f3c]/40',
+                'bg-[#2C337F] border-[#3a44a6]/40',
+                'bg-[#141F16] border-[#2A3C2E]'
               ];
               const cardStyle = cardBgColors[idx % cardBgColors.length];
 

@@ -62,6 +62,22 @@ app.use((req, res, next) => {
 
 // 4. Global Error Handling Middleware
 app.use((err, req, res, next) => {
+  // Handle JSON syntax error from express.json()
+  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+    return res.status(400).json({
+      status: 'fail',
+      message: 'Invalid JSON payload in request body.'
+    });
+  }
+
+  // Handle Multer upload errors
+  if (err.name === 'MulterError') {
+    return res.status(400).json({
+      status: 'fail',
+      message: `Upload error: ${err.message}`
+    });
+  }
+
   err.statusCode = err.statusCode || 500;
   err.status = err.status || 'error';
 

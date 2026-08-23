@@ -26,6 +26,7 @@ export default function AthleteOpportunitiesSection({ saved = [], setSaved = () 
   const [error, setError] = useState(null);
   const [feedbackMessage, setFeedbackMessage] = useState(null);
   const [expandedPosts, setExpandedPosts] = useState({});
+  const [copiedId, setCopiedId] = useState(null);
 
   const sportsFilter = ['All', 'Cricket', 'Track & Field', 'Football', 'Tennis', 'Basketball', 'Badminton'];
 
@@ -148,24 +149,11 @@ export default function AthleteOpportunitiesSection({ saved = [], setSaved = () 
         <div>
           <h1 className="text-2xl font-black font-['Poppins',sans-serif] tracking-wider text-white uppercase flex items-center gap-2">
             OPPORTUNITIES
-            <span className="text-xs px-2 py-0.5 rounded-full bg-[#F2FF65]/20 text-[#F2FF65] font-mono font-bold tracking-normal uppercase">
-              LIVE FEED
-            </span>
           </h1>
           <p className="text-xs text-gray-400 mt-0.5 font-['Inter',sans-serif]">
             Verified academy listings with direct application submissions
           </p>
         </div>
-        <button
-          onClick={() => {
-            fetchOpportunities();
-            fetchMyAgreements();
-          }}
-          className="p-2 text-gray-400 hover:text-[#F2FF65] bg-[#141F16] border border-[#2A3C2E] rounded-xl transition-colors cursor-pointer"
-          title="Refresh Feed"
-        >
-          <RefreshCw size={15} className={loading ? 'animate-spin text-[#F2FF65]' : ''} />
-        </button>
       </div>
 
       {/* Global Feedback Banner */}
@@ -253,23 +241,50 @@ export default function AthleteOpportunitiesSection({ saved = [], setSaved = () 
               ? `₹${Number(opp.compensation_cash).toLocaleString()} / month`
               : 'Competitive Compensation';
 
-            // Card background theme
-            const cardBgColors = [
-              'bg-[#141F16] border-[#2A3C2E]',
-              'bg-[#18261b] border-[#2f4a34]/60',
-              'bg-[#111c13] border-[#243627]'
+            // Distinct card background themes (cycling through rich, vibrant dark colors)
+            const cardThemes = [
+              {
+                outer: 'bg-[#95402f] border-[#b24f3c]/40',
+                inner: 'bg-black/25 border-t border-b border-white/10',
+                footer: 'bg-black/30',
+                tag: 'bg-white/15 text-white border border-white/20',
+              },
+              {
+                outer: 'bg-[#2C337F] border-[#3a44a6]/40',
+                inner: 'bg-black/25 border-t border-b border-white/10',
+                footer: 'bg-black/30',
+                tag: 'bg-white/15 text-white border border-white/20',
+              },
+              {
+                outer: 'bg-[#315038] border-[#446d4c]/50',
+                inner: 'bg-black/25 border-t border-b border-white/10',
+                footer: 'bg-black/30',
+                tag: 'bg-[#F2FF65]/15 text-[#F2FF65] border border-[#F2FF65]/20',
+              },
+              {
+                outer: 'bg-[#2D1F3F] border-[#483363]/50',
+                inner: 'bg-black/25 border-t border-b border-white/10',
+                footer: 'bg-black/30',
+                tag: 'bg-purple-300/15 text-purple-200 border border-purple-300/20',
+              },
+              {
+                outer: 'bg-[#1E3A40] border-[#2D565E]/50',
+                inner: 'bg-black/25 border-t border-b border-white/10',
+                footer: 'bg-black/30',
+                tag: 'bg-teal-300/15 text-teal-200 border border-teal-300/20',
+              },
             ];
-            const cardStyle = cardBgColors[idx % cardBgColors.length];
+            const theme = cardThemes[idx % cardThemes.length];
 
             return (
               <article
                 key={opp.id}
-                className={`${cardStyle} border rounded-2xl overflow-hidden text-[#F7F8FA] font-['Inter',sans-serif] shadow-xl hover:-translate-y-0.5 transition-all duration-300`}
+                className={`${theme.outer} border rounded-2xl overflow-hidden text-[#F7F8FA] font-['Inter',sans-serif] shadow-xl hover:-translate-y-0.5 transition-all duration-300`}
               >
                 {/* 1. Academy Header */}
                 <div className="p-4 sm:p-5 flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-[#2A3C2E] border border-white/10 flex items-center justify-center font-bold text-sm text-[#F2FF65]">
+                    <div className="w-10 h-10 rounded-full bg-black/30 border border-white/15 flex items-center justify-center font-bold text-sm text-[#F2FF65]">
                       {opp.academy_name ? opp.academy_name.charAt(0).toUpperCase() : 'A'}
                     </div>
                     <div>
@@ -279,18 +294,18 @@ export default function AthleteOpportunitiesSection({ saved = [], setSaved = () 
                         </h3>
                         <CheckCircle2 size={14} className="text-[#F2FF65]" />
                       </div>
-                      <p className="text-[11px] text-gray-400">{formatTimeAgo(opp.created_at)}</p>
+                      <p className="text-[11px] text-gray-300">{formatTimeAgo(opp.created_at)}</p>
                     </div>
                   </div>
 
-                  <span className="px-2.5 py-1 rounded-lg bg-[#F2FF65]/10 text-[#F2FF65] border border-[#F2FF65]/20 text-[10px] font-mono font-bold uppercase">
+                  <span className={`px-2.5 py-1 rounded-lg ${theme.tag} text-[10px] font-mono font-bold uppercase`}>
                     {opp.sport}
                   </span>
                 </div>
 
                 {/* 2. Caption Text */}
                 <div className="px-4 sm:px-5 pb-3">
-                  <p className="text-xs sm:text-sm text-gray-200 leading-relaxed">
+                  <p className="text-xs sm:text-sm text-gray-100 leading-relaxed">
                     {isExpanded || !isCaptionLong
                       ? captionText
                       : `${captionText.slice(0, 110)}... `}
@@ -308,7 +323,7 @@ export default function AthleteOpportunitiesSection({ saved = [], setSaved = () 
 
                 {/* 3. Media Image (if available) */}
                 {opp.media_image && (
-                  <div className="w-full max-h-[320px] overflow-hidden bg-[#0B120D]">
+                  <div className="w-full max-h-[320px] overflow-hidden bg-black/40">
                     <img
                       src={opp.media_image}
                       alt={opp.title}
@@ -318,58 +333,58 @@ export default function AthleteOpportunitiesSection({ saved = [], setSaved = () 
                 )}
 
                 {/* 4. Structured Opportunity Details */}
-                <div className="p-4 sm:p-5 bg-[#0B120D] border-t border-b border-[#2A3C2E] space-y-4">
+                <div className={`p-4 sm:p-5 ${theme.inner} space-y-4`}>
                   {/* Opportunity Title & Status */}
                   <div className="space-y-1">
                     <h4 className="text-base font-bold font-mono tracking-wide text-white uppercase">
                       {opp.title}
                     </h4>
-                    <p className="text-xs font-semibold text-gray-300">{opp.academy_name || 'Partner Academy'}</p>
-                    <div className="flex items-center gap-3 text-xs text-gray-300 pt-1">
+                    <p className="text-xs font-semibold text-gray-200">{opp.academy_name || 'Partner Academy'}</p>
+                    <div className="flex items-center gap-3 text-xs text-gray-200 pt-1">
                       <span className="flex items-center gap-1 text-[#F2FF65]">
                         <MapPin size={13} />
                         {opp.display_location || opp.location || opp.academy_location || 'India'}
                       </span>
-                      <span className="text-emerald-400 font-semibold flex items-center gap-1.5">
+                      <span className="text-emerald-300 font-semibold flex items-center gap-1.5">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                         {opp.status === 'active' ? 'Active Opportunity' : opp.status}
                       </span>
                     </div>
                   </div>
 
-                  <hr className="border-t border-[#2A3C2E]" />
+                  <hr className="border-t border-white/10" />
 
                   {/* ACTIVE TIMELINE */}
                   {opp.timeline && (
                     <>
                       <div className="space-y-1">
-                        <span className="text-[10px] font-mono font-bold tracking-widest text-gray-400 uppercase">
+                        <span className="text-[10px] font-mono font-bold tracking-widest text-gray-300 uppercase">
                           ACTIVE TIMELINE
                         </span>
-                        <p className="text-xs sm:text-sm text-sky-400 font-mono font-semibold flex items-center gap-1.5">
+                        <p className="text-xs sm:text-sm text-sky-300 font-mono font-semibold flex items-center gap-1.5">
                           <Clock size={14} />
                           <span>{opp.timeline}</span>
                         </p>
                       </div>
-                      <hr className="border-t border-[#2A3C2E]" />
+                      <hr className="border-t border-white/10" />
                     </>
                   )}
 
                   {/* ROLE */}
                   <div className="space-y-1">
-                    <span className="text-[10px] font-mono font-bold tracking-widest text-gray-400 uppercase">
+                    <span className="text-[10px] font-mono font-bold tracking-widest text-gray-300 uppercase">
                       ROLE
                     </span>
                     <p className="text-xs sm:text-sm text-gray-100 font-medium">{opp.role}</p>
                   </div>
 
-                  <hr className="border-t border-[#2A3C2E]" />
+                  <hr className="border-t border-white/10" />
 
                   {/* WHAT YOU'LL DO / DESCRIPTION */}
                   {(opp.description || opp.what_you_will_do) && (
                     <>
                       <div className="space-y-1">
-                        <span className="text-[10px] font-mono font-bold tracking-widest text-gray-400 uppercase">
+                        <span className="text-[10px] font-mono font-bold tracking-widest text-gray-300 uppercase">
                           WHAT YOU'LL DO
                         </span>
                         <p className="text-xs sm:text-sm text-gray-200 leading-relaxed">
@@ -378,7 +393,7 @@ export default function AthleteOpportunitiesSection({ saved = [], setSaved = () 
                             : `${(opp.description || opp.what_you_will_do).slice(0, 90)}...`}
                         </p>
                       </div>
-                      <hr className="border-t border-[#2A3C2E]" />
+                      <hr className="border-t border-white/10" />
                     </>
                   )}
 
@@ -386,7 +401,7 @@ export default function AthleteOpportunitiesSection({ saved = [], setSaved = () 
                   {opp.requirements && Array.isArray(opp.requirements) && opp.requirements.length > 0 && (
                     <>
                       <div className="space-y-1.5">
-                        <span className="text-[10px] font-mono font-bold tracking-widest text-gray-400 uppercase">
+                        <span className="text-[10px] font-mono font-bold tracking-widest text-gray-300 uppercase">
                           REQUIREMENTS
                         </span>
                         <ul className="space-y-1 text-xs sm:text-sm text-gray-200">
@@ -398,7 +413,7 @@ export default function AthleteOpportunitiesSection({ saved = [], setSaved = () 
                           ))}
                         </ul>
                       </div>
-                      <hr className="border-t border-[#2A3C2E]" />
+                      <hr className="border-t border-white/10" />
                     </>
                   )}
 
@@ -406,21 +421,21 @@ export default function AthleteOpportunitiesSection({ saved = [], setSaved = () 
                   {opp.perks && Array.isArray(opp.perks) && opp.perks.length > 0 && (
                     <>
                       <div className="space-y-1.5">
-                        <span className="text-[10px] font-mono font-bold tracking-widest text-gray-400 uppercase">
+                        <span className="text-[10px] font-mono font-bold tracking-widest text-gray-300 uppercase">
                           DEVELOPMENTAL PERKS
                         </span>
                         <div className="flex flex-wrap gap-1.5 pt-0.5">
                           {opp.perks.map((perk, pIdx) => (
                             <span
                               key={pIdx}
-                              className="px-2 py-0.5 bg-[#141F16] border border-[#2A3C2E] rounded-md text-[11px] text-gray-300"
+                              className="px-2 py-0.5 bg-black/30 border border-white/10 rounded-md text-[11px] text-gray-200"
                             >
                               ✨ {perk}
                             </span>
                           ))}
                         </div>
                       </div>
-                      <hr className="border-t border-[#2A3C2E]" />
+                      <hr className="border-t border-white/10" />
                     </>
                   )}
 
@@ -438,7 +453,7 @@ export default function AthleteOpportunitiesSection({ saved = [], setSaved = () 
                   <div className="pt-1 text-center">
                     <button
                       onClick={() => toggleExpand(opp.id)}
-                      className="px-3 py-1 bg-[#141F16] border border-[#2A3C2E] hover:border-[#F2FF65] text-[#F2FF65] text-[11px] font-mono font-bold uppercase rounded-md transition-all cursor-pointer inline-flex items-center gap-1.5"
+                      className="px-3 py-1 bg-black/30 border border-white/15 hover:border-[#F2FF65] text-[#F2FF65] text-[11px] font-mono font-bold uppercase rounded-md transition-all cursor-pointer inline-flex items-center gap-1.5"
                     >
                       <span>{isExpanded ? 'Collapse Details' : 'Show Full Details'}</span>
                       <ChevronDown size={13} className={`transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} />
@@ -447,17 +462,31 @@ export default function AthleteOpportunitiesSection({ saved = [], setSaved = () 
                 </div>
 
                 {/* 5. Streamlined Action Footer */}
-                <div className="p-3 flex items-center justify-between gap-3 bg-[#141F16]">
+                <div className={`p-3 flex items-center justify-between gap-3 ${theme.footer}`}>
                   {/* Share button */}
                   <button
                     onClick={() => {
                       navigator.clipboard.writeText(window.location.href);
-                      alert('Opportunity link copied to clipboard!');
+                      setCopiedId(opp.id);
+                      setTimeout(() => setCopiedId(null), 2000);
                     }}
-                    className="px-4 py-2 rounded-xl text-gray-300 hover:text-white hover:bg-white/5 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+                    className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+                      copiedId === opp.id
+                        ? 'text-emerald-300 bg-emerald-500/20 border border-emerald-500/40 shadow-sm'
+                        : 'text-gray-200 hover:text-white hover:bg-white/10 border border-transparent'
+                    }`}
                   >
-                    <Share2 size={15} />
-                    <span className="hidden sm:inline">Share</span>
+                    {copiedId === opp.id ? (
+                      <>
+                        <Check size={15} className="text-emerald-400 shrink-0 animate-bounce" />
+                        <span>Copied!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Share2 size={15} />
+                        <span className="hidden sm:inline">Share</span>
+                      </>
+                    )}
                   </button>
 
                   {/* Save Button */}
@@ -465,8 +494,8 @@ export default function AthleteOpportunitiesSection({ saved = [], setSaved = () 
                     onClick={() => handleSaveToggle(opp)}
                     className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer ${
                       saved.some((s) => s.opportunity_id === opp.id)
-                        ? 'text-[#F2FF65] bg-[#F2FF65]/10 border border-[#F2FF65]/20'
-                        : 'text-gray-300 hover:text-white hover:bg-white/5 border border-transparent'
+                        ? 'text-[#F2FF65] bg-[#F2FF65]/15 border border-[#F2FF65]/30'
+                        : 'text-gray-200 hover:text-white hover:bg-white/10 border border-transparent'
                     }`}
                   >
                     <Bookmark size={15} className={saved.some((s) => s.opportunity_id === opp.id) ? "fill-[#F2FF65]" : ""} />
@@ -488,7 +517,7 @@ export default function AthleteOpportunitiesSection({ saved = [], setSaved = () 
                     {isApplied ? (
                       <>
                         <Check size={15} />
-                        <span>Applied ✓</span>
+                        <span>Applied</span>
                       </>
                     ) : isApplying ? (
                       <>

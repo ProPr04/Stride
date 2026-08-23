@@ -22,7 +22,10 @@ import {
   AlertCircle,
   Upload,
   Camera,
-  Image as ImageIcon
+  Image as ImageIcon,
+  ExternalLink,
+  Building2,
+  Eye
 } from 'lucide-react';
 import { api } from '../../../services/api';
 
@@ -35,9 +38,22 @@ export default function AthleteProfileSection() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [feedbackMessage, setFeedbackMessage] = useState(null);
+  const [copiedProfile, setCopiedProfile] = useState(false);
 
   const avatarInputRef = useRef(null);
   const coverInputRef = useRef(null);
+  const certFileInputRef = useRef(null);
+
+  const [isCertModalOpen, setIsCertModalOpen] = useState(false);
+  const [viewingCert, setViewingCert] = useState(null);
+  const [certUploading, setCertUploading] = useState(false);
+  const [certForm, setCertForm] = useState({
+    name: '',
+    issuer: '',
+    issue_date: '',
+    credential_id: '',
+    file_url: ''
+  });
 
   const [athleteData, setAthleteData] = useState({
     name: 'Athlete Profile',
@@ -241,6 +257,96 @@ export default function AthleteProfileSection() {
     });
   };
 
+  // Certification Handlers
+  const handleOpenAddCertModal = () => {
+    setCertForm({
+      name: '',
+      issuer: '',
+      issue_date: `${new Date().getFullYear()} - ${new Date().getFullYear() + 2}`,
+      credential_id: '',
+      file_url: ''
+    });
+    setIsCertModalOpen(true);
+  };
+
+  const handleCertFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setCertUploading(true);
+    try {
+      const res = await api.upload.image(file);
+      if (res.data?.url) {
+        setCertForm(prev => ({ ...prev, file_url: res.data.url }));
+      }
+    } catch (err) {
+      alert('Failed to upload certificate file: ' + err.message);
+    } finally {
+      setCertUploading(false);
+    }
+  };
+
+  const handleSaveCertification = async (e) => {
+    e.preventDefault();
+    if (!certForm.name.trim()) return;
+
+    const newCertList = [...(athleteData.certifications || []), certForm];
+    const updatedAthleteData = { ...athleteData, certifications: newCertList };
+    setAthleteData(updatedAthleteData);
+    setEditForm(updatedAthleteData);
+    setIsCertModalOpen(false);
+
+    try {
+      await api.profiles.updateMyProfile({
+        full_name: updatedAthleteData.name,
+        sport: updatedAthleteData.sport,
+        playing_level: updatedAthleteData.playing_level,
+        location: updatedAthleteData.location,
+        age: updatedAthleteData.age,
+        bio: updatedAthleteData.bio,
+        performance_metrics: updatedAthleteData.performanceMetrics,
+        avatar_url: updatedAthleteData.avatar,
+        cover_url: updatedAthleteData.cover,
+        achievements: updatedAthleteData.achievements,
+        videos: updatedAthleteData.videos,
+        certifications: newCertList
+      });
+      setFeedbackMessage({
+        type: 'success',
+        text: 'Certification added and saved to backend profile!'
+      });
+      setTimeout(() => setFeedbackMessage(null), 4000);
+    } catch (err) {
+      console.warn('Backend save notice:', err.message);
+    }
+  };
+
+  const handleDeleteCertification = async (indexToDelete) => {
+    const newCertList = athleteData.certifications.filter((_, idx) => idx !== indexToDelete);
+    const updatedAthleteData = { ...athleteData, certifications: newCertList };
+    setAthleteData(updatedAthleteData);
+    setEditForm(updatedAthleteData);
+
+    try {
+      await api.profiles.updateMyProfile({
+        full_name: updatedAthleteData.name,
+        sport: updatedAthleteData.sport,
+        playing_level: updatedAthleteData.playing_level,
+        location: updatedAthleteData.location,
+        age: updatedAthleteData.age,
+        bio: updatedAthleteData.bio,
+        performance_metrics: updatedAthleteData.performanceMetrics,
+        avatar_url: updatedAthleteData.avatar,
+        cover_url: updatedAthleteData.cover,
+        achievements: updatedAthleteData.achievements,
+        videos: updatedAthleteData.videos,
+        certifications: newCertList
+      });
+    } catch (err) {
+      console.warn('Backend delete notice:', err.message);
+    }
+  };
+
   return (
     <div className="profile-pane matchpoint-fade-in max-w-5xl mx-auto space-y-6 pb-16 font-['Inter',sans-serif]">
       {/* Title Header */}
@@ -248,9 +354,6 @@ export default function AthleteProfileSection() {
         <div>
           <h1 className="text-2xl font-black font-['Poppins',sans-serif] tracking-wider text-white uppercase flex items-center gap-2">
             ATHLETE PROFILE
-            <span className="text-xs px-2 py-0.5 rounded-full bg-[#F2FF65]/20 text-[#F2FF65] font-mono font-bold tracking-normal uppercase">
-              LIVE
-            </span>
           </h1>
           <p className="text-xs text-gray-400 mt-0.5">
             Your verified athletic bureau visible to scouting academies
@@ -259,21 +362,28 @@ export default function AthleteProfileSection() {
 
         <div className="flex items-center gap-2">
           <button
-            onClick={fetchProfile}
-            className="p-2 bg-[#141F16] border border-[#2A3C2E] text-gray-400 hover:text-[#F2FF65] rounded-xl transition-colors cursor-pointer"
-            title="Refresh Profile"
-          >
-            <RefreshCw size={15} className={loading ? 'animate-spin text-[#F2FF65]' : ''} />
-          </button>
-          <button
             onClick={() => {
               navigator.clipboard.writeText(window.location.href);
-              alert('Profile dossier link copied to clipboard!');
+              setCopiedProfile(true);
+              setTimeout(() => setCopiedProfile(false), 2000);
             }}
-            className="px-3.5 py-2 bg-[#141F16] border border-[#2A3C2E] text-gray-300 hover:text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-colors"
+            className={`px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-all ${
+              copiedProfile
+                ? 'bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 shadow-sm'
+                : 'bg-[#141F16] border border-[#2A3C2E] text-gray-300 hover:text-white'
+            }`}
           >
-            <Share2 size={14} />
-            <span>Share</span>
+            {copiedProfile ? (
+              <>
+                <CheckCircle2 size={14} className="text-emerald-400 shrink-0" />
+                <span>Copied!</span>
+              </>
+            ) : (
+              <>
+                <Share2 size={14} />
+                <span>Share</span>
+              </>
+            )}
           </button>
           <button
             onClick={handleOpenEditModal}
@@ -373,7 +483,7 @@ export default function AthleteProfileSection() {
 
       {/* Profile Navigation Tabs */}
       <div className="flex border-b border-[#2A3C2E] gap-6 text-xs font-mono font-bold uppercase overflow-x-auto scrollbar-none">
-        {['overview', 'achievements', 'videos', 'certifications'].map((tab) => (
+        {['overview', 'achievements', 'certifications'].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -393,30 +503,32 @@ export default function AthleteProfileSection() {
         {/* OVERVIEW TAB */}
         {activeTab === 'overview' && (
           <div className="space-y-6">
-            <div className="bg-[#141F16] border border-[#2A3C2E] rounded-xl p-5 space-y-3">
+            {/* Bio Card (Terracotta Red) */}
+            <div className="bg-[#95402f] border border-[#b24f3c]/40 rounded-xl p-5 space-y-3 shadow-lg">
               <h3 className="text-xs font-mono font-bold tracking-widest text-[#F2FF65] uppercase">
                 ATHLETE BIO & BACKGROUND
               </h3>
-              <p className="text-xs sm:text-sm text-gray-200 leading-relaxed">
+              <p className="text-xs sm:text-sm text-gray-100 leading-relaxed font-['Inter',sans-serif]">
                 {athleteData.bio}
               </p>
             </div>
 
-            <div className="bg-[#141F16] border border-[#2A3C2E] rounded-xl p-5 space-y-3">
+            {/* Accomplishments Card (Royal Sport Blue) */}
+            <div className="bg-[#2C337F] border border-[#3a44a6]/40 rounded-xl p-5 space-y-3 shadow-lg">
               <h3 className="text-xs font-mono font-bold tracking-widest text-[#F2FF65] uppercase">
                 RECENT ACCOMPLISHMENTS & MEDALS
               </h3>
               <div className="space-y-2">
                 {athleteData.achievements.length === 0 ? (
-                  <p className="text-xs text-gray-400">No accomplishments added yet. Click "Edit Profile" to add your tournaments.</p>
+                  <p className="text-xs text-gray-300">No accomplishments added yet. Click "Edit Profile" to add your tournaments.</p>
                 ) : (
                   athleteData.achievements.map((item, idx) => (
-                    <div key={idx} className="p-3 bg-[#0B120D] border border-[#2A3C2E] rounded-lg flex items-center justify-between text-xs">
+                    <div key={idx} className="p-3 bg-black/25 border border-white/10 rounded-lg flex items-center justify-between text-xs">
                       <div className="flex items-center gap-2">
                         <Trophy size={14} className="text-[#F2FF65] shrink-0" />
-                        <span className="font-medium text-gray-200">{item.title}</span>
+                        <span className="font-medium text-white">{item.title}</span>
                       </div>
-                      <span className="text-[10px] font-mono text-gray-400 shrink-0 ml-3">{item.date}</span>
+                      <span className="text-[10px] font-mono text-gray-300 shrink-0 ml-3">{item.date}</span>
                     </div>
                   ))
                 )}
@@ -427,7 +539,7 @@ export default function AthleteProfileSection() {
 
         {/* ACHIEVEMENTS TAB */}
         {activeTab === 'achievements' && (
-          <div className="bg-[#141F16] border border-[#2A3C2E] rounded-xl p-5 space-y-4">
+          <div className="bg-[#141F16] border border-[#2A3C2E] rounded-xl p-5 space-y-4 shadow-xl">
             <div className="flex items-center justify-between">
               <h3 className="text-xs font-mono font-bold tracking-widest text-[#F2FF65] uppercase">
                 TOURNAMENT & MEDAL HISTORY
@@ -452,72 +564,217 @@ export default function AthleteProfileSection() {
                   </button>
                 </div>
               ) : (
-                athleteData.achievements.map((item, idx) => (
-                  <div key={idx} className="p-4 bg-[#0B120D] border border-[#2A3C2E] rounded-lg flex items-center gap-3">
-                    <Trophy size={18} className="text-[#F2FF65] shrink-0" />
-                    <div className="flex-1">
-                      <p className="text-xs sm:text-sm font-semibold text-white">{item.title}</p>
-                      <p className="text-[10px] font-mono text-gray-400">{item.date}</p>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* VIDEOS TAB */}
-        {activeTab === 'videos' && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xs font-mono font-bold tracking-widest text-[#F2FF65] uppercase">
-                HIGHLIGHT REEL & PERFORMANCE VIDEOS
-              </h3>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {athleteData.videos.map((video, idx) => (
-                <div key={idx} className="bg-[#141F16] border border-[#2A3C2E] rounded-xl overflow-hidden space-y-2 p-3">
-                  <div className="relative h-36 bg-[#0B120D] rounded-lg overflow-hidden group cursor-pointer">
-                    <img src={video.thumbnail || DEFAULT_COVER} alt={video.title} className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform" />
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="w-10 h-10 rounded-full bg-[#F2FF65] text-[#141F16] flex items-center justify-center font-bold pl-0.5 shadow-lg">
-                        ▶
+                athleteData.achievements.map((item, idx) => {
+                  const cardBgColors = [
+                    'bg-[#95402f] border-[#b24f3c]/40',
+                    'bg-[#2C337F] border-[#3a44a6]/40',
+                    'bg-[#141F16] border-[#2A3C2E]'
+                  ];
+                  const itemStyle = cardBgColors[idx % cardBgColors.length];
+                  return (
+                    <div key={idx} className={`p-4 ${itemStyle} border rounded-xl flex items-center gap-3 shadow-md`}>
+                      <Trophy size={18} className="text-[#F2FF65] shrink-0" />
+                      <div className="flex-1">
+                        <p className="text-xs sm:text-sm font-semibold text-white">{item.title}</p>
+                        <p className="text-[10px] font-mono text-gray-300">{item.date}</p>
                       </div>
                     </div>
-                    <span className="absolute bottom-2 right-2 bg-black/70 text-white font-mono text-[10px] px-2 py-0.5 rounded">
-                      {video.duration || '0:45'}
-                    </span>
-                  </div>
-                  <p className="text-xs font-bold text-white truncate">{video.title}</p>
-                </div>
-              ))}
+                  );
+                })
+              )}
             </div>
           </div>
         )}
 
         {/* CERTIFICATIONS TAB */}
         {activeTab === 'certifications' && (
-          <div className="bg-[#141F16] border border-[#2A3C2E] rounded-xl p-5 space-y-4">
-            <h3 className="text-xs font-mono font-bold tracking-widest text-[#F2FF65] uppercase">
-              VERIFIED FEDERATION & ANTI-DOPING CREDENTIALS
-            </h3>
+          <div className="bg-[#141F16] border border-[#2A3C2E] rounded-xl p-5 space-y-4 shadow-xl">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-mono font-bold tracking-widest text-[#F2FF65] uppercase">
+                VERIFIED FEDERATION & ANTI-DOPING CREDENTIALS
+              </h3>
+              <button
+                onClick={handleOpenAddCertModal}
+                className="px-3.5 py-1.5 bg-[#F2FF65] hover:bg-[#e2ef4f] text-[#141F16] font-['Poppins',sans-serif] font-bold rounded-xl text-xs uppercase flex items-center gap-1.5 cursor-pointer shadow-md transition-all"
+              >
+                <Plus size={14} />
+                <span>Add Certification</span>
+              </button>
+            </div>
+
             <div className="space-y-3">
-              {athleteData.certifications.map((cert, idx) => (
-                <div key={idx} className="p-4 bg-[#0B120D] border border-[#2A3C2E] rounded-lg flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <FileText size={18} className="text-[#F2FF65] shrink-0" />
-                    <span className="text-xs font-mono font-semibold text-gray-200">{cert.name}</span>
-                  </div>
-                  <span className="px-2.5 py-1 text-[10px] font-mono font-bold rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
-                    {(cert.status || 'VERIFIED').toUpperCase()}
-                  </span>
+              {athleteData.certifications.length === 0 ? (
+                <div className="text-center py-8 text-gray-400 text-xs space-y-3">
+                  <p>No certification credentials uploaded yet.</p>
+                  <button
+                    onClick={handleOpenAddCertModal}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#F2FF65] text-[#141F16] font-bold text-xs uppercase rounded-xl hover:bg-[#e2ef4f] cursor-pointer"
+                  >
+                    <Plus size={14} />
+                    <span>Upload First Certification</span>
+                  </button>
                 </div>
-              ))}
+              ) : (
+                athleteData.certifications.map((cert, idx) => {
+                  const cardBgColors = [
+                    'bg-[#95402f] border-[#b24f3c]/40',
+                    'bg-[#2C337F] border-[#3a44a6]/40',
+                    'bg-[#141F16] border-[#2A3C2E]'
+                  ];
+                  const itemStyle = cardBgColors[idx % cardBgColors.length];
+                  return (
+                    <div key={idx} className={`p-4 ${itemStyle} border rounded-xl space-y-3 shadow-md`}>
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-start gap-3">
+                          <div className="p-2.5 bg-black/20 rounded-xl border border-white/10 text-[#F2FF65] shrink-0">
+                            <FileText size={20} />
+                          </div>
+                          <div className="space-y-1">
+                            <h4 className="text-xs sm:text-sm font-bold text-white font-['Poppins',sans-serif]">
+                              {cert.name || cert.title || 'Sports Certification'}
+                            </h4>
+                            {cert.issuer && (
+                              <p className="text-xs font-semibold text-gray-200 flex items-center gap-1">
+                                <Building2 size={13} className="text-[#F2FF65]" />
+                                <span>{cert.issuer}</span>
+                              </p>
+                            )}
+                            <div className="flex flex-wrap items-center gap-3 text-[11px] text-gray-300 font-mono pt-0.5">
+                              {cert.issue_date && (
+                                <span>Validity/Issued: <strong className="text-white">{cert.issue_date}</strong></span>
+                              )}
+                              {cert.credential_id && (
+                                <span>ID: <strong className="text-[#F2FF65]">{cert.credential_id}</strong></span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 shrink-0">
+                          <button
+                            onClick={() => setViewingCert(cert)}
+                            className="px-3 py-1.5 bg-[#F2FF65] hover:bg-[#e2ef4f] text-[#141F16] font-mono text-xs font-bold uppercase rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 shadow-sm"
+                            title="View Certificate"
+                          >
+                            <Eye size={14} />
+                            <span>View</span>
+                          </button>
+
+                          <button
+                            onClick={() => handleDeleteCertification(idx)}
+                            className="p-1.5 bg-black/20 hover:bg-rose-500/20 text-gray-300 hover:text-rose-400 border border-white/10 rounded-lg transition-colors cursor-pointer"
+                            title="Delete Certification"
+                          >
+                            <Trash2 size={15} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
             </div>
           </div>
         )}
       </div>
+
+      {/* ADD CERTIFICATION MODAL */}
+      {isCertModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md matchpoint-fade-in">
+          <div
+            className="bg-[#141F16] border border-[#2A3C2E] w-full max-w-md rounded-2xl shadow-2xl text-[#F7F8FA] font-['Inter',sans-serif] space-y-4 p-6 relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-[#2A3C2E] pb-3">
+              <div className="flex items-center gap-2">
+                <FileText size={18} className="text-[#F2FF65]" />
+                <h3 className="text-sm font-bold font-mono text-white uppercase">
+                  ADD NEW CERTIFICATION
+                </h3>
+              </div>
+              <button
+                onClick={() => setIsCertModalOpen(false)}
+                className="text-gray-400 hover:text-white p-1 rounded-lg hover:bg-white/10 cursor-pointer"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleSaveCertification} className="space-y-3">
+              <div className="space-y-1">
+                <label className="text-[11px] font-mono font-bold text-gray-300 uppercase">
+                  CERTIFICATION / LICENSE NAME *
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. National Athletics Federation License"
+                  value={certForm.name}
+                  onChange={(e) => setCertForm({ ...certForm, name: e.target.value })}
+                  required
+                  className="w-full px-3 py-2 bg-[#0B120D] border border-[#2A3C2E] rounded-lg text-xs text-white placeholder-gray-500 focus:outline-none focus:border-[#F2FF65]"
+                />
+              </div>
+
+              {/* Certificate File Attachment */}
+              <div className="space-y-1.5 pt-1">
+                <label className="text-[11px] font-mono font-bold text-gray-300 uppercase flex items-center justify-between">
+                  <span>CERTIFICATE DOCUMENT / FILE</span>
+                  {certForm.file_url && <span className="text-emerald-400">File Uploaded ✓</span>}
+                </label>
+
+                <input
+                  type="file"
+                  ref={certFileInputRef}
+                  onChange={handleCertFileUpload}
+                  accept="image/*,.pdf"
+                  className="hidden"
+                />
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => certFileInputRef.current?.click()}
+                    disabled={certUploading}
+                    className="px-3.5 py-2 bg-[#0B120D] border border-[#2A3C2E] hover:border-[#F2FF65] text-xs font-semibold text-gray-200 rounded-lg flex items-center gap-2 transition-all cursor-pointer flex-1"
+                  >
+                    {certUploading ? (
+                      <>
+                        <RefreshCw size={14} className="animate-spin text-[#F2FF65]" />
+                        <span>Uploading File...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Upload size={14} className="text-[#F2FF65]" />
+                        <span>{certForm.file_url ? 'Change File' : 'Upload Document (PDF / Image)'}</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* Action buttons */}
+              <div className="pt-3 border-t border-[#2A3C2E] flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsCertModalOpen(false)}
+                  className="px-4 py-2 bg-[#0B120D] text-gray-300 border border-[#2A3C2E] rounded-lg text-xs font-mono font-bold uppercase hover:bg-white/5 cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 bg-[#F2FF65] hover:bg-[#e2ef4f] text-[#141F16] rounded-lg text-xs font-mono font-bold uppercase cursor-pointer shadow-md flex items-center gap-1.5"
+                >
+                  <Save size={14} />
+                  <span>Save Certification</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* EDIT PROFILE MODAL */}
       {isEditModalOpen && (
@@ -815,6 +1072,98 @@ export default function AthleteProfileSection() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* CERTIFICATE VIEWER MODAL */}
+      {viewingCert && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md matchpoint-fade-in">
+          <div
+            className="bg-[#141F16] border border-[#2A3C2E] w-full max-w-lg rounded-2xl shadow-2xl text-[#F7F8FA] font-['Inter',sans-serif] p-6 space-y-5 relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-[#2A3C2E] pb-3">
+              <div className="flex items-center gap-2">
+                <FileText size={20} className="text-[#F2FF65]" />
+                <h3 className="text-sm font-bold font-mono text-white uppercase tracking-wider">
+                  OFFICIAL ATHLETIC CERTIFICATE
+                </h3>
+              </div>
+              <button
+                onClick={() => setViewingCert(null)}
+                className="text-gray-400 hover:text-white p-1 rounded-lg hover:bg-white/10 cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Certificate Document Display inside Pop-up Modal */}
+            <div className="bg-[#0B120D] border border-[#2A3C2E] rounded-xl p-5 text-center space-y-4 shadow-inner relative overflow-hidden">
+              <div>
+                <span className="text-[10px] font-mono text-[#F2FF65] uppercase tracking-widest block font-bold">
+                  VERIFIED CERTIFICATE DOSSIER
+                </span>
+                <h4 className="text-base font-bold text-white font-['Poppins',sans-serif] mt-0.5">
+                  {viewingCert.name || viewingCert.title || 'Sports Certification Document'}
+                </h4>
+                <p className="text-xs text-gray-300 mt-0.5">
+                  Issued to: <strong className="text-white">{athleteData.name}</strong>
+                </p>
+              </div>
+
+              {viewingCert.file_url ? (
+                <div className="space-y-3">
+                  <div className="max-h-80 min-h-[220px] overflow-hidden rounded-lg border border-[#2A3C2E] bg-black/60 flex items-center justify-center p-2">
+                    {viewingCert.file_url.toLowerCase().endsWith('.pdf') ? (
+                      <iframe
+                        src={viewingCert.file_url}
+                        title={viewingCert.name}
+                        className="w-full h-72 rounded border-0"
+                      />
+                    ) : (
+                      <img
+                        src={viewingCert.file_url}
+                        alt={viewingCert.name}
+                        className="max-w-full max-h-72 object-contain rounded"
+                      />
+                    )}
+                  </div>
+                  <a
+                    href={viewingCert.file_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-xs font-mono text-[#F2FF65] hover:underline"
+                  >
+                    <span>Open raw file in new window</span>
+                    <ExternalLink size={13} />
+                  </a>
+                </div>
+              ) : (
+                <div className="space-y-3 py-4">
+                  <div className="w-14 h-14 rounded-full bg-[#F2FF65]/10 border border-[#F2FF65]/30 flex items-center justify-center mx-auto text-[#F2FF65]">
+                    <FileText size={28} />
+                  </div>
+                  <p className="text-xs text-gray-300">
+                    Official verified digital record registered to athlete profile.
+                  </p>
+                  <div className="inline-block px-3 py-1 bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 rounded text-[11px] font-mono font-bold uppercase">
+                    STATUS: VERIFIED & ACTIVE
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Actions */}
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                onClick={() => setViewingCert(null)}
+                className="px-5 py-2 bg-[#F2FF65] hover:bg-[#e2ef4f] text-[#141F16] font-mono font-bold text-xs uppercase rounded-lg transition-colors cursor-pointer shadow-md"
+              >
+                Close Viewer
+              </button>
+            </div>
           </div>
         </div>
       )}

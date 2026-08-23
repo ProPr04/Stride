@@ -2,17 +2,18 @@ import savedModel from '../models/savedModel.js';
 
 export const saveOpportunity = async (req, res, next) => {
   try {
-    const athleteId = req.user.id;
+    const athleteId = parseInt(req.user.id, 10);
     const { opportunityId } = req.body;
+    const numOppId = parseInt(opportunityId, 10);
 
-    if (!opportunityId) {
+    if (!opportunityId || isNaN(numOppId) || isNaN(athleteId)) {
       return res.status(400).json({
         status: 'fail',
-        message: 'opportunityId is required.',
+        message: 'Valid opportunityId is required.',
       });
     }
 
-    const saved = await savedModel.saveOpportunity(athleteId, opportunityId);
+    const saved = await savedModel.saveOpportunity(athleteId, numOppId);
 
     res.status(201).json({
       status: 'success',
@@ -27,17 +28,18 @@ export const saveOpportunity = async (req, res, next) => {
 
 export const unsaveOpportunity = async (req, res, next) => {
   try {
-    const athleteId = req.user.id;
+    const athleteId = parseInt(req.user.id, 10);
     const { opportunityId } = req.params;
+    const numOppId = parseInt(opportunityId, 10);
 
-    if (!opportunityId) {
+    if (!opportunityId || isNaN(numOppId) || isNaN(athleteId)) {
       return res.status(400).json({
         status: 'fail',
-        message: 'opportunityId is required.',
+        message: 'Valid opportunityId is required.',
       });
     }
 
-    await savedModel.unsaveOpportunity(athleteId, opportunityId);
+    await savedModel.unsaveOpportunity(athleteId, numOppId);
 
     res.status(204).json({
       status: 'success',

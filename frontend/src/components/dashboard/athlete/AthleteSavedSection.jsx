@@ -141,11 +141,13 @@ export default function AthleteSavedSection({ savedOpportunities = [], setSavedO
           {filteredSaved.map((item, idx) => {
             const isApplied = appliedIds.includes(item.id);
 
-            // Cycle Red (#95402f), Blue (#2C337F), and Dark Green (#141F16)
+            // Cycle Terracotta Red (#95402f), Royal Blue (#2C337F), Forest Green (#315038), Plum Purple (#2D1F3F), and Deep Cyan (#1E3A40)
             const cardBgColors = [
               'bg-[#95402f] border-[#b24f3c]/40',
               'bg-[#2C337F] border-[#3a44a6]/40',
-              'bg-[#141F16] border-[#2A3C2E]'
+              'bg-[#315038] border-[#446d4c]/50',
+              'bg-[#2D1F3F] border-[#483363]/50',
+              'bg-[#1E3A40] border-[#2D565E]/50'
             ];
             const cardStyle = cardBgColors[idx % cardBgColors.length];
 
@@ -207,7 +209,7 @@ export default function AthleteSavedSection({ savedOpportunities = [], setSavedO
                     }}
                     className="flex-1 py-2 bg-black/20 hover:bg-black/40 border border-white/10 text-white rounded-xl text-xs font-mono font-bold uppercase flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                   >
-                    <span>View Hub</span>
+                    <span>View Post</span>
                     <ExternalLink size={13} />
                   </button>
 

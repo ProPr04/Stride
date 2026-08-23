@@ -7,27 +7,30 @@ import agreementModel from '../models/agreementModel.js';
  */
 export const applyForOpportunity = async (req, res, next) => {
   try {
-    const athleteId = req.user.id;
+    const athleteId = parseInt(req.user.id, 10);
     let { opportunityId, academyId } = req.body;
 
-    if (!opportunityId) {
+    const numOppId = parseInt(opportunityId, 10);
+    if (!opportunityId || isNaN(numOppId)) {
       return res.status(400).json({
         status: 'fail',
-        message: 'opportunityId is required to apply.',
+        message: 'Valid opportunityId is required to apply.',
       });
     }
 
-    if (!academyId) {
-      const oppRes = await pool.query('SELECT academy_id FROM opportunities WHERE id = $1', [opportunityId]);
+    let numAcademyId = academyId ? parseInt(academyId, 10) : null;
+
+    if (!numAcademyId || isNaN(numAcademyId)) {
+      const oppRes = await pool.query('SELECT academy_id FROM opportunities WHERE id = $1', [numOppId]);
       if (oppRes.rows.length > 0 && oppRes.rows[0].academy_id) {
-        academyId = oppRes.rows[0].academy_id;
+        numAcademyId = parseInt(oppRes.rows[0].academy_id, 10);
       }
     }
 
     const newAgreement = await agreementModel.createAgreement(
-      opportunityId, 
+      numOppId, 
       athleteId, 
-      academyId || null
+      numAcademyId || null
     );
 
 
@@ -78,9 +81,16 @@ export const getMyAgreements = async (req, res, next) => {
  */
 export const updateAgreementStatus = async (req, res, next) => {
   try {
-    const academyId = req.user.id;
-    const { id } = req.params; // The agreement ID from the URL
+    const academyId = parseInt(req.user.id, 10);
+    const agreementId = parseInt(req.params.id, 10);
     const { status } = req.body;
+
+    if (isNaN(agreementId) || isNaN(academyId)) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Invalid agreement or academy ID format.',
+      });
+    }
 
     // Normalize status
     let normalizedStatus = status;
@@ -96,7 +106,7 @@ export const updateAgreementStatus = async (req, res, next) => {
     }
 
     const updatedAgreement = await agreementModel.updateAgreementStatus(
-      id, 
+      agreementId, 
       academyId, 
       normalizedStatus
     );

@@ -36,7 +36,7 @@ export default function AthleteEngagementsSection({ agreements = [] }) {
         timeline: agr.opportunity_timeline || 'Ongoing',
         daysLeft: agr.status === 'completed' ? 'Completed' : 'Active',
         status: agr.status === 'completed' ? 'Completed' : 'Active Now',
-        nextSession: 'View schedule in Hub',
+        nextSession: 'View schedule in Post',
         role: agr.role || agr.title || 'Athlete',
         whatYouWillDo: agr.opportunity_description || 'Contribute to academy goals',
         requirements: agr.opportunity_requirements && Array.isArray(agr.opportunity_requirements) 
@@ -119,11 +119,6 @@ export default function AthleteEngagementsSection({ agreements = [] }) {
                           {eng.academy}
                         </p>
                       </div>
-
-                      <span className="px-2.5 py-1 text-xs font-mono font-bold rounded-md bg-black/20 text-white/80 border border-white/10 flex items-center gap-1.5 shrink-0">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                        <span>{eng.status.toUpperCase()}</span>
-                      </span>
                     </div>
 
                     {/* Location Tag */}
@@ -158,13 +153,13 @@ export default function AthleteEngagementsSection({ agreements = [] }) {
                     </div>
                   </div>
 
-                  {/* Footer Action: ONLY View Hub button (Message button removed) */}
+                  {/* Footer Action: ONLY View Post button (Message button removed) */}
                   <div className="pt-3 border-t border-white/10 mt-2">
                     <button
                       onClick={() => setActiveModalEngagement(eng)}
                       className="w-full py-2 bg-[#F2FF65] hover:bg-[#e2ef4f] text-[#141F16] rounded-lg text-xs font-mono font-bold uppercase flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-md"
                     >
-                      <span>VIEW HUB</span>
+                      <span>VIEW POST</span>
                       <ExternalLink size={14} />
                     </button>
                   </div>
@@ -310,7 +305,7 @@ export default function AthleteEngagementsSection({ agreements = [] }) {
                 onClick={() => setActiveModalEngagement(null)}
                 className="w-full py-2.5 bg-[#0B120D] hover:bg-[#1C2A1E] text-white border border-[#2A3C2E] rounded-xl text-xs font-mono font-bold uppercase transition-colors cursor-pointer"
               >
-                CLOSE DETAIL HUB
+                CLOSE DETAIL POST
               </button>
             </div>
           </div>

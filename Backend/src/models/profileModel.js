@@ -272,12 +272,29 @@ export const upsertAthleteProfile = async (userId, profileData) => {
         updated_at = CURRENT_TIMESTAMP
       RETURNING *;
     `;
+  const safeJsonString = (val, fallback = '[]') => {
+    if (val == null) return fallback;
+    if (typeof val === 'string') {
+      try {
+        JSON.parse(val);
+        return val;
+      } catch {
+        return fallback;
+      }
+    }
+    try {
+      return JSON.stringify(val);
+    } catch {
+      return fallback;
+    }
+  };
+
   const values = [
     userId,
     sport,
     playing_level,
     Array.isArray(skills) ? skills : [],
-    typeof availability === 'object' ? JSON.stringify(availability) : '{}',
+    typeof availability === 'object' ? JSON.stringify(availability) : (typeof availability === 'string' ? availability : '{}'),
     bio,
     effectiveFullName,
     location || null,
@@ -285,9 +302,9 @@ export const upsertAthleteProfile = async (userId, profileData) => {
     effectiveAvatar,
     effectiveCover,
     effectiveMetrics,
-    JSON.stringify(achievements || []),
-    JSON.stringify(videos || []),
-    JSON.stringify(certifications || []),
+    safeJsonString(achievements, '[]'),
+    safeJsonString(videos, '[]'),
+    safeJsonString(certifications, '[]'),
     verification_level || 1,
   ];
 
@@ -393,9 +410,9 @@ export const getAllAthletes = async (filters = {}) => {
       COALESCE(ap.bio, 'Dedicated athlete striving for sports excellence.') AS bio,
       COALESCE(ap.performance_metrics, 'Personal Best: Top 5 State Rank | 12 Tournament Starts') AS performance_metrics,
       COALESCE(ap.skills, '{}') AS skills,
-      COALESCE(ap.achievements, '[]') AS achievements,
-      COALESCE(ap.videos, '[]') AS videos,
-      COALESCE(ap.certifications, '[]') AS certifications,
+      COALESCE(ap.achievements, '[]'::jsonb) AS achievements,
+      COALESCE(ap.videos, '[]'::jsonb) AS videos,
+      COALESCE(ap.certifications, '[]'::jsonb) AS certifications,
       COALESCE(ap.verification_level, 1) AS verification_level,
       TRUE AS verified,
       '4.8' AS rating,

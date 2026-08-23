@@ -161,9 +161,16 @@ export const getMyPostedOpportunities = async (req, res, next) => {
  */
 export const updateOpportunityStatus = async (req, res, next) => {
   try {
-    const academyId = req.user.id;
-    const { id } = req.params;
+    const academyId = parseInt(req.user.id, 10);
+    const opportunityId = parseInt(req.params.id, 10);
     const { status } = req.body;
+
+    if (isNaN(opportunityId) || isNaN(academyId)) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Invalid opportunity or academy ID format.',
+      });
+    }
 
     if (!['active', 'closed'].includes(status)) {
       return res.status(400).json({
@@ -172,7 +179,7 @@ export const updateOpportunityStatus = async (req, res, next) => {
       });
     }
 
-    const updated = await opportunityModel.updateOpportunityStatus(id, academyId, status);
+    const updated = await opportunityModel.updateOpportunityStatus(opportunityId, academyId, status);
 
     if (!updated) {
       return res.status(404).json({
@@ -199,21 +206,28 @@ export const updateOpportunityStatus = async (req, res, next) => {
  */
 export const updateOpportunity = async (req, res, next) => {
   try {
-    const academyId = req.user.id;
-    const { id } = req.params;
+    const academyId = parseInt(req.user.id, 10);
+    const opportunityId = parseInt(req.params.id, 10);
     const data = req.body;
+
+    if (isNaN(opportunityId) || isNaN(academyId)) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Invalid opportunity or academy ID format.',
+      });
+    }
 
     let oldImage = null;
     if (data.media_image !== undefined || data.image !== undefined) {
       try {
-        const oldRes = await pool.query('SELECT media_image FROM opportunities WHERE id = $1', [id]);
+        const oldRes = await pool.query('SELECT media_image FROM opportunities WHERE id = $1', [opportunityId]);
         oldImage = oldRes.rows[0]?.media_image;
       } catch (queryErr) {
         console.warn('Could not query previous opportunity image:', queryErr.message);
       }
     }
 
-    const updated = await opportunityModel.updateOpportunity(id, academyId, data);
+    const updated = await opportunityModel.updateOpportunity(opportunityId, academyId, data);
 
     if (!updated) {
       return res.status(404).json({
