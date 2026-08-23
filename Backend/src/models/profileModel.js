@@ -102,10 +102,38 @@ export const upsertAcademyProfile = async (userId, profileData) => {
   return rows[0];
 };
 
+/**
+ * Retrieves an athlete's public profile and user details by user ID.
+ * @param {number|string} userId - The ID from the users table.
+ */
+export const getPublicAthleteProfileByUserId = async (userId) => {
+  const queryText = `
+    SELECT 
+      u.id AS user_id,
+      u.email,
+      u.role,
+      u.created_at AS member_since,
+      ap.id AS profile_id,
+      ap.sport,
+      ap.playing_level,
+      ap.verification_level,
+      ap.skills,
+      ap.availability,
+      ap.bio,
+      ap.updated_at
+    FROM users u
+    LEFT JOIN athlete_profiles ap ON u.id = ap.user_id
+    WHERE u.id = $1 AND u.role = 'athlete';
+  `;
+  const { rows } = await pool.query(queryText, [userId]);
+  return rows[0] || null;
+};
+
 export default {
   createProfileTables,
   getAthleteProfileByUserId,
   getAcademyProfileByUserId,
+  getPublicAthleteProfileByUserId,
   upsertAthleteProfile,
   upsertAcademyProfile,
-};
+};

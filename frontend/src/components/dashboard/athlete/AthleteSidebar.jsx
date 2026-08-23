@@ -1,69 +1,67 @@
 import React from 'react';
 import {
-  LayoutDashboard,
-  User,
   Search,
+  Bookmark,
   FileText,
   Handshake,
-  ShieldCheck,
-  Star,
-  Bell,
-  Settings,
+  User,
   LogOut
 } from 'lucide-react';
 
-export default function AthleteSidebar({ activeTab, setActiveTab, onLogout, notificationsCount }) {
+export default function AthleteSidebar({ activeTab, setActiveTab, onLogout }) {
   const navItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'profile', label: 'My Sporting Profile', icon: User },
-    { id: 'opportunities', label: 'Find Opportunities', icon: Search },
+    { id: 'opportunities', label: 'Opportunities', icon: Search },
+    { id: 'saved', label: 'Saved', icon: Bookmark },
     { id: 'applications', label: 'Applications', icon: FileText },
-    { id: 'engagements', label: 'My Engagements', icon: Handshake },
-    { id: 'verification', label: 'Verification', icon: ShieldCheck },
-    { id: 'reviews', label: 'Reviews & Reputation', icon: Star },
-    { id: 'notifications', label: 'Notifications', icon: Bell, badge: notificationsCount },
-    { id: 'settings', label: 'Settings', icon: Settings },
+    { id: 'engagements', label: 'Engagements', icon: Handshake },
+    { id: 'profile', label: 'Profile', icon: User },
   ];
 
   return (
-    <aside className="athlete-sidebar">
+    <aside className="athlete-sidebar bg-[#17241a] border-r border-[#2A3C2E]">
       {/* Sidebar Top Brand Header */}
-      <div className="sidebar-brand-box">
-        <div className="brand-badge-pill">6.1 ATHLETE</div>
-        <div className="sidebar-brand-title">
-          <span className="brand-symbol">✳</span> STRIDE
-        </div>
-        <span className="sidebar-sub-tag">PERFORMANCE HUB</span>
+      <div className="sidebar-brand-box pb-5 mb-6 border-b border-[#2A3C2E]">
+        <a href="/" className="flex items-center gap-2.5 group">
+          <span className="font-['Poppins',sans-serif] font-bold text-2xl tracking-tight text-white">
+            STRIDE<span className="text-[#F2FF65]">.</span>
+          </span>
+        </a>
+        <span className="text-[10px] font-mono font-bold tracking-widest text-[#F2FF65]/70 uppercase mt-1 block">
+          ATHLETE PERFORMANCE HUB
+        </span>
       </div>
 
       {/* Navigation Links */}
-      <nav className="sidebar-nav-list">
-        <div className="nav-group-header">NAVIGATION</div>
+      <nav className="sidebar-nav-list space-y-1.5 flex-1">
         {navItems.map((item, idx) => {
           const Icon = item.icon;
           const isActive = activeTab === item.id;
           return (
             <button
               key={item.id}
-              className={`matchpoint-nav-btn ${isActive ? 'active' : ''}`}
               onClick={() => setActiveTab(item.id)}
+              className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-['Poppins',sans-serif] font-bold tracking-wide uppercase transition-all cursor-pointer ${
+                isActive
+                  ? 'bg-[#141F16] text-[#F2FF65] border border-[#F2FF65]/60 shadow-lg shadow-black/20'
+                  : 'text-gray-300 hover:text-white hover:bg-[#141F16]/50 border border-transparent'
+              }`}
             >
-              <span className="nav-step-index">0{idx + 1}</span>
-              <Icon size={17} className="nav-icon" />
-              <span className="nav-btn-text">{item.label}</span>
-              {item.badge && item.badge > 0 ? (
-                <span className="matchpoint-badge">{item.badge}</span>
-              ) : null}
+              <span className="text-[11px] font-mono text-[#F2FF65]/50">0{idx + 1}</span>
+              <Icon size={16} className={isActive ? 'text-[#F2FF65]' : 'text-gray-400'} />
+              <span>{item.label}</span>
             </button>
           );
         })}
       </nav>
 
-      <div className="sidebar-footer-box">
-        <div className="court-line-divider" />
-        <button className="matchpoint-nav-btn logout-btn" onClick={onLogout}>
-          <LogOut size={17} className="nav-icon" />
-          <span className="nav-btn-text">Logout</span>
+      {/* Footer Logout Button */}
+      <div className="pt-4 border-t border-[#2A3C2E]">
+        <button
+          onClick={onLogout}
+          className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-['Poppins',sans-serif] font-bold tracking-wide uppercase text-gray-400 hover:text-rose-400 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/20 transition-all cursor-pointer"
+        >
+          <LogOut size={16} />
+          <span>Logout</span>
         </button>
       </div>
     </aside>

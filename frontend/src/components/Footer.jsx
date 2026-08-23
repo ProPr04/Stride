@@ -13,28 +13,30 @@ const navigation = [
 
 export default function Footer() {
   return (
-    <footer className="w-full bg-[#07130d] px-6 py-12 font-['Plus_Jakarta_Sans'] text-[#f7f5ed] sm:px-10 sm:py-14 lg:px-16 xl:px-20">
+    <footer className="w-full bg-[#07130d] px-6 py-12 font-['Poppins',sans-serif] text-[#f7f5ed] sm:px-10 sm:py-14 lg:px-16 xl:px-20">
       <div className="mx-auto w-full max-w-[1200px]">
         <div className="border-y border-[#f2ff65]/70 py-8 sm:py-10">
           <div className="grid gap-10 lg:grid-cols-12 lg:gap-8">
             <div className="lg:col-span-7">
-              <p className="text-5xl font-extrabold leading-none tracking-[-0.08em] text-[#f2ff65] sm:text-6xl md:text-7xl">
-                STRIDE
-              </p>
+              <a href="/" className="flex items-center gap-2.5 group">
+                <span className="font-['Poppins',sans-serif] font-bold text-xl sm:text-6xl tracking-tight text-white">
+                   STRIDE<span className="text-[#F2FF65]">.</span>
+                </span>
+            </a>
 
               <p className="mt-7 max-w-2xl text-xl font-semibold leading-snug tracking-[-0.035em] text-[#f7f5ed] sm:text-2xl">
                 Don&apos;t fund the athlete&apos;s dream. Help the athlete earn
                 their way forward through sport.
               </p>
 
-              <p className="mt-4 max-w-xl text-sm font-light leading-relaxed text-[#f7f5ed]/65 sm:text-base">
+              <p className="mt-4 max-w-xl text-sm font-light leading-relaxed text-[#f7f5ed]/65 sm:text-base font-['Inter',sans-serif]">
                 STRIDE connects emerging athletes with academies through
                 sport-specific paid opportunities and verified experience.
               </p>
 
               <a
                 href="#opportunities"
-                className="group mt-7 inline-flex items-center gap-3 border-b border-[#f2ff65] pb-1.5 text-sm font-bold tracking-[0.04em] text-[#f2ff65]"
+                className="group mt-7 inline-flex items-center gap-3 border-b border-[#f2ff65] pb-1.5 text-sm font-bold tracking-[0.04em] text-[#f2ff65] font-['Inter',sans-serif]"
               >
                 Find Your Opportunity
                 <span className="text-lg leading-none transition-transform duration-300 group-hover:translate-x-1">
@@ -73,7 +75,7 @@ export default function Footer() {
         </div>
 
         <div className="flex flex-col gap-5 py-6 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm font-semibold tracking-[-0.02em] text-[#f2ff65]">
+          <p className="text-sm font-semibold tracking-[-0.02em] text-[#f2ff65] font-['Inter',sans-serif]">
             Earn. Learn. Prove. Grow.
           </p>
 

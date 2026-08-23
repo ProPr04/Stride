@@ -1,11 +1,11 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FaArrowRight } from 'react-icons/fa';
+import { ArrowRight } from 'lucide-react';
 import HeroImage from '../assets/images/hero-court-basketball.jpg';
 
 export const Hero = () => {
   return (
-    <section className="relative min-h-[90vh] lg:min-h-screen w-full flex items-center justify-end overflow-hidden bg-[#1A1F1E] text-[#F7F8FA] font-['Inter',sans-serif]">
+    <section className="relative min-h-[90vh] lg:min-h-screen w-full flex items-center justify-end overflow-hidden bg-[#17241a] text-[#F7F8FA] font-['Inter',sans-serif]">
       {/* 1. Background Court Asset with Minimal Vignette */}
       <div className="absolute inset-0 z-0">
         <img
@@ -14,8 +14,9 @@ export const Hero = () => {
           className="h-full w-full object-cover object-left md:object-center"
         />
         {/* Soft directional gradient to protect text contrast on the right while keeping the ball clear */}
-        <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-l from-[#1A1F1E]/95 via-[#1A1F1E]/70 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-l from-[#17241a] via-[#17241a]/75 to-transparent" />
         <div className="absolute inset-0 bg-black/25" />
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-b from-transparent to-[#17241a] pointer-events-none" />
       </div>
 
       {/* 2. Content Container (Right-Aligned & Minimalist) */}
@@ -47,7 +48,7 @@ export const Hero = () => {
               className="inline-flex items-center justify-center gap-3 px-8 py-3.5 rounded-xl bg-[#F2FF65] text-[#0F172A] font-['Poppins',sans-serif] font-bold text-sm sm:text-base hover:bg-[#e2ef4f] transition-colors duration-200 cursor-pointer shadow-md shadow-black/20"
             >
               <span>Explore Opportunities</span>
-              <FaArrowRight className="text-xs" />
+              <ArrowRight size={16} />
             </button>
 
             <button
