@@ -17,6 +17,9 @@ const poolConfig = process.env.DATABASE_URL
   ? {
       connectionString: process.env.DATABASE_URL,
       ssl: isSSLRequired ? { rejectUnauthorized: false } : false,
+      connectionTimeoutMillis: 10000,
+      idleTimeoutMillis: 30000,
+      max: 20,
     }
   : {
       user: process.env.DB_USER,
@@ -25,14 +28,16 @@ const poolConfig = process.env.DATABASE_URL
       password: process.env.DB_PASSWORD,
       port: process.env.DB_PORT || 5432,
       ssl: isSSLRequired ? { rejectUnauthorized: false } : false,
+      connectionTimeoutMillis: 10000,
+      idleTimeoutMillis: 30000,
+      max: 20,
     };
 
 const pool = new Pool(poolConfig);
 
-// Global error handler for idle clients in the pool
+// Global error handler for idle clients in the pool (do not exit process on idle connection disconnects)
 pool.on('error', (err, client) => {
-  console.error('Unexpected error on idle database client:', err.message);
-  process.exit(-1);
+  console.warn('⚠️ Warning: Unexpected error on idle PostgreSQL client (auto-recovering):', err.message);
 });
 
 /**
@@ -46,7 +51,10 @@ export const connectDB = async () => {
     console.log(`📦 Successfully connected to PostgreSQL database: ${dbTarget}`);
     client.release();
   } catch (err) {
-    console.error('Database connection error:', err.message);
+    console.error('❌ Database connection error:', err.message);
+    if (err.code === 'ETIMEDOUT' || err.code === 'ENOTFOUND' || err.code === 'EHOSTUNREACH') {
+      console.error('💡 Network / IPv6 Timeout Tip: If using Supabase Direct Connection (db.<project>.supabase.co:5432), try switching to the Supabase Connection Pooler URL (aws-0-<region>.pooler.supabase.com:6543 or 5432) in your .env DATABASE_URL.');
+    }
     console.error('Please verify your database credentials in the .env file.');
     process.exit(1);
   }
