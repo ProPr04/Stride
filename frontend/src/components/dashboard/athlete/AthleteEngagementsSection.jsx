@@ -14,143 +14,37 @@ import {
   BookOpen
 } from 'lucide-react';
 
-export default function AthleteEngagementsSection() {
+export default function AthleteEngagementsSection({ agreements = [] }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [visibleCount, setVisibleCount] = useState(6);
   const [activeModalEngagement, setActiveModalEngagement] = useState(null);
 
-  const activeEngagements = [
-    {
-      id: 'eng-1',
-      title: 'ASSISTANT CRICKET COACH',
-      academy: 'Delhi Sports Academy',
-      academyAvatar: 'https://images.unsplash.com/photo-1577495508048-b635879837f1?w=150&auto=format&fit=crop&q=80',
-      location: 'Delhi',
-      compensation: '₹15,000 / month',
-      type: 'Part-time',
-      timings: '4 PM – 8 PM',
-      timeline: 'Aug 15 – Sep 15, 2026',
-      daysLeft: '24 Days Remaining',
-      status: 'Active Now',
-      nextSession: 'Tomorrow, 4:00 PM (Field Practice)',
-      role: 'Assistant Cricket Coach',
-      whatYouWillDo: 'Support academy training sessions and assist senior coaches during trial matches, tactical video breakdowns, and player fitness tracking.',
-      requirements: [
-        'Cricket playing experience at state/district level',
-        'Intermediate or advanced playing credential',
-        'Evening availability & tournament travel readiness'
-      ],
-      coordinator: 'Coach Rajesh Kumar (Head Director)'
-    },
-    {
-      id: 'eng-2',
-      title: 'JUNIOR TRACK & FIELD SPRINT FELLOWSHIP',
-      academy: 'National High Performance Center',
-      academyAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-      location: 'Bengaluru, KA',
-      compensation: '₹25,000 / month',
-      type: 'Full-time',
-      timings: 'Morning & Evening Sessions',
-      timeline: 'Aug 10 – Sep 10, 2026',
-      daysLeft: '19 Days Remaining',
-      status: 'Active Now',
-      nextSession: 'Today, 5:30 PM (Biomechanical Assessment)',
-      role: 'Track Athlete (100m / 200m)',
-      whatYouWillDo: 'Complete daily sprint drills, bi-weekly time trials, and represent the academy in national track meets.',
-      requirements: [
-        'Under-23 age category eligibility',
-        'State or National level participation history',
-        'Full-time high-intensity training commitment'
-      ],
-      coordinator: 'Dr. Anita Roy (High Performance Lead)'
-    },
-    {
-      id: 'eng-3',
-      title: 'SENIOR BADMINTON SPARRING PARTNER',
-      academy: 'Prakash Padukone Excellence Academy',
-      academyAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
-      location: 'Bengaluru, KA',
-      compensation: '₹30,000 / month',
-      type: 'Full-time',
-      timings: '6 AM – 12 PM',
-      timeline: 'Jul 25 – Aug 25, 2026',
-      daysLeft: '3 Days Remaining',
-      status: 'Active Now',
-      nextSession: 'Tomorrow, 6:00 AM (Court 3 Match Play)',
-      role: 'Badminton Sparring Athlete',
-      whatYouWillDo: 'Spar with elite national players during morning court blocks and assist in tactical drill simulations.',
-      requirements: [
-        'National ranking within top 100',
-        'Morning shift punctuality',
-        'High physical conditioning'
-      ],
-      coordinator: 'U. Vimal Kumar (Senior Advisor)'
-    },
-    {
-      id: 'eng-4',
-      title: 'HIGH PERFORMANCE BASKETBALL GUARD',
-      academy: 'NBA Academy India',
-      academyAvatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
-      location: 'Greater Noida, UP',
-      compensation: '₹35,000 / month',
-      type: 'Full-time',
-      timings: 'Daily Residency Training',
-      timeline: 'Jul 15 – Oct 15, 2026',
-      daysLeft: '54 Days Remaining',
-      status: 'Active Now',
-      nextSession: 'Friday, 10:00 AM (Tactical Video Review)',
-      role: 'Point Guard / Shooting Guard',
-      whatYouWillDo: 'Participate in international scouting combines, daily ball-handling routines, and league exhibition matches.',
-      requirements: [
-        'Height minimum 6ft 1in',
-        'National U-18 tournament experience',
-        'Full residency agreement'
-      ],
-      coordinator: 'Coach Scott Fleming (Technical Lead)'
-    },
-    {
-      id: 'eng-5',
-      title: 'SHOOTING 10M AIR RIFLE SCHOLAR',
-      academy: 'Gun For Glory Shooting Academy',
-      location: 'Pune, MH',
-      compensation: '₹26,000 / month',
-      type: 'Contract',
-      timings: 'Morning Range Practice',
-      timeline: 'Jun 28 – Sep 28, 2026',
-      daysLeft: '37 Days Remaining',
-      status: 'Active Now',
-      nextSession: 'Saturday, 8:00 AM (Precision Trial)',
-      role: '10m Air Rifle Shooter',
-      whatYouWillDo: 'Log daily 60-shot series scores, participate in mental focus training, and compete in zonal trials.',
-      requirements: [
-        'National Rifle Association card holder',
-        'Minimum average score 620+',
-        'Personal air rifle equipment'
-      ],
-      coordinator: 'Gagan Narang (Academy Founder)'
-    },
-    {
-      id: 'eng-6',
-      title: 'ATHLETICS HIGH JUMP FELLOW',
-      academy: 'Inspire Institute of Sport',
-      location: 'Vijayanagar, KA',
-      compensation: '₹32,000 / month',
-      type: 'Full-time',
-      timings: 'Full Day Sports Complex Access',
-      timeline: 'Jun 02 – Dec 02, 2026',
-      daysLeft: '102 Days Remaining',
-      status: 'Active Now',
-      nextSession: 'Today, 4:00 PM (Plyometric Conditioning)',
-      role: 'High Jump Specialist',
-      whatYouWillDo: 'Train under international jumps coaches with full sports science support, recovery pools, and nutrition tracking.',
-      requirements: [
-        'Personal best clearance 2.05m+',
-        'Full year residency readiness',
-        'Medical clearance'
-      ],
-      coordinator: 'Coach Antony Yaich (Head of Jumps)'
-    }
-  ];
+  const activeEngagements = React.useMemo(() => {
+    return agreements
+      .filter((agr) => ['accepted', 'completed'].includes(String(agr.status).toLowerCase()))
+      .map((agr) => ({
+        id: agr.id,
+        title: agr.title || agr.role || 'Opportunity',
+        academy: agr.academy_name || 'Partner Academy',
+        academyAvatar: 'https://images.unsplash.com/photo-1577495508048-b635879837f1?w=150&auto=format&fit=crop&q=80',
+        location: agr.opportunity_location || agr.academy_location || 'India',
+        compensation: agr.compensation_cash 
+          ? `₹${Number(agr.compensation_cash).toLocaleString()} / month`
+          : 'Competitive Compensation',
+        type: agr.opportunity_type || 'Engagement',
+        timings: agr.opportunity_timings || 'Standard',
+        timeline: agr.opportunity_timeline || 'Ongoing',
+        daysLeft: agr.status === 'completed' ? 'Completed' : 'Active',
+        status: agr.status === 'completed' ? 'Completed' : 'Active Now',
+        nextSession: 'View schedule in Hub',
+        role: agr.role || agr.title || 'Athlete',
+        whatYouWillDo: agr.opportunity_description || 'Contribute to academy goals',
+        requirements: agr.opportunity_requirements && Array.isArray(agr.opportunity_requirements) 
+          ? agr.opportunity_requirements 
+          : ['Fulfil agreement terms'],
+        coordinator: agr.academy_name || 'Academy Coordinator'
+      }));
+  }, [agreements]);
 
   const filteredEngagements = activeEngagements.filter(eng => {
     return (

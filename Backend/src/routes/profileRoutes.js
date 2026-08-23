@@ -1,6 +1,7 @@
 import express from 'express';
 import profileController from '../controllers/profileController.js';
 import { protect } from '../middlewares/authMiddleware.js';
+import { resolveDirectUrls } from '../middlewares/directUrlMiddleware.js';
 
 const router = express.Router();
 
@@ -19,7 +20,11 @@ router.get('/me', profileController.getMyProfile);
  * @desc    Create or update the profile of the currently logged-in user
  * @access  Private
  */
-router.put('/me', profileController.updateMyProfile);
+router.put(
+  '/me', 
+  resolveDirectUrls(['avatar_url', 'avatar', 'cover_url', 'cover', 'logo_url']), 
+  profileController.updateMyProfile
+);
 
 /**
  * @route   GET /api/profiles/athlete/:userId
@@ -28,5 +33,13 @@ router.put('/me', profileController.updateMyProfile);
  */
 router.get('/athlete/:userId', profileController.getAthleteProfileById);
 
+/**
+ * @route   GET /api/profiles/athletes
+ * @desc    Get all athletes for scouting and academy discovery
+ * @access  Private
+ */
+router.get('/athletes', profileController.getAllAthletes);
+
 export default router;
+
 

@@ -13,89 +13,51 @@ import {
   Share2,
   X
 } from 'lucide-react';
+import { api } from '../../../services/api';
 
-export default function AthleteSavedSection({ onNavigateToOpportunities }) {
+export default function AthleteSavedSection({ savedOpportunities = [], setSavedOpportunities, onNavigateToOpportunities }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSport, setSelectedSport] = useState('All');
   const [appliedIds, setAppliedIds] = useState([]);
   const [activeModalOpp, setActiveModalOpp] = useState(null);
 
-  // Initial list of saved opportunities
-  const [savedOpportunities, setSavedOpportunities] = useState([
-    {
-      id: 'saved-1',
-      title: 'JUNIOR TRACK & FIELD SPRINT FELLOWSHIP',
-      academy: 'National High Performance Center',
-      location: 'Bengaluru, KA',
-      compensation: '₹25,000 / month',
-      type: 'Full-time',
-      sport: 'Track & Field',
-      timeline: 'Aug 10 – Sep 10, 2026 (Active for 30 Days)',
-      savedDate: 'Aug 18, 2026',
-      mediaImage: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=1000&auto=format&fit=crop&q=80',
-      role: 'Track Athlete (100m / 200m)',
-      whatYouWillDo: 'Complete daily sprint drills, bi-weekly time trials, and represent the academy in national meets.',
-      requirements: [
-        'Under-23 age category',
-        'State or National level participation history',
-        'Full-time training commitment'
-      ]
-    },
-    {
-      id: 'saved-2',
-      title: 'ASSISTANT CRICKET COACH',
-      academy: 'Delhi Sports Academy',
-      location: 'Delhi',
-      compensation: '₹15,000 / month',
-      type: 'Part-time (Evening)',
-      sport: 'Cricket',
-      timeline: 'Aug 15 – Sep 15, 2026 (Active for 30 Days)',
-      savedDate: 'Aug 20, 2026',
-      mediaImage: 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=1000&auto=format&fit=crop&q=80',
-      role: 'Assistant Cricket Coach',
-      whatYouWillDo: 'Support academy training sessions and assist senior coaches during trial matches and tactical breakdowns.',
-      requirements: [
-        'Cricket playing experience',
-        'Intermediate playing level',
-        'Evening availability'
-      ]
-    },
-    {
-      id: 'saved-3',
-      title: 'YOUTH TENNIS ASSISTANT TRAINER',
-      academy: 'Apex Tennis Foundation',
-      location: 'Hyderabad, TS',
-      compensation: '₹18,000 / month',
-      type: 'Weekend Shifts',
-      sport: 'Tennis',
-      timeline: 'Jul 25 – Aug 25, 2026 (Active for 30 Days)',
-      savedDate: 'Aug 21, 2026',
-      mediaImage: 'https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?w=1000&auto=format&fit=crop&q=80',
-      role: 'Tennis Assistant Trainer',
-      whatYouWillDo: 'Conduct junior academy warm-ups, feed balls during drill sets, and log player performance.',
-      requirements: [
-        'Competitive junior tennis background',
-        'Good communication skills',
-        'Weekend morning availability'
-      ]
-    }
-  ]);
-
   const sportsFilter = ['All', 'Track & Field', 'Cricket', 'Tennis', 'Football', 'Basketball'];
 
-  const handleRemoveSaved = (id, e) => {
+  const handleRemoveSaved = async (id, e) => {
     e.stopPropagation();
-    setSavedOpportunities(prev => prev.filter(item => item.id !== id));
+    try {
+      await api.saved.unsave(id);
+      setSavedOpportunities(prev => prev.filter(item => item.opportunity_id !== id));
+    } catch (err) {
+      console.error('Failed to unsave', err);
+    }
   };
 
   const handleApplyNow = (id, e) => {
     e.stopPropagation();
+    // Implementation should call api.agreements.apply
     if (!appliedIds.includes(id)) {
       setAppliedIds(prev => [...prev, id]);
     }
   };
 
-  const filteredSaved = savedOpportunities.filter(item => {
+  const formattedSaved = savedOpportunities.map(item => ({
+    id: item.opportunity_id,
+    title: item.title || item.role || 'Opportunity',
+    academy: item.academy_name || 'Partner Academy',
+    location: item.display_location || item.location || item.academy_location || 'India',
+    compensation: item.compensation_cash ? `₹${Number(item.compensation_cash).toLocaleString()} / month` : 'Competitive Compensation',
+    type: item.type || 'Full-time',
+    sport: item.sport || 'General',
+    timeline: item.timeline || 'Ongoing',
+    savedDate: item.saved_at ? new Date(item.saved_at).toLocaleDateString() : 'Recently',
+    mediaImage: item.media_image,
+    role: item.role || item.title || 'Athlete',
+    whatYouWillDo: item.description || item.what_you_will_do || 'Contribute to academy goals',
+    requirements: item.requirements && Array.isArray(item.requirements) ? item.requirements : ['Standard athletic requirements']
+  }));
+
+  const filteredSaved = formattedSaved.filter(item => {
     const matchesSport = selectedSport === 'All' || item.sport === selectedSport;
     const matchesSearch =
       item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||

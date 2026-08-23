@@ -1,11 +1,11 @@
 import React from 'react';
 import {
   Search,
-  Bookmark,
   FileText,
   Handshake,
   User,
-  LogOut
+  LogOut,
+  Bookmark
 } from 'lucide-react';
 
 export default function AthleteSidebar({ activeTab, setActiveTab, onLogout }) {
@@ -16,6 +16,7 @@ export default function AthleteSidebar({ activeTab, setActiveTab, onLogout }) {
     { id: 'engagements', label: 'Engagements', icon: Handshake },
     { id: 'profile', label: 'Profile', icon: User },
   ];
+
 
   return (
     <aside className="athlete-sidebar bg-[#17241a] border-r border-[#2A3C2E]">
@@ -46,7 +47,6 @@ export default function AthleteSidebar({ activeTab, setActiveTab, onLogout }) {
                   : 'text-gray-300 hover:text-white hover:bg-[#141F16]/50 border border-transparent'
               }`}
             >
-              <span className="text-[11px] font-mono text-[#F2FF65]/50">0{idx + 1}</span>
               <Icon size={16} className={isActive ? 'text-[#F2FF65]' : 'text-gray-400'} />
               <span>{item.label}</span>
             </button>

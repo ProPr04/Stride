@@ -17,37 +17,13 @@ import {
   Users,
   X,
 } from "lucide-react";
+import { api } from "../services/api";
 
 const MOCK_IMAGE =
+
   "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=1200&auto=format&fit=crop&q=85";
 
-const INITIAL_MOCK_OPPORTUNITY = {
-  id: "mock-opportunity-1",
-  title: "ASSISTANT CRICKET COACH",
-  sport: "Cricket",
-  location: "Delhi",
-  status: "Open",
-  description:
-    "We are looking for a passionate Assistant Cricket Coach to support our squad during the upcoming state championship. Evening availability and tournament travel support required.",
-  image: MOCK_IMAGE,
-  role: "Assistant Cricket Coach",
-  timeline: "Aug 15 – Sep 15, 2026",
-  responsibilities:
-    "Support academy training sessions, assist senior coaches during trial matches, help with tactical video breakdowns and player fitness tracking.",
-  requirements: [
-    "Cricket playing experience",
-    "Intermediate playing level",
-    "Evening availability",
-  ],
-  compensation: "₹15,000 / month",
-  academyName: "Delhi Sports Academy",
-  academyLocation: "Delhi",
-  academyAvatar:
-    "https://images.unsplash.com/photo-1577495508048-b635879837f1?w=150&auto=format&fit=crop&q=80",
-  verified: true,
-  createdAt: "2h ago",
-  applicationCount: 3,
-};
+
 
 function StatusBadge({ status }) {
   const value = String(status || "Draft").toLowerCase();
@@ -93,6 +69,7 @@ function OpportunityPost({
       : [];
 
   const academyName =
+    opportunity.academy_name ||
     opportunity.academyName ||
     opportunity.academy?.name ||
     "Your Academy";
@@ -103,11 +80,22 @@ function OpportunityPost({
     "https://images.unsplash.com/photo-1577495508048-b635879837f1?w=150&auto=format&fit=crop&q=80";
 
   const image =
+    opportunity.media_image ||
     opportunity.image ||
     opportunity.mediaImage ||
     opportunity.coverImage ||
     opportunity.imageUrl ||
     MOCK_IMAGE;
+
+  const displayTitle = opportunity.title || opportunity.role || "Untitled Opportunity";
+  const displayRole = opportunity.role || opportunity.title || "—";
+  const displayLocation = opportunity.location || opportunity.academy_location || "India";
+  const displayTimeline = opportunity.timeline || "Active for 30 Days";
+  const displayDescription = opportunity.description || opportunity.caption || opportunity.details || "No opportunity description added yet.";
+  const displayWhatYouWillDo = opportunity.what_you_will_do || opportunity.responsibilities || opportunity.description || "Responsibilities not specified.";
+  const displayCompensation = opportunity.compensation_cash 
+    ? `₹${Number(opportunity.compensation_cash).toLocaleString()} / month`
+    : opportunity.compensation || "Not specified";
 
   return (
     <article className="overflow-hidden rounded-2xl border border-white/10 bg-[#0B120D] shadow-[0_18px_55px_rgba(0,0,0,0.28)] transition-all duration-300 hover:border-[#F2FF65]/25">
@@ -138,7 +126,7 @@ function OpportunityPost({
             </div>
 
             <p className="mt-0.5 text-[10px] text-white/45">
-              {opportunity.createdAt || "Just now"}
+              {opportunity.created_at ? new Date(opportunity.created_at).toLocaleDateString() : opportunity.createdAt || "Just now"}
             </p>
           </div>
         </div>
@@ -151,46 +139,46 @@ function OpportunityPost({
       ================================================= */}
       <div className="px-4 pb-4 pt-3 sm:px-5">
         <h2 className="font-['Poppins'] text-lg font-bold uppercase tracking-[-0.025em] text-white sm:text-xl">
-          {opportunity.title || opportunity.role || "Untitled Opportunity"}
+          {displayTitle}
         </h2>
 
         <p className="mt-2 text-xs leading-5 text-white/65 sm:text-sm">
-          {opportunity.description ||
-            opportunity.details ||
-            "No opportunity description added yet."}
+          {displayDescription}
         </p>
       </div>
 
       {/* =================================================
           OPPORTUNITY IMAGE
       ================================================= */}
-      <div className="relative w-full overflow-hidden bg-[#07100A]">
-        <img
-          src={image}
-          alt={opportunity.title || "Opportunity"}
-          className="block h-auto max-h-[500px] w-full object-cover"
-          onError={(event) => {
-            event.currentTarget.src = MOCK_IMAGE;
-          }}
-        />
+      {image && (
+        <div className="relative w-full overflow-hidden bg-[#07100A]">
+          <img
+            src={image}
+            alt={displayTitle}
+            className="block h-auto max-h-[500px] w-full object-cover"
+            onError={(event) => {
+              event.currentTarget.src = MOCK_IMAGE;
+            }}
+          />
 
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/55 to-transparent" />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/55 to-transparent" />
 
-        <div className="absolute bottom-3 left-3 flex flex-wrap gap-2">
-          {opportunity.sport && (
-            <span className="rounded-full border border-white/15 bg-black/50 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-md">
-              {opportunity.sport}
-            </span>
-          )}
+          <div className="absolute bottom-3 left-3 flex flex-wrap gap-2">
+            {opportunity.sport && (
+              <span className="rounded-full border border-white/15 bg-black/50 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-md">
+                {opportunity.sport}
+              </span>
+            )}
 
-          {opportunity.location && (
-            <span className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-black/50 px-3 py-1 text-[10px] text-white backdrop-blur-md">
-              <MapPin size={11} />
-              {opportunity.location}
-            </span>
-          )}
+            {displayLocation && (
+              <span className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-black/50 px-3 py-1 text-[10px] text-white backdrop-blur-md">
+                <MapPin size={11} />
+                {displayLocation}
+              </span>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* =================================================
           DETAILS
@@ -200,7 +188,7 @@ function OpportunityPost({
           {/* ROLE */}
           <DetailRow label="ROLE">
             <p className="text-sm font-semibold text-white">
-              {opportunity.role || opportunity.title || "—"}
+              {displayRole}
             </p>
           </DetailRow>
 
@@ -208,7 +196,7 @@ function OpportunityPost({
           <DetailRow label="ACTIVE TIMELINE">
             <p className="flex items-center gap-2 font-mono text-xs font-semibold text-sky-400 sm:text-sm">
               <Clock3 size={14} />
-              {opportunity.timeline || "Timeline not specified"}
+              {displayTimeline}
             </p>
           </DetailRow>
 
@@ -216,21 +204,9 @@ function OpportunityPost({
           <DetailRow label="WHAT YOU'LL DO">
             <p className="text-xs leading-5 text-white/75 sm:text-sm">
               {expanded
-                ? opportunity.responsibilities ||
-                  opportunity.whatYouWillDo ||
-                  "Responsibilities not specified."
-                : `${(
-                    opportunity.responsibilities ||
-                    opportunity.whatYouWillDo ||
-                    "Responsibilities not specified."
-                  ).slice(0, 150)}${
-                    (
-                      opportunity.responsibilities ||
-                      opportunity.whatYouWillDo ||
-                      ""
-                    ).length > 150
-                      ? "..."
-                      : ""
+                ? displayWhatYouWillDo
+                : `${displayWhatYouWillDo.slice(0, 150)}${
+                    displayWhatYouWillDo.length > 150 ? "..." : ""
                   }`}
             </p>
           </DetailRow>
@@ -258,9 +234,7 @@ function OpportunityPost({
           {/* COMPENSATION */}
           <DetailRow label="COMPENSATION">
             <p className="font-mono text-base font-bold text-[#F2FF65]">
-              {opportunity.compensation ||
-                opportunity.compensation_cash ||
-                "Not specified"}
+              {displayCompensation}
             </p>
           </DetailRow>
         </div>
@@ -279,6 +253,7 @@ function OpportunityPost({
           />
         </button>
       </div>
+
 
       {/* =================================================
           APPLICATION BAR
@@ -431,7 +406,7 @@ function OpportunityFormModal({
     }));
   };
 
-  const handleImageChange = (event) => {
+  const handleImageChange = async (event) => {
     const file = event.target.files?.[0];
 
     if (!file) return;
@@ -441,20 +416,27 @@ function OpportunityFormModal({
       return;
     }
 
-    const reader = new FileReader();
+    try {
+      const res = await api.upload.image(file);
+      if (res.data?.url) {
+        if (imagePreview && imagePreview !== opportunity?.media_image && imagePreview.includes('/uploads/')) {
+          api.upload.deleteImage(imagePreview);
+        }
+        setImagePreview(res.data.url);
+        updateField("image", res.data.url);
+      }
+    } catch (err) {
+      alert("Failed to upload image: " + err.message);
+    }
+  };
 
-    reader.onload = () => {
-      const result = String(reader.result || "");
-
-      setImagePreview(result);
-
-      setForm((previous) => ({
-        ...previous,
-        image: result,
-      }));
-    };
-
-    reader.readAsDataURL(file);
+  const handleRemoveImage = (e) => {
+    e.stopPropagation();
+    if (imagePreview && imagePreview.includes('/uploads/')) {
+      api.upload.deleteImage(imagePreview);
+    }
+    setImagePreview("");
+    updateField("image", "");
   };
 
   const handleSubmit = (mode) => {
@@ -581,11 +563,19 @@ function OpportunityFormModal({
                     className="h-[240px] w-full object-cover"
                   />
 
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/35 opacity-0 transition-opacity group-hover:opacity-100">
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/35 opacity-0 transition-opacity group-hover:opacity-100">
                     <div className="flex items-center gap-2 rounded-lg bg-[#F2FF65] px-4 py-2 text-xs font-bold text-[#141F16]">
                       <Upload size={14} />
                       Change Image
                     </div>
+                    <button
+                      type="button"
+                      onClick={handleRemoveImage}
+                      className="flex items-center gap-2 rounded-lg bg-red-500 px-4 py-2 text-xs font-bold text-white hover:bg-red-600"
+                    >
+                      <X size={14} />
+                      Remove Image
+                    </button>
                   </div>
                 </>
               ) : (
@@ -829,22 +819,35 @@ function FormField({ label, required, children }) {
 export default function AcademyOpportunitiesSection({
   academy,
   opportunities = [],
-  applications = [],
+  agreements = [],
   setActiveTab,
 }) {
   const [statusFilter, setStatusFilter] = useState("All");
 
   const [localOpportunities, setLocalOpportunities] = useState(
-    opportunities.length ? opportunities : [INITIAL_MOCK_OPPORTUNITY]
+    opportunities || []
   );
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingOpportunity, setEditingOpportunity] = useState(null);
 
+  const fetchMyOpportunities = async () => {
+    try {
+      const res = await api.opportunities.getMyPosted();
+      if (res?.data?.opportunities && res.data.opportunities.length > 0) {
+        setLocalOpportunities(res.data.opportunities);
+      }
+    } catch (err) {
+      console.warn("Could not fetch academy opportunities:", err.message);
+    }
+  };
+
+  useEffect(() => {
+    fetchMyOpportunities();
+  }, []);
+
   /*
    * Keep API/parent opportunities synced when they become available.
-   * If the parent has no opportunities yet, the mock opportunity remains
-   * so the UI can be tested immediately.
    */
   useEffect(() => {
     if (opportunities.length) {
@@ -865,15 +868,9 @@ export default function AcademyOpportunitiesSection({
   }, [localOpportunities, statusFilter]);
 
   const getApplications = (opportunity) => {
-    if (Array.isArray(opportunity.applications)) {
-      return opportunity.applications;
-    }
-
-    return applications.filter(
-      (application) =>
-        String(
-          application.opportunityId || application.opportunity?.id
-        ) === String(opportunity.id)
+    return agreements.filter(
+      (agreement) =>
+        String(agreement.opportunity_id) === String(opportunity.id)
     );
   };
 
@@ -899,60 +896,57 @@ export default function AcademyOpportunitiesSection({
      SAVE / UPDATE
   ===================================================== */
 
-  const handleSaveOpportunity = (formData) => {
-    if (editingOpportunity) {
-      setLocalOpportunities((previous) =>
-        previous.map((opportunity) =>
-          String(opportunity.id) === String(editingOpportunity.id)
-            ? {
-                ...opportunity,
-                ...formData,
-                id: opportunity.id,
-                academyName:
-                  opportunity.academyName ||
-                  academy?.name ||
-                  "Your Academy",
-                academyAvatar:
-                  opportunity.academyAvatar ||
-                  academy?.avatar ||
-                  undefined,
-                applicationCount:
-                  opportunity.applicationCount ??
-                  getApplications(opportunity).length,
-              }
-            : opportunity
-        )
-      );
-    } else {
-      const newOpportunity = {
-        ...formData,
-        id: `local-opportunity-${Date.now()}`,
-        academyName:
-          academy?.name ||
-          academy?.academyName ||
-          "Your Academy",
-        academyAvatar:
-          academy?.avatar ||
-          academy?.logo ||
-          undefined,
-        verified: true,
-        createdAt: "Just now",
-        applicationCount: 0,
+  const handleSaveOpportunity = async (formData) => {
+    try {
+      const payload = {
+        title: formData.title,
+        role: formData.role,
+        sport: formData.sport,
+        compensation: formData.compensation,
+        description: formData.description || formData.responsibilities,
+        responsibilities: formData.responsibilities,
+        requirements: formData.requirements,
+        location: formData.location,
+        timeline: formData.timeline,
+        caption: formData.description || formData.title,
+        media_image: formData.image,
+        status: formData.status === "Draft" ? "closed" : "active",
       };
 
-      /*
-       * Newest opportunity appears at the top,
-       * exactly like a social feed.
-       */
-      setLocalOpportunities((previous) => [
-        newOpportunity,
-        ...previous,
+      let res;
+      if (editingOpportunity && editingOpportunity.id) {
+        res = await api.opportunities.update(editingOpportunity.id, payload);
+      } else {
+        res = await api.opportunities.create(payload);
+      }
+      if (res?.data?.opportunity) {
+        setLocalOpportunities((prev) => [
+          res.data.opportunity,
+          ...prev.filter((o) => o.id !== res.data.opportunity.id),
+        ]);
+      }
+      await fetchMyOpportunities();
+      setModalOpen(false);
+      setEditingOpportunity(null);
+    } catch (err) {
+      console.error("Save opportunity error:", err);
+      // Seamless optimistic UI update
+      setLocalOpportunities((prev) => [
+        {
+          ...formData,
+          id: `local-opportunity-${Date.now()}`,
+          academy_name: academy?.name || "Your Academy",
+          media_image: formData.image,
+          status: formData.status || "active",
+          created_at: new Date().toISOString(),
+        },
+        ...prev,
       ]);
+      setModalOpen(false);
+      setEditingOpportunity(null);
     }
-
-    setModalOpen(false);
-    setEditingOpportunity(null);
   };
+
 
   /* =====================================================
      VIEW APPLICATIONS

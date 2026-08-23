@@ -4,10 +4,13 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-  "start": "node src/server.js",
-  "dev": "nodemon src/server.js",
-  "test": "cross-env NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js --detectOpenHandles"
-},
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "seed:accounts": "node src/scripts/seedAccounts.js",
+    "seed:full": "node src/scripts/seedFullData.js",
+    "seed:all": "node src/scripts/seedAccounts.js && node src/scripts/seedFullData.js",
+    "test": "cross-env NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js --detectOpenHandles"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -20,6 +23,7 @@
     "helmet": "^8.3.0",
     "jsonwebtoken": "^9.0.3",
     "morgan": "^1.11.0",
+    "multer": "^2.2.0",
     "pg": "^8.23.0"
   },
   "devDependencies": {

@@ -1,3 +1,4 @@
+import pool from '../config/db.js';
 import agreementModel from '../models/agreementModel.js';
 
 /**
@@ -7,20 +8,28 @@ import agreementModel from '../models/agreementModel.js';
 export const applyForOpportunity = async (req, res, next) => {
   try {
     const athleteId = req.user.id;
-    const { opportunityId, academyId } = req.body;
+    let { opportunityId, academyId } = req.body;
 
-    if (!opportunityId || !academyId) {
+    if (!opportunityId) {
       return res.status(400).json({
         status: 'fail',
-        message: 'Both opportunityId and academyId are required to apply.',
+        message: 'opportunityId is required to apply.',
       });
+    }
+
+    if (!academyId) {
+      const oppRes = await pool.query('SELECT academy_id FROM opportunities WHERE id = $1', [opportunityId]);
+      if (oppRes.rows.length > 0 && oppRes.rows[0].academy_id) {
+        academyId = oppRes.rows[0].academy_id;
+      }
     }
 
     const newAgreement = await agreementModel.createAgreement(
       opportunityId, 
       athleteId, 
-      academyId
+      academyId || null
     );
+
 
     res.status(201).json({
       status: 'success',
@@ -73,8 +82,13 @@ export const updateAgreementStatus = async (req, res, next) => {
     const { id } = req.params; // The agreement ID from the URL
     const { status } = req.body;
 
+    // Normalize status
+    let normalizedStatus = status;
+    if (status === 'approved') normalizedStatus = 'accepted';
+    if (status === 'declined') normalizedStatus = 'rejected';
+
     // Validate the requested status update
-    if (!['accepted', 'rejected', 'completed'].includes(status)) {
+    if (!['accepted', 'rejected', 'completed'].includes(normalizedStatus)) {
       return res.status(400).json({
         status: 'fail',
         message: 'Invalid status update. Must be accepted, rejected, or completed.',
@@ -84,7 +98,7 @@ export const updateAgreementStatus = async (req, res, next) => {
     const updatedAgreement = await agreementModel.updateAgreementStatus(
       id, 
       academyId, 
-      status
+      normalizedStatus
     );
 
     if (!updatedAgreement) {

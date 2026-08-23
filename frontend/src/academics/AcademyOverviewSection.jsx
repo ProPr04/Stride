@@ -25,108 +25,17 @@ const COLORS = {
   text: "#F7F5ED",
 };
 
-/* =========================================================
-   MOCK ATHLETE PROFILE DATA
-========================================================= */
-
-const MOCK_ATHLETE_PROFILES = {
-  "1": {
-    age: "21 Yrs",
-    bio: "Dedicated football midfielder focused on developing technical ability, game intelligence and match consistency. Currently competing at state-level competitions and actively looking for academy opportunities.",
-    performanceMetrics:
-      "Goals: 18 | Assists: 14 | Matches Played: 32 | Pass Accuracy: 87% | State Ranking: #6",
-    achievements: [
-      {
-        title: "Best Midfielder - Maharashtra State U-21 Championship",
-        date: "Dec 2025",
-      },
-      {
-        title: "Semi-Finalist - National Youth Football Championship",
-        date: "Oct 2025",
-      },
-      {
-        title: "Player of the Match - State League Finals",
-        date: "Aug 2025",
-      },
-    ],
-  },
-
-  "2": {
-    age: "19 Yrs",
-    bio: "Young cricket all-rounder with a strong batting foundation and developing bowling ability. Known for consistency, athletic fielding and calm decision-making under pressure.",
-    performanceMetrics:
-      "Batting Average: 42.8 | Strike Rate: 136.4 | Wickets: 28 | Best Score: 112* | Matches: 41",
-    achievements: [
-      {
-        title: "Top Run Scorer - Maharashtra U-19 League",
-        date: "Jan 2026",
-      },
-      {
-        title: "Player of the Tournament - District Cricket Cup",
-        date: "Nov 2025",
-      },
-      {
-        title: "Century - Inter-Academy Championship",
-        date: "Sep 2025",
-      },
-    ],
-  },
-
-  "3": {
-    age: "22 Yrs",
-    bio: "Competitive badminton athlete specialising in singles. Focused on explosive movement, endurance and tactical court coverage with experience across state-level tournaments.",
-    performanceMetrics:
-      "State Ranking: #8 | Matches Won: 36 | Win Rate: 78% | Tournament Finals: 7",
-    achievements: [
-      {
-        title: "Silver Medal - Maharashtra State Badminton Championship",
-        date: "Dec 2025",
-      },
-      {
-        title: "Winner - Pune Open Badminton Series",
-        date: "Oct 2025",
-      },
-      {
-        title: "Quarter Finalist - National Ranking Tournament",
-        date: "Jul 2025",
-      },
-    ],
-  },
-
-  "4": {
-    age: "20 Yrs",
-    bio: "Emerging athletics sprinter specialising in 100m and 200m events. Training with a focus on acceleration mechanics, strength development and competition performance.",
-    performanceMetrics:
-      "100m PB: 10.68s | 200m PB: 21.74s | State Ranking: #4 | Events: 24",
-    achievements: [
-      {
-        title: "Gold Medal - Maharashtra Senior Athletics Championship",
-        date: "Dec 2025",
-      },
-      {
-        title: "Finalist - Khelo India University Games",
-        date: "Oct 2025",
-      },
-      {
-        title: "Bronze Medal - West Zone Athletics Championship",
-        date: "Aug 2025",
-      },
-    ],
-  },
-};
 
 /* =========================================================
    ATHLETE CARD
 ========================================================= */
 
 function AthleteCard({ athlete, onViewProfile }) {
-  const profile = MOCK_ATHLETE_PROFILES[String(athlete.id)] || {};
-
   const image =
-    athlete.image ||
+    athlete.avatar_url ||
     athlete.avatar ||
+    athlete.image ||
     athlete.profileImage ||
-    profile.image ||
     null;
 
   return (
@@ -243,32 +152,25 @@ function AthleteCard({ athlete, onViewProfile }) {
 function AthleteProfileModal({ athlete, onClose }) {
   if (!athlete) return null;
 
-  const mockProfile =
-    MOCK_ATHLETE_PROFILES[String(athlete.id)] || {};
-
   const image =
-    athlete.image ||
+    athlete.avatar_url ||
     athlete.avatar ||
+    athlete.image ||
     athlete.profileImage ||
-    mockProfile.image ||
     null;
 
-  const age = athlete.age || mockProfile.age || "21 Yrs";
+  const age = athlete.age || "21 Yrs";
 
-  const bio =
-    athlete.bio ||
-    mockProfile.bio ||
-    "Athlete profile information will appear here.";
+  const bio = athlete.bio || "Athlete profile information will appear here.";
 
-  const performanceMetrics =
-    athlete.performanceMetrics ||
-    mockProfile.performanceMetrics ||
-    "Performance information will be updated by the athlete.";
+  const performanceMetrics = athlete.performance_metrics || athlete.performanceMetrics || "Performance information will be updated by the athlete.";
 
-  const achievements =
-    athlete.achievements?.length
-      ? athlete.achievements
-      : mockProfile.achievements || [];
+  let achievements = [];
+  try {
+    achievements = typeof athlete.achievements === 'string' ? JSON.parse(athlete.achievements) : athlete.achievements || [];
+  } catch (e) {
+    achievements = [];
+  }
 
   return (
     <div
