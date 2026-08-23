@@ -10,25 +10,7 @@ export const registerUser = async (req, res, next) => {
   try {
     const { email, password, role, fullName, name, sport } = req.body;
 
-    // Dev bypass when ENABLE_AUTH=false
-    if (process.env.ENABLE_AUTH === 'false' || process.env.DISABLE_AUTH === 'true') {
-      const selectedRole = role || 'athlete';
-      const displayName = fullName || name || (selectedRole === 'academy' ? 'Partner Academy' : 'Athlete');
-      const devUser = {
-        id: Math.floor(Math.random() * 1000) + 1,
-        email: email ? email.toLowerCase().trim() : 'dev@stride.com',
-        role: selectedRole,
-        name: displayName,
-      };
-      const token = generateToken(devUser.id, devUser.role);
-      return res.status(201).json({
-        status: 'success',
-        token,
-        data: {
-          user: devUser,
-        },
-      });
-    }
+
 
     // 1. Validate inputs
     if (!email || !password || !role) {
@@ -127,11 +109,29 @@ export const loginUser = async (req, res, next) => {
     // Dev bypass when ENABLE_AUTH=false
     if (process.env.ENABLE_AUTH === 'false' || process.env.DISABLE_AUTH === 'true') {
       const selectedRole = role || (email && email.includes('academy') ? 'academy' : 'athlete');
+      
+      let userId = 1;
+      let displayName = selectedRole === 'academy' ? 'Partner Academy' : 'Athlete';
+
+      if (email) {
+        const user = await userModel.findUserByEmail(email);
+        if (user) {
+          userId = user.id;
+          if (user.role === 'athlete') {
+            const profile = await profileModel.getAthleteProfileByUserId(user.id);
+            if (profile && profile.full_name) displayName = profile.full_name;
+          } else if (user.role === 'academy') {
+            const profile = await profileModel.getAcademyProfileByUserId(user.id);
+            if (profile && profile.academy_name) displayName = profile.academy_name;
+          }
+        }
+      }
+
       const devUser = {
-        id: 1,
+        id: userId,
         email: email ? email.toLowerCase().trim() : 'dev@stride.com',
         role: selectedRole,
-        name: selectedRole === 'academy' ? 'Partner Academy' : 'Athlete',
+        name: displayName,
       };
       const token = generateToken(devUser.id, devUser.role);
       return res.status(200).json({
@@ -169,10 +169,20 @@ export const loginUser = async (req, res, next) => {
       });
     }
 
-    // 4. Generate JWT
+    // 4. Get profile name
+    let name = undefined;
+    if (user.role === 'athlete') {
+      const profile = await profileModel.getAthleteProfileByUserId(user.id);
+      name = profile ? profile.full_name : 'Athlete';
+    } else if (user.role === 'academy') {
+      const profile = await profileModel.getAcademyProfileByUserId(user.id);
+      name = profile ? profile.academy_name : 'Partner Academy';
+    }
+
+    // 5. Generate JWT
     const token = generateToken(user.id, user.role);
 
-    // 5. Send response (excluding password hash)
+    // 6. Send response (excluding password hash)
     res.status(200).json({
       status: 'success',
       token,
@@ -181,6 +191,7 @@ export const loginUser = async (req, res, next) => {
           id: user.id,
           email: user.email,
           role: user.role,
+          name,
         },
       },
     });

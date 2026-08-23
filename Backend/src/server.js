@@ -5,6 +5,7 @@ import { createUsersTable } from './models/userModel.js';
 import { createProfileTables } from './models/profileModel.js';
 import { createOpportunityTable } from './models/opportunityModel.js';
 import { createAgreementTable } from './models/agreementModel.js';
+import { createSavedTable } from './models/savedModel.js';
 
 const PORT = process.env.PORT || 5000;
 
@@ -19,6 +20,7 @@ const startServer = async () => {
     await createProfileTables();
     await createOpportunityTable();
     await createAgreementTable();
+    await createSavedTable();
     console.log('✅ All database tables initialized/verified.');
 
     // 3. Start the Express server

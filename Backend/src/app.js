@@ -7,7 +7,8 @@ import morgan from 'morgan';
 import authRoutes from './routes/authRoutes.js';
 import profileRoutes from './routes/profileRoutes.js';
 import opportunityRoutes from './routes/opportunityRoutes.js';
-import agreementRoutes from './routes/agreementRoutes.js'
+import agreementRoutes from './routes/agreementRoutes.js';
+import savedRoutes from './routes/savedRoutes.js';
 
 // Initialize Express app
 const app = express();
@@ -36,7 +37,7 @@ app.use('/api/opportunities', opportunityRoutes);
 
 app.use('/api/agreements', agreementRoutes);
 
-
+app.use('/api/saved', savedRoutes);
 
 
 // 3. Unhandled Route 404 Catcher (Updated Fix)

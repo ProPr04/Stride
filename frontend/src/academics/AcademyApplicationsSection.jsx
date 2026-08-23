@@ -75,8 +75,6 @@ function StatusBadge({ status }) {
 
 function ApplicationCard({
   application,
-  athlete,
-  opportunity,
   onClick,
 }) {
   /*
@@ -97,37 +95,30 @@ function ApplicationCard({
 
   const title =
     application.opportunityName ||
-    opportunity?.title ||
     "SPORTS OPPORTUNITY";
 
   const athleteName =
     application.athleteName ||
-    athlete?.name ||
     "Athlete";
 
   const location =
-    opportunity?.location ||
     application.location ||
     "Location unavailable";
 
   const compensation =
-    opportunity?.compensation ||
     application.compensation ||
     application.salary ||
     "Compensation not specified";
 
   const activePeriod =
-    opportunity?.timeline ||
     application.timeline ||
-    "Aug 15 – Sep 15, 2026";
+    "Timeline not specified";
 
   const type =
-    opportunity?.type ||
     application.type ||
     "Full-time";
 
   const timings =
-    opportunity?.timings ||
     application.timings ||
     "Schedule unavailable";
 
@@ -225,8 +216,6 @@ function ApplicationCard({
 
 function ApplicationModal({
   application,
-  athlete,
-  opportunity,
   onClose,
   onApprove,
   onDecline,
@@ -239,24 +228,13 @@ function ApplicationModal({
 
   const athleteName =
     application.athleteName ||
-    athlete?.name ||
     "Athlete";
 
   const sport =
-    athlete?.sport ||
     application.sport ||
-    opportunity?.sport ||
     "Athlete";
 
-  /*
-    Supports common profile-image field names.
-    If your athlete object has one of these, it will automatically show.
-  */
   const profileImage =
-    athlete?.profilePicture ||
-    athlete?.profileImage ||
-    athlete?.avatar ||
-    athlete?.image ||
     application.profilePicture ||
     application.profileImage ||
     application.avatar ||
@@ -384,59 +362,38 @@ function ApplicationModal({
 ========================================================= */
 
 export default function AcademyApplicationsSection({
-  applications = [],
-  opportunities = [],
-  athletes = [],
-
-  /*
-    Connect this to your existing athlete-profile navigation.
-
-    Example:
-    onViewAthlete={(athlete) =>
-      navigate(`/academy/athletes/${athlete.id}`)
-    }
-  */
+  agreements = [],
   onViewAthlete,
-
-  /*
-    Connect these to your backend/database actions.
-  */
   onApprove,
   onDecline,
 }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
-  const [opportunityFilter, setOpportunityFilter] =
-    useState("All");
-
+  
   const [selectedApplication, setSelectedApplication] =
     useState(null);
 
   /* =======================================================
-     DATA HELPERS
+     MAP AGREEMENTS
   ======================================================= */
 
-  const getOpportunity = (application) => {
-    const id =
-      application.opportunityId ||
-      application.opportunity?.id;
+  const applications = useMemo(() => {
+    return agreements.map((a) => ({
+      id: a.id,
+      athleteName: a.athlete_name || a.athlete_email,
+      sport: a.athlete_sport || a.opportunity_sport,
+      opportunityName: a.opportunity_title,
+      location: a.opportunity_location || a.academy_location,
+      compensation: a.opportunity_compensation,
+      timeline: a.opportunity_timeline,
+      type: a.opportunity_type,
+      timings: a.opportunity_requirements || a.opportunity_responsibilities,
+      status: a.status === 'pending' ? 'Pending' : a.status === 'accepted' ? 'Approved' : a.status === 'rejected' ? 'Declined' : 'Under Review',
+      createdAt: new Date(a.created_at).toLocaleDateString(),
+      profileImage: a.athlete_avatar_url || a.athlete_avatar,
+    }));
+  }, [agreements]);
 
-    return opportunities.find(
-      (opportunity) =>
-        String(opportunity.id) === String(id)
-    );
-  };
-
-  const getAthlete = (application) => {
-    const id =
-      application.athleteId ||
-      application.athlete?.id;
-
-    return athletes.find(
-      (athlete) =>
-        String(athlete.id) === String(id)
-    );
-  };
 
   /* =======================================================
      FILTERING
@@ -446,26 +403,12 @@ export default function AcademyApplicationsSection({
     const query = searchTerm.trim().toLowerCase();
 
     return applications.filter((application) => {
-      const opportunity =
-        getOpportunity(application);
-
-      const athlete =
-        getAthlete(application);
-
-      const status =
-        application.status || "Pending";
-
-      const opportunityId =
-        application.opportunityId ||
-        application.opportunity?.id;
+      const status = application.status || "Pending";
 
       const searchableText = [
         application.athleteName,
-        athlete?.name,
         application.opportunityName,
-        opportunity?.title,
-        opportunity?.sport,
-        opportunity?.location,
+        application.sport,
         application.location,
       ]
         .filter(Boolean)
@@ -480,25 +423,9 @@ export default function AcademyApplicationsSection({
         statusFilter === "All" ||
         status === statusFilter;
 
-      const matchesOpportunity =
-        opportunityFilter === "All" ||
-        String(opportunityId) ===
-          String(opportunityFilter);
-
-      return (
-        matchesSearch &&
-        matchesStatus &&
-        matchesOpportunity
-      );
+      return matchesSearch && matchesStatus;
     });
-  }, [
-    applications,
-    opportunities,
-    athletes,
-    searchTerm,
-    statusFilter,
-    opportunityFilter,
-  ]);
+  }, [applications, searchTerm, statusFilter]);
 
   /* =======================================================
      NEEDS ATTENTION
@@ -528,7 +455,7 @@ export default function AcademyApplicationsSection({
 
   const handleApprove = (application) => {
     if (onApprove) {
-      onApprove(application);
+      onApprove(application.id);
     }
 
     setSelectedApplication(null);
@@ -536,7 +463,7 @@ export default function AcademyApplicationsSection({
 
   const handleDecline = (application) => {
     if (onDecline) {
-      onDecline(application);
+      onDecline(application.id);
     }
 
     setSelectedApplication(null);
@@ -619,29 +546,6 @@ export default function AcademyApplicationsSection({
               </option>
             ))}
           </select>
-
-          {/* OPPORTUNITY */}
-
-          <select
-            value={opportunityFilter}
-            onChange={(event) =>
-              setOpportunityFilter(event.target.value)
-            }
-            className="max-w-[220px] cursor-pointer rounded-xl border border-[#2A3C2E] bg-[#0B120D] px-3.5 py-2 text-[10px] font-bold uppercase tracking-wider text-gray-300 outline-none transition-all hover:border-[#F2FF65]/40 focus:border-[#F2FF65]"
-          >
-            <option value="All">
-              ALL OPPORTUNITIES
-            </option>
-
-            {opportunities.map((opportunity) => (
-              <option
-                key={opportunity.id}
-                value={opportunity.id}
-              >
-                {opportunity.title}
-              </option>
-            ))}
-          </select>
         </div>
       </div>
 
@@ -679,10 +583,6 @@ export default function AcademyApplicationsSection({
                     ...application,
                     cardIndex: index,
                   }}
-                  athlete={getAthlete(application)}
-                  opportunity={getOpportunity(
-                    application
-                  )}
                   onClick={
                     setSelectedApplication
                   }
@@ -744,10 +644,6 @@ export default function AcademyApplicationsSection({
                       needsAttention.length +
                       index,
                   }}
-                  athlete={getAthlete(application)}
-                  opportunity={getOpportunity(
-                    application
-                  )}
                   onClick={
                     setSelectedApplication
                   }
@@ -774,16 +670,6 @@ export default function AcademyApplicationsSection({
 
       <ApplicationModal
         application={selectedApplication}
-        athlete={
-          selectedApplication
-            ? getAthlete(selectedApplication)
-            : null
-        }
-        opportunity={
-          selectedApplication
-            ? getOpportunity(selectedApplication)
-            : null
-        }
         onClose={() =>
           setSelectedApplication(null)
         }

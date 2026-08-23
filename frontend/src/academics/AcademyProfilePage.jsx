@@ -24,124 +24,13 @@ import {
   X,
 } from "lucide-react";
 
-const fallbackVerification = [
-  {
-    level: "LEVEL 01",
-    title: "ORGANIZATION IDENTITY",
-    status: "VERIFIED",
-  },
-  {
-    level: "LEVEL 02",
-    title: "COACHING STAFF",
-    status: "VERIFIED",
-  },
-  {
-    level: "LEVEL 03",
-    title: "TRAINING FACILITY",
-    status: "VERIFIED",
-  },
-  {
-    level: "LEVEL 04",
-    title: "COMPETITION AFFILIATION",
-    status: "VERIFIED",
-  },
-  {
-    level: "LEVEL 05",
-    title: "FEDERATION / OFFICIAL",
-    status: "PENDING",
-  },
-];
+const fallbackVerification = [];
 
-const fallbackCoaches = [
-  {
-    name: "Marcus Vance",
-    role: "Head Coach",
-    experience: "12 yrs",
-    verified: true,
-  },
-  {
-    name: "Neha Sharma",
-    role: "Sprint Coach",
-    experience: "8 yrs",
-    verified: true,
-  },
-  {
-    name: "Rahul Shah",
-    role: "Strength Coach",
-    experience: "10 yrs",
-    verified: true,
-  },
-  {
-    name: "Arjun Patel",
-    role: "Performance Coach",
-    experience: "7 yrs",
-    verified: true,
-  },
-  {
-    name: "Priya Nair",
-    role: "Youth Development Coach",
-    experience: "6 yrs",
-    verified: true,
-  },
-];
+const fallbackCoaches = [];
 
-const fallbackPrograms = [
-  {
-    title: "Elite Sprint Development",
-    discipline: "Athletics",
-    description:
-      "High-performance sprint coaching and technical progression.",
-  },
-  {
-    title: "Youth Development",
-    discipline: "Multi-sport",
-    description:
-      "Foundational training for emerging young athletes.",
-  },
-  {
-    title: "Performance Program",
-    discipline: "Strength & Conditioning",
-    description:
-      "Structured physical preparation for competition.",
-  },
-  {
-    title: "Competition Preparation",
-    discipline: "Athletics",
-    description:
-      "Race strategy, tapering and event-readiness support.",
-  },
-  {
-    title: "Speed & Agility",
-    discipline: "Performance",
-    description:
-      "Explosive movement, acceleration and change-of-direction training.",
-  },
-  {
-    title: "Athlete Recovery",
-    discipline: "Performance",
-    description:
-      "Recovery protocols designed to maintain athlete readiness.",
-  },
-];
+const fallbackPrograms = [];
 
-const fallbackOpportunities = [
-  {
-    id: "OPP-001",
-    title: "Assistant Track Coach",
-    sport: "Athletics",
-    location: "Mumbai, India",
-    positions: "2 positions",
-    status: "OPEN",
-  },
-  {
-    id: "OPP-002",
-    title: "Strength & Conditioning Intern",
-    sport: "Performance",
-    location: "Mumbai, India",
-    positions: "1 position",
-    status: "OPEN",
-  },
-];
+const fallbackOpportunities = [];
 
 function StatusBadge({ children, verified = true }) {
   return (
@@ -558,13 +447,16 @@ function EditProfileModal({
   const handleSave = () => {
     onSave?.({
       ...academy,
+      academy_name: form.name,
       name: form.name,
       academyName: form.name,
       tagline: form.tagline,
       description: form.tagline,
       location: form.location,
       city: form.location,
+      primary_sports: [form.primarySports],
       primarySports: form.primarySports,
+      logo_url: form.image,
       logo: form.image,
       image: form.image,
       programs: form.programs,

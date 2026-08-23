@@ -15,65 +15,6 @@ import {
   X,
 } from "lucide-react";
 
-const mockEngagements = [
-  {
-    id: "ENG-001",
-    athleteName: "Aarav Mehta",
-    opportunityName: "Assistant Football Coach",
-    sport: "Football",
-    location: "Mumbai",
-    startDate: "15 Jun 2026",
-    endDate: "15 Sep 2026",
-    status: "Active",
-    details:
-      "Supporting youth football training sessions and match-day coaching activities.",
-    progress: 68,
-    verification: "Verified",
-  },
-  {
-    id: "ENG-002",
-    athleteName: "Riya Kapoor",
-    opportunityName: "Basketball Skills Mentor",
-    sport: "Basketball",
-    location: "Delhi",
-    startDate: "01 Sep 2026",
-    endDate: "30 Nov 2026",
-    status: "Upcoming",
-    details:
-      "Leading skills sessions for academy players during the autumn development programme.",
-    progress: 0,
-    verification: "Verified",
-  },
-  {
-    id: "ENG-003",
-    athleteName: "Kabir Singh",
-    opportunityName: "Cricket Academy Assistant",
-    sport: "Cricket",
-    location: "Bengaluru",
-    startDate: "10 Feb 2026",
-    endDate: "10 May 2026",
-    status: "Completed",
-    details:
-      "Assisted coaches with fielding drills, match preparation and player support.",
-    progress: 100,
-    verification: "Verified",
-  },
-  {
-    id: "ENG-004",
-    athleteName: "Ananya Rao",
-    opportunityName: "Athletics Camp Support",
-    sport: "Athletics",
-    location: "Pune",
-    startDate: "05 Mar 2026",
-    endDate: "20 Mar 2026",
-    status: "Cancelled",
-    details:
-      "Seasonal training camp engagement that was cancelled before completion.",
-    progress: 0,
-    verification: "Not Verified",
-  },
-];
-
 const statuses = [
   "All",
   "Active",
@@ -455,7 +396,7 @@ function DetailBox({ label, value, icon: Icon }) {
    MAIN COMPONENT
 ========================================================= */
 
-export default function AcademyEngagementsSection() {
+export default function AcademyEngagementsSection({ agreements = [], setActiveTab }) {
   const [statusFilter, setStatusFilter] =
     useState("All");
 
@@ -465,6 +406,35 @@ export default function AcademyEngagementsSection() {
   const [selectedEngagement, setSelectedEngagement] =
     useState(null);
 
+  /* MAP REAL DATA */
+  const realEngagements = useMemo(() => {
+    return agreements
+      .filter((a) => ["accepted", "completed", "rejected"].includes(a.status))
+      .map((a) => ({
+        id: `ENG-${a.id}`,
+        athleteName: a.athlete_name || a.athlete_email || "Athlete",
+        opportunityName: a.opportunity_title || "Opportunity",
+        sport: a.opportunity_sport || a.athlete_sport || "-",
+        location: a.opportunity_location || "Remote",
+        startDate: new Date(a.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+        endDate: a.opportunity_timeline || "-",
+        status:
+          a.status === "accepted"
+            ? "Active"
+            : a.status === "completed"
+            ? "Completed"
+            : "Cancelled",
+        details: a.opportunity_description || "No description provided.",
+        progress:
+          a.status === "completed"
+            ? 100
+            : a.status === "accepted"
+            ? 50
+            : 0,
+        verification: "Verified",
+      }));
+  }, [agreements]);
+
   /* SEARCH + STATUS FILTER */
 
   const visibleEngagements = useMemo(() => {
@@ -472,7 +442,7 @@ export default function AcademyEngagementsSection() {
       .trim()
       .toLowerCase();
 
-    return mockEngagements.filter((engagement) => {
+    return realEngagements.filter((engagement) => {
       const matchesStatus =
         statusFilter === "All" ||
         engagement.status === statusFilter;

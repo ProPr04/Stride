@@ -4,10 +4,15 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-  "start": "node src/server.js",
-  "dev": "nodemon src/server.js",
-  "test": "cross-env NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js --detectOpenHandles"
-},
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "seed:accounts": "node src/scripts/seedAccounts.js",
+    "seed:full": "node src/scripts/seedFullData.js",
+    "seed:all": "node src/scripts/seedAccounts.js && node src/scripts/seedFullData.js",
+    "test": "cross-env NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js --detectOpenHandles"
+  },
+
+
   "keywords": [],
   "author": "",
   "license": "ISC",

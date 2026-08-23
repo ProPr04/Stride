@@ -35,4 +35,11 @@ router.get('/my', authorize('academy'), opportunityController.getMyPostedOpportu
  */
 router.patch('/:id/status', authorize('academy'), opportunityController.updateOpportunityStatus);
 
+/**
+ * @route   PUT /api/opportunities/:id
+ * @desc    Update existing opportunity
+ * @access  Private (Academy Only)
+ */
+router.put('/:id', authorize('academy'), opportunityController.updateOpportunity);
+
 export default router;

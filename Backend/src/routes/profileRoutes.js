@@ -28,5 +28,13 @@ router.put('/me', profileController.updateMyProfile);
  */
 router.get('/athlete/:userId', profileController.getAthleteProfileById);
 
+/**
+ * @route   GET /api/profiles/athletes
+ * @desc    Get all athletes for scouting and academy discovery
+ * @access  Private
+ */
+router.get('/athletes', profileController.getAllAthletes);
+
 export default router;
+
 

@@ -1,11 +1,11 @@
 import React from 'react';
 import {
   Search,
-  Bookmark,
   FileText,
   Handshake,
   User,
-  LogOut
+  LogOut,
+  Bookmark
 } from 'lucide-react';
 
 export default function AthleteSidebar({ activeTab, setActiveTab, onLogout }) {
@@ -16,6 +16,7 @@ export default function AthleteSidebar({ activeTab, setActiveTab, onLogout }) {
     { id: 'engagements', label: 'Engagements', icon: Handshake },
     { id: 'profile', label: 'Profile', icon: User },
   ];
+
 
   return (
     <aside className="athlete-sidebar bg-[#17241a] border-r border-[#2A3C2E]">

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import api from '../services/api';
 import AcademySidebar from '../academics/AcademySidebar';
 import AcademyHeader from '../academics/AcademyHeader';
 import AcademyOverviewSection from '../academics/AcademyOverviewSection';
@@ -7,124 +8,65 @@ import AcademyOpportunitiesSection from '../academics/AcademyOpportunitiesSectio
 import AcademyApplicationsSection from '../academics/AcademyApplicationsSection';
 import AcademyTalentPoolSection from '../academics/AcademyTalentPoolSection';
 import AcademyEngagementsSection from '../academics/AcademyEngagementsSection';
+import AcademyAgreementsSection from '../academics/AcademyAgreementsSection';
+import AcademyReviewsSection from '../academics/AcademyReviewsSection';
+import AcademySettingsSection from '../academics/AcademySettingsSection';
 import AcademyProfilePage from '../academics/AcademyProfilePage';
 
 export default function AcademyDashboard({ onLogout }) {
   const [activeTab, setActiveTab] = useState('dashboard');
+  
+  const [academy, setAcademy] = useState(null);
+  const [opportunities, setOpportunities] = useState([]);
+  const [agreements, setAgreements] = useState([]);
+  const [athletes, setAthletes] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const academy = {
-    name: 'Stride Sports Academy',
-    type: 'Multi-Sport Academy',
-    location: 'Mumbai, India',
-    verified: true,
-    stats: {
-      activeOpportunities: 4,
-      totalApplications: 28,
-      athletesInTalentPool: 64,
-      activeEngagements: 7,
-    },
+  useEffect(() => {
+    Promise.all([
+      api.profiles.getMyProfile().catch(() => ({ data: { profile: null } })),
+      api.opportunities.getMyPosted().catch(() => ({ data: { opportunities: [] } })),
+      api.agreements.getMyAgreements().catch(() => ({ data: { agreements: [] } })),
+      api.profiles.getAllAthletes().catch(() => ({ data: { athletes: [] } })),
+    ]).then(([profileRes, oppsRes, agreementsRes, athletesRes]) => {
+      setAcademy(profileRes.data?.profile || null);
+      setOpportunities(oppsRes.data?.opportunities || []);
+      setAgreements(agreementsRes.data?.agreements || []);
+      setAthletes(athletesRes.data?.athletes || []);
+    }).finally(() => setLoading(false));
+  }, []);
+
+  const handleApprove = async (id) => {
+    try {
+      await api.agreements.updateStatus(id, 'accepted');
+      setAgreements(prev => prev.map(a => a.id === id ? { ...a, status: 'accepted' } : a));
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  const athletes = [
-    {
-      id: 1,
-      name: 'Arjun Singh',
-      sport: 'Football',
-      position: 'Midfielder',
-      level: 'Professional',
-      location: 'Mumbai, India',
-      rating: '4.8',
-      verified: true,
-    },
-    {
-      id: 2,
-      name: 'Riya Sharma',
-      sport: 'Athletics',
-      position: 'Sprinter',
-      level: 'National',
-      location: 'Pune, India',
-      rating: '4.7',
-      verified: true,
-    },
-    {
-      id: 3,
-      name: 'Kabir Mehta',
-      sport: 'Cricket',
-      position: 'All-Rounder',
-      level: 'State',
-      location: 'Delhi, India',
-      rating: '4.6',
-      verified: true,
-    },
-    {
-      id: 4,
-      name: 'Ananya Patil',
-      sport: 'Badminton',
-      position: 'Singles',
-      level: 'National',
-      location: 'Bengaluru, India',
-      rating: '4.9',
-      verified: true,
-    },
-  ];
+  const handleDecline = async (id) => {
+    try {
+      await api.agreements.updateStatus(id, 'rejected');
+      setAgreements(prev => prev.map(a => a.id === id ? { ...a, status: 'rejected' } : a));
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
-  const opportunities = [
-    {
-      id: 1,
-      title: 'Football Coach',
-      sport: 'Football',
-      location: 'Mumbai, India',
-      status: 'Open',
-      applicationCount: 12,
-    },
-    {
-      id: 2,
-      title: 'Performance Analyst',
-      sport: 'Football',
-      location: 'Pune, India',
-      status: 'Open',
-      applicationCount: 8,
-    },
-    {
-      id: 3,
-      title: 'Athletics Trainer',
-      sport: 'Athletics',
-      location: 'Bengaluru, India',
-      status: 'Draft',
-      applicationCount: 0,
-    },
-  ];
+  const handleSaveProfile = async (data) => {
+    try {
+      const res = await api.profiles.updateMyProfile(data);
+      setAcademy(res.data.profile);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
-  const applications = [
-    {
-      id: 'APP-104',
-      athlete: 'Arjun Singh',
-      opportunity: 'Football Coach',
-      date: 'Aug 20, 2026',
-      status: 'Under Review',
-    },
-    {
-      id: 'APP-098',
-      athlete: 'Riya Sharma',
-      opportunity: 'Athletics Trainer',
-      date: 'Aug 18, 2026',
-      status: 'Pending',
-    },
-    {
-      id: 'APP-072',
-      athlete: 'Kabir Mehta',
-      opportunity: 'Performance Analyst',
-      date: 'Aug 15, 2026',
-      status: 'Approved',
-    },
-    {
-      id: 'APP-061',
-      athlete: 'Ananya Patil',
-      opportunity: 'Football Coach',
-      date: 'Aug 10, 2026',
-      status: 'Declined',
-    },
-  ];
+  if (loading) {
+    return <div className="flex justify-center items-center h-screen">Loading...</div>;
+  }
+
 
   return (
     <div className="matchpoint-dashboard-layout min-h-screen">
@@ -137,20 +79,15 @@ export default function AcademyDashboard({ onLogout }) {
 
       {/* MAIN AREA */}
       <div className="matchpoint-dashboard-main min-w-0 lg:ml-[308px]">
-        {/* <AcademyHeader
-          academy={academy}
-          onProfileClick={() => setActiveTab('profile')}
-        /> */}
-
         {/* PAGE CONTENT */}
         <main className="matchpoint-content-viewport min-w-0 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-7">
           {/* HOME */}
           {activeTab === 'dashboard' && (
             <AcademyOverviewSection
               academy={academy}
-              athletes={athletes}
               opportunities={opportunities}
-              applications={applications}
+              agreements={agreements}
+              athletes={athletes}
               setActiveTab={setActiveTab}
             />
           )}
@@ -159,7 +96,15 @@ export default function AcademyDashboard({ onLogout }) {
           {activeTab === 'opportunities' && (
             <AcademyOpportunitiesSection
               opportunities={opportunities}
-              applications={applications}
+              agreements={agreements}
+              setActiveTab={setActiveTab}
+            />
+          )}
+
+          {/* ATHLETES SCOUTING & DIRECTORY */}
+          {activeTab === 'athletes' && (
+            <AcademyTalentPoolSection
+              athletes={athletes}
               setActiveTab={setActiveTab}
             />
           )}
@@ -167,23 +112,42 @@ export default function AcademyDashboard({ onLogout }) {
           {/* APPLICATIONS */}
           {activeTab === 'applications' && (
             <AcademyApplicationsSection
-              applications={applications}
-              opportunities={opportunities}
-              athletes={athletes}
+              agreements={agreements}
+              onApprove={handleApprove}
+              onDecline={handleDecline}
             />
           )}
 
           {/* ENGAGEMENTS */}
           {activeTab === 'engagements' && (
             <AcademyEngagementsSection
+              agreements={agreements}
               setActiveTab={setActiveTab}
             />
+          )}
+
+          {/* AGREEMENTS */}
+          {activeTab === 'agreements' && (
+            <AcademyAgreementsSection
+              agreements={agreements}
+            />
+          )}
+
+          {/* REVIEWS */}
+          {activeTab === 'reviews' && (
+            <AcademyReviewsSection />
+          )}
+
+          {/* SETTINGS */}
+          {activeTab === 'settings' && (
+            <AcademySettingsSection onLogout={onLogout} />
           )}
 
           {/* ACADEMY PROFILE */}
           {activeTab === 'profile' && (
             <AcademyProfilePage
               academy={academy}
+              onSaveProfile={handleSaveProfile}
               onViewOpportunity={() => setActiveTab('opportunities')}
             />
           )}
@@ -191,4 +155,4 @@ export default function AcademyDashboard({ onLogout }) {
       </div>
     </div>
   );
-}
+}

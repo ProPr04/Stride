@@ -56,8 +56,14 @@ export const getAgreementsByUser = async (userId, role) => {
         o.role,
         o.sport,
         o.compensation_cash,
+        o.location AS opportunity_location,
+        o.timeline AS opportunity_timeline,
+        o.description AS opportunity_description,
+        o.requirements AS opportunity_requirements,
+        o.perks AS opportunity_perks,
+        o.media_image AS opportunity_media_image,
         COALESCE(ap.academy_name, 'Partner Academy') AS academy_name,
-        ap.location AS academy_location
+        COALESCE(o.location, ap.location, 'India') AS academy_location
       FROM agreements a
       JOIN opportunities o ON a.opportunity_id = o.id
       LEFT JOIN academy_profiles ap ON a.academy_id = ap.user_id
@@ -78,8 +84,15 @@ export const getAgreementsByUser = async (userId, role) => {
         o.title AS opportunity_title,
         o.role AS opportunity_role,
         o.sport AS opportunity_sport,
+        o.compensation_cash AS opportunity_compensation,
+        o.location AS opportunity_location,
+        o.timeline AS opportunity_timeline,
         u.email AS athlete_email,
-        ath.sport AS athlete_sport,
+        COALESCE(ath.full_name, split_part(u.email, '@', 1)) AS athlete_name,
+        ath.avatar_url AS athlete_avatar,
+        ath.location AS athlete_location,
+        ath.playing_level AS athlete_level,
+        COALESCE(ath.sport, o.sport) AS athlete_sport,
         ath.playing_level AS athlete_playing_level,
         ath.skills AS athlete_skills,
         ath.bio AS athlete_bio,
@@ -96,6 +109,7 @@ export const getAgreementsByUser = async (userId, role) => {
   const { rows } = await pool.query(queryText, [userId]);
   return rows;
 };
+
 
 /**
  * Updates the status of an agreement (e.g., academy accepts/rejects, or marks completed).

@@ -167,17 +167,28 @@ export const api = {
     getAthleteProfile: async (userId) => {
       return apiFetch(`/profiles/athlete/${userId}`);
     },
+
+    getAllAthletes: async (filters = {}) => {
+      const params = new URLSearchParams();
+      if (filters.sport && filters.sport !== 'All') params.append('sport', filters.sport);
+      if (filters.search) params.append('search', filters.search);
+      const query = params.toString() ? `?${params.toString()}` : '';
+      return apiFetch(`/profiles/athletes${query}`);
+    },
   },
+
 
   // Opportunities Endpoints
   opportunities: {
     getAll: async (filters = {}) => {
       const params = new URLSearchParams();
-      if (filters.sport) params.append('sport', filters.sport);
+      if (filters.sport && filters.sport !== 'All') params.append('sport', filters.sport);
       if (filters.role) params.append('role', filters.role);
+      if (filters.search) params.append('search', filters.search);
       const query = params.toString() ? `?${params.toString()}` : '';
       return apiFetch(`/opportunities${query}`);
     },
+
 
     getMyPosted: async () => {
       return apiFetch('/opportunities/my');
@@ -194,6 +205,13 @@ export const api = {
       return apiFetch(`/opportunities/${id}/status`, {
         method: 'PATCH',
         body: JSON.stringify({ status }),
+      });
+    },
+
+    update: async (id, data) => {
+      return apiFetch(`/opportunities/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
       });
     },
   },
@@ -217,6 +235,18 @@ export const api = {
         body: JSON.stringify({ status }),
       });
     },
+  },
+
+  // Saved opportunities (athlete)
+  saved: {
+    getMySaved: async () => apiFetch('/saved'),
+    save: async (opportunityId) => apiFetch('/saved', {
+      method: 'POST',
+      body: JSON.stringify({ opportunityId }),
+    }),
+    unsave: async (opportunityId) => apiFetch(`/saved/${opportunityId}`, {
+      method: 'DELETE',
+    }),
   },
 };
 

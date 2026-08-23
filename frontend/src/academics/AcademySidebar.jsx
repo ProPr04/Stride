@@ -2,12 +2,14 @@
 import React, { useState } from "react";
 import {
   BriefcaseBusiness,
+  Building2,
   ClipboardList,
   Home,
   LogOut,
   Menu,
   Sparkles,
   UserRound,
+  Users,
   X,
 } from "lucide-react";
 
@@ -26,23 +28,30 @@ const navigationItems = [
   },
   {
     number: "03",
+    label: "Athletes",
+    tab: "athletes",
+    icon: Users,
+  },
+  {
+    number: "04",
     label: "Applications",
     tab: "applications",
     icon: ClipboardList,
   },
   {
-    number: "04",
+    number: "05",
     label: "Engagements",
     tab: "engagements",
     icon: Sparkles,
   },
   {
-    number: "05",
+    number: "06",
     label: "Academy Profile",
     tab: "profile",
-    icon: UserRound,
+    icon: Building2,
   },
 ];
+
 
 export default function AcademySidebar({
   activeTab = "dashboard",
@@ -165,24 +174,7 @@ export default function AcademySidebar({
                     }
                   `}
                 >
-                  {/* Number */}
-
-                  <span
-                    className={`
-                      w-[20px]
-                      font-mono
-                      text-[9px]
-                      font-bold
-                      tracking-[0.08em]
-                      ${
-                        isActive
-                          ? "text-[#F2FF65]"
-                          : "text-[#F2FF65]/55"
-                      }
-                    `}
-                  >
-                    {number}
-                  </span>
+              
 
                   {/* Icon */}
 
