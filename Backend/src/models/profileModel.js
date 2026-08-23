@@ -60,11 +60,13 @@ export const createProfileTables = async () => {
 
     ALTER TABLE academy_profiles ADD COLUMN IF NOT EXISTS tagline TEXT;
     ALTER TABLE academy_profiles ADD COLUMN IF NOT EXISTS logo_url TEXT;
-    ALTER TABLE academy_profiles ADD COLUMN IF NOT EXISTS founded VARCHAR(10);
+    ALTER TABLE academy_profiles ADD COLUMN IF NOT EXISTS founded VARCHAR(50);
     ALTER TABLE academy_profiles ADD COLUMN IF NOT EXISTS primary_sports TEXT[];
     ALTER TABLE academy_profiles ADD COLUMN IF NOT EXISTS coaches JSONB DEFAULT '[]';
     ALTER TABLE academy_profiles ADD COLUMN IF NOT EXISTS programs JSONB DEFAULT '[]';
     ALTER TABLE academy_profiles ADD COLUMN IF NOT EXISTS stats JSONB DEFAULT '{}';
+    ALTER TABLE academy_profiles ADD COLUMN IF NOT EXISTS competitive_level VARCHAR(100);
+    ALTER TABLE academy_profiles ADD COLUMN IF NOT EXISTS recent_achievements JSONB DEFAULT '[]';
   `;
   await pool.query(queryText);
   await seedSampleAthletesIfEmpty();
@@ -317,15 +319,38 @@ export const upsertAthleteProfile = async (userId, profileData) => {
  */
 export const upsertAcademyProfile = async (userId, profileData) => {
   const { 
-    academy_name, location, sports_offered, facilities, compensation_structure,
-    tagline, logo_url, founded, primary_sports, coaches, programs, stats
+    academy_name, name, academyName, location, city, sports_offered, facilities, compensation_structure,
+    tagline, description, logo_url, logo, image, founded, primary_sports, primarySports, coaches, programs, stats,
+    competitive_level, competitiveLevel, recent_achievements, recentAchievements
   } = profileData;
+
+  const effAcademyName = academy_name || name || academyName || 'Partner Sports Academy';
+  const effLocation = location || city || 'Pune, Maharashtra';
+  const effTagline = tagline !== undefined ? tagline : (description !== undefined ? description : '');
+  const effLogoUrl = logo_url !== undefined ? logo_url : (logo !== undefined ? logo : (image !== undefined ? image : ''));
+  const effFounded = founded !== undefined ? founded : '2018';
+  const effCompetitiveLevel = competitive_level || competitiveLevel || 'National / State';
+
+  let effPrimarySports = primary_sports || primarySports || sports_offered || ['Cricket', 'Football', 'Tennis'];
+  if (typeof effPrimarySports === 'string') {
+    effPrimarySports = effPrimarySports.split(',').map(s => s.trim()).filter(Boolean);
+  }
+  let effSportsOffered = sports_offered || effPrimarySports;
+  if (typeof effSportsOffered === 'string') {
+    effSportsOffered = effSportsOffered.split(',').map(s => s.trim()).filter(Boolean);
+  }
+
+  const effAchievements = recent_achievements || recentAchievements || [];
+  const effPrograms = programs || [];
+  const effStats = stats || {};
+
   const queryText = `
     INSERT INTO academy_profiles (
       user_id, academy_name, location, sports_offered, facilities, compensation_structure,
-      tagline, logo_url, founded, primary_sports, coaches, programs, stats
+      tagline, logo_url, founded, primary_sports, coaches, programs, stats,
+      competitive_level, recent_achievements
     )
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
     ON CONFLICT (user_id) DO UPDATE SET
       academy_name = EXCLUDED.academy_name,
       location = EXCLUDED.location,
@@ -339,15 +364,27 @@ export const upsertAcademyProfile = async (userId, profileData) => {
       coaches = EXCLUDED.coaches,
       programs = EXCLUDED.programs,
       stats = EXCLUDED.stats,
+      competitive_level = EXCLUDED.competitive_level,
+      recent_achievements = EXCLUDED.recent_achievements,
       updated_at = CURRENT_TIMESTAMP
     RETURNING *;
   `;
   const values = [
-    userId, academy_name, location, sports_offered, facilities, compensation_structure,
-    tagline, logo_url, founded, primary_sports, 
-    coaches ? JSON.stringify(coaches) : '[]', 
-    programs ? JSON.stringify(programs) : '[]', 
-    stats ? JSON.stringify(stats) : '{}'
+    userId,
+    effAcademyName,
+    effLocation,
+    Array.isArray(effSportsOffered) ? effSportsOffered : [],
+    facilities || null,
+    compensation_structure ? JSON.stringify(compensation_structure) : null,
+    effTagline,
+    effLogoUrl,
+    effFounded,
+    Array.isArray(effPrimarySports) ? effPrimarySports : [],
+    coaches ? JSON.stringify(coaches) : '[]',
+    typeof effPrograms === 'string' ? effPrograms : JSON.stringify(effPrograms),
+    typeof effStats === 'string' ? effStats : JSON.stringify(effStats),
+    effCompetitiveLevel,
+    typeof effAchievements === 'string' ? effAchievements : JSON.stringify(effAchievements)
   ];
   const { rows } = await pool.query(queryText, values);
   return rows[0];

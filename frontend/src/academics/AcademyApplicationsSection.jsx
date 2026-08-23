@@ -35,7 +35,7 @@ function StatusBadge({ status }) {
 
   if (value === "approved") {
     return (
-      <span className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-emerald-400/30 bg-emerald-400/10 px-2.5 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wide text-emerald-300">
+        <span className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-emerald-400/30 bg-emerald-400/10 px-2.5 py-1.5 font-mono text-[11px] font-bold uppercase tracking-wide text-white">
         <CheckCircle2 size={13} />
         APPROVED
       </span>
@@ -44,7 +44,7 @@ function StatusBadge({ status }) {
 
   if (value === "declined") {
     return (
-      <span className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-rose-400/30 bg-rose-400/10 px-2.5 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wide text-rose-300">
+        <span className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-rose-400/30 bg-rose-400/10 px-2.5 py-1.5 font-mono text-[11px] font-bold uppercase tracking-wide text-white">
         <XCircle size={13} />
         DECLINED
       </span>
@@ -53,7 +53,7 @@ function StatusBadge({ status }) {
 
   if (value === "under review") {
     return (
-      <span className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-sky-400/30 bg-sky-400/10 px-2.5 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wide text-sky-300">
+        <span className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-[#F2FF65]/30 bg-[#F2FF65]/10 px-2.5 py-1.5 font-mono text-[11px] font-bold uppercase tracking-wide text-white">
         <Clock3 size={13} />
         UNDER REVIEW
       </span>
@@ -61,7 +61,7 @@ function StatusBadge({ status }) {
   }
 
   return (
-    <span className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-sky-400/30 bg-sky-400/10 px-2.5 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wide text-sky-300">
+    <span className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-[#F2FF65]/30 bg-[#F2FF65]/10 px-2.5 py-1.5 font-mono text-[11px] font-bold uppercase tracking-wide text-white">
       <Send size={13} />
       PENDING
     </span>
@@ -105,10 +105,16 @@ function ApplicationCard({
     application.location ||
     "Location unavailable";
 
-  const compensation =
+  const rawCompensation =
     application.compensation ||
     application.salary ||
     "Compensation not specified";
+
+  const compensation =
+    rawCompensation !== "Compensation not specified" &&
+    !String(rawCompensation).includes("₹")
+      ? `₹${rawCompensation}`
+      : rawCompensation;
 
   const activePeriod =
     application.timeline ||
@@ -143,11 +149,11 @@ function ApplicationCard({
               {title}
             </h3>
 
-            <p className="mt-1.5 text-sm font-semibold text-gray-200">
+            <p className="mt-1.5 text-base font-semibold text-white">
               {athleteName}
             </p>
 
-            <p className="mt-0.5 text-xs font-medium text-gray-300/80">
+            <p className="mt-0.5 text-sm font-medium text-white/80">
               Applicant
             </p>
           </div>
@@ -159,7 +165,7 @@ function ApplicationCard({
             LOCATION
         ============================================= */}
 
-        <div className="flex items-center gap-1.5 text-xs text-[#F2FF65]">
+        <div className="flex items-center gap-1.5 text-sm text-white">
           <MapPin size={14} />
           <span>{location}</span>
         </div>
@@ -168,7 +174,7 @@ function ApplicationCard({
             COMPENSATION
         ============================================= */}
 
-        <div className="font-mono text-base font-bold text-[#F2FF65]">
+        <div className="font-mono text-lg font-bold text-[#F2FF65]">
           {compensation}
         </div>
 
@@ -176,7 +182,7 @@ function ApplicationCard({
             ACTIVE TIMELINE
         ============================================= */}
 
-        <div className="flex items-center gap-1.5 font-mono text-xs font-medium text-sky-400">
+        <div className="flex items-center gap-1.5 font-mono text-sm font-medium text-white">
           <Clock3 size={13} />
           <span>Active: {activePeriod}</span>
         </div>
@@ -185,9 +191,9 @@ function ApplicationCard({
             TYPE + TIMINGS
         ============================================= */}
 
-        <div className="space-y-1 font-mono text-xs text-gray-200">
+        <div className="space-y-1 font-mono text-sm text-white">
           <p className="font-medium">{type}</p>
-          <p className="text-gray-400">{timings}</p>
+          <p className="text-white/80">{timings}</p>
         </div>
       </div>
 
@@ -196,7 +202,7 @@ function ApplicationCard({
       =============================================== */}
 
       <div className="mt-5 flex items-center justify-between border-t border-white/15 pt-3">
-        <div className="flex items-center gap-1.5 font-mono text-[11px] text-gray-300/70">
+        <div className="flex items-center gap-1.5 font-mono text-xs text-white">
           <CalendarDays size={13} />
           <span>Applied on {appliedDate}</span>
         </div>
@@ -220,11 +226,9 @@ function ApplicationModal({
   onApprove,
   onDecline,
 }) {
-  if (!application) return null;
+  const [isUpdating, setIsUpdating] = useState(false);
 
-  const isProcessed = ["Approved", "Declined"].includes(
-    application.status
-  );
+  if (!application) return null;
 
   const athleteName =
     application.athleteName ||
@@ -308,18 +312,17 @@ function ApplicationModal({
             <StatusBadge status={application.status} />
           </div>
 
-          {/* =================================================
-              DECISION BUTTONS
-              ONLY FOR PENDING / UNDER REVIEW
-          ================================================= */}
-
-          {!isProcessed && (
-            <div className="mt-7 grid w-full grid-cols-2 gap-3">
+          <div className="mt-7 grid w-full grid-cols-2 gap-3">
 
               <button
                 type="button"
-                onClick={() => onDecline(application)}
-                className="flex items-center justify-center gap-2 rounded-xl border border-rose-400/30 bg-[#95402F]/30 px-4 py-3 text-xs font-bold uppercase tracking-wider text-rose-300 transition-all hover:border-rose-400/60 hover:bg-[#95402F]/50 hover:-translate-y-0.5"
+                onClick={async () => {
+                  setIsUpdating(true);
+                  await onDecline(application);
+                  setIsUpdating(false);
+                }}
+                disabled={isUpdating}
+                className="flex items-center justify-center gap-2 rounded-xl border border-rose-400/30 bg-[#95402F]/30 px-4 py-3 text-xs font-bold uppercase tracking-wider text-rose-300 transition-all hover:border-rose-400/60 hover:bg-[#95402F]/50 hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <XCircle size={15} />
                 DECLINE
@@ -327,15 +330,19 @@ function ApplicationModal({
 
               <button
                 type="button"
-                onClick={() => onApprove(application)}
-                className="flex items-center justify-center gap-2 rounded-xl bg-[#F2FF65] px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#07130D] transition-all hover:-translate-y-0.5 hover:shadow-lg"
+                onClick={async () => {
+                  setIsUpdating(true);
+                  await onApprove(application);
+                  setIsUpdating(false);
+                }}
+                disabled={isUpdating}
+                className="flex items-center justify-center gap-2 rounded-xl bg-[#F2FF65] px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#07130D] transition-all hover:-translate-y-0.5 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <CheckCircle2 size={15} />
                 APPROVE
               </button>
 
-            </div>
-          )}
+          </div>
 
           {/* =================================================
               CLOSE
@@ -344,9 +351,7 @@ function ApplicationModal({
           <button
             type="button"
             onClick={onClose}
-            className={`w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#F7F5ED]/65 transition-all hover:border-[#F2FF65]/30 hover:bg-[#F2FF65]/10 hover:text-[#F2FF65] ${
-              !isProcessed ? "mt-3" : "mt-7"
-            }`}
+            className="mt-3 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-xs font-bold uppercase tracking-wider text-white/80 transition-all hover:border-[#F2FF65]/30 hover:bg-[#F2FF65]/10 hover:text-[#F2FF65]"
           >
             CLOSE
           </button>
@@ -453,20 +458,16 @@ export default function AcademyApplicationsSection({
      DECISION HANDLERS
   ======================================================= */
 
-  const handleApprove = (application) => {
-    if (onApprove) {
-      onApprove(application.id);
-    }
-
-    setSelectedApplication(null);
+  const handleApprove = async (application) => {
+    if (!onApprove) return;
+    const updated = await onApprove(application.id);
+    if (updated) setSelectedApplication((current) => current ? { ...current, status: "Approved" } : null);
   };
 
-  const handleDecline = (application) => {
-    if (onDecline) {
-      onDecline(application.id);
-    }
-
-    setSelectedApplication(null);
+  const handleDecline = async (application) => {
+    if (!onDecline) return;
+    const updated = await onDecline(application.id);
+    if (updated) setSelectedApplication((current) => current ? { ...current, status: "Declined" } : null);
   };
 
   return (
@@ -503,7 +504,7 @@ export default function AcademyApplicationsSection({
 
         <div className="relative">
           <Search
-            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"
+            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/70"
             size={17}
           />
 
@@ -514,7 +515,7 @@ export default function AcademyApplicationsSection({
               setSearchTerm(event.target.value)
             }
             placeholder="Search applicant, opportunity, academy, or location..."
-            className="w-full rounded-xl border border-[#2A3C2E] bg-[#0B120D] py-3 pl-11 pr-4 text-xs text-white placeholder-gray-500 outline-none transition-colors focus:border-[#F2FF65]"
+            className="w-full rounded-xl border border-[#2A3C2E] bg-[#0B120D] py-3 pl-11 pr-4 text-xs text-white placeholder:text-white/45 outline-none transition-colors focus:border-[#F2FF65]"
           />
         </div>
 
@@ -522,7 +523,7 @@ export default function AcademyApplicationsSection({
 
         <div className="mt-3 flex flex-wrap items-center justify-end gap-2">
 
-          <div className="flex items-center gap-1.5 text-gray-500">
+          <div className="flex items-center gap-1.5 text-white/65">
             <Filter size={14} />
             <span className="font-mono text-[9px] font-bold uppercase tracking-wider">
               Filter
@@ -536,7 +537,7 @@ export default function AcademyApplicationsSection({
             onChange={(event) =>
               setStatusFilter(event.target.value)
             }
-            className="cursor-pointer rounded-xl border border-[#2A3C2E] bg-[#0B120D] px-3.5 py-2 text-[10px] font-bold uppercase tracking-wider text-gray-300 outline-none transition-all hover:border-[#F2FF65]/40 focus:border-[#F2FF65]"
+            className="cursor-pointer rounded-xl border border-[#2A3C2E] bg-[#0B120D] px-3.5 py-2 text-[10px] font-bold uppercase tracking-wider text-white outline-none transition-all hover:border-[#F2FF65]/40 focus:border-[#F2FF65]"
           >
             {statuses.map((status) => (
               <option key={status} value={status}>
@@ -564,7 +565,7 @@ export default function AcademyApplicationsSection({
             Needs Attention
           </h2>
 
-          <span className="font-mono text-xs text-gray-500">
+          <span className="font-mono text-xs text-white/70">
             ({needsAttention.length})
           </span>
         </div>
@@ -601,7 +602,7 @@ export default function AcademyApplicationsSection({
               All caught up
             </p>
 
-            <p className="mt-1 text-xs text-gray-500">
+            <p className="mt-1 text-xs text-white/65">
               There are no applications waiting for your decision.
             </p>
           </div>
@@ -623,7 +624,7 @@ export default function AcademyApplicationsSection({
             Processed Applications
           </h2>
 
-          <span className="font-mono text-xs text-gray-500">
+          <span className="font-mono text-xs text-white/70">
             ({processedApplications.length})
           </span>
         </div>
@@ -657,7 +658,7 @@ export default function AcademyApplicationsSection({
               No processed applications
             </p>
 
-            <p className="mt-1 text-xs text-gray-500">
+            <p className="mt-1 text-xs text-white/65">
               Approved and declined applications will appear here.
             </p>
           </div>

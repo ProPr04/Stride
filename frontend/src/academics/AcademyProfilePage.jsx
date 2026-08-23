@@ -303,6 +303,8 @@ function EditProfileModal({
   onSave,
 }) {
   const fileInputRef = useRef(null);
+  const achievementRefs = useRef({});
+  const previousAchievementCount = useRef(0);
 
   const [form, setForm] = useState({
     name:
@@ -321,15 +323,41 @@ function EditProfileModal({
       academy.city ||
       "Pune, Maharashtra",
 
+    founded:
+      academy.founded ||
+      "2018",
+
+    competitiveLevel:
+      academy.competitive_level ||
+      academy.competitiveLevel ||
+      "National / State",
+
     primarySports:
-      Array.isArray(academy.primary_sports) && academy.primary_sports.length
+      Array.isArray(academy.primary_sports) &&
+      academy.primary_sports.length
         ? academy.primary_sports.join(", ")
-        : Array.isArray(academy.sports_offered) && academy.sports_offered.length
+        : Array.isArray(academy.sports_offered) &&
+          academy.sports_offered.length
         ? academy.sports_offered.join(", ")
         : academy.primary_sports ||
           academy.primarySports ||
           academy.sports_offered ||
           "Cricket, Football, Tennis",
+
+    activeAthletes:
+      academy.stats?.active_athletes ?? (academy.activeAthletes ?? 48),
+
+    personalBests:
+      academy.stats?.personal_bests ?? (academy.personalBests ?? 27),
+
+    competitionMedals:
+      academy.stats?.competition_medals ?? (academy.competitionMedals ?? 14),
+
+    nationalQualifiers:
+      academy.stats?.national_qualifiers ?? (academy.nationalQualifiers ?? 11),
+
+    scholarships:
+      academy.stats?.scholarships ?? (academy.scholarships ?? 6),
 
     image:
       academy.logo_url ||
@@ -339,30 +367,66 @@ function EditProfileModal({
       "",
 
     programs:
-      Array.isArray(academy.programs) && academy.programs.length
+      Array.isArray(academy.programs) &&
+      academy.programs.length
         ? academy.programs
         : fallbackPrograms,
 
     achievements:
-      Array.isArray(academy.recentAchievements) && academy.recentAchievements.length
-        ? academy.recentAchievements
-        : Array.isArray(academy.achievements) && academy.achievements.length
-        ? academy.achievements
+      Array.isArray(academy.recent_achievements) &&
+      academy.recent_achievements.length
+        ? academy.recent_achievements.map((achievement, index) => ({
+            id:
+              achievement.id ||
+              `achievement-existing-${index}`,
+            title: achievement.title || "",
+            date: achievement.date || "",
+          }))
+        : Array.isArray(academy.recentAchievements) &&
+          academy.recentAchievements.length
+        ? academy.recentAchievements.map((achievement, index) => ({
+            id:
+              achievement.id ||
+              `achievement-existing-${index}`,
+            title: achievement.title || "",
+            date: achievement.date || "",
+          }))
+        : Array.isArray(academy.achievements) &&
+          academy.achievements.length
+        ? academy.achievements.map((achievement, index) => ({
+            id:
+              achievement.id ||
+              `achievement-existing-${index}`,
+            title: achievement.title || "",
+            date: achievement.date || "",
+          }))
         : [
             {
-              title: "Four athletes reached national qualifying standards",
+              id: "achievement-1",
+              title:
+                "Four athletes reached national qualifying standards",
               date: "THIS SEASON",
             },
             {
-              title: "Sprint squad achieved seven verified personal bests",
+              id: "achievement-2",
+              title:
+                "Sprint squad achieved seven verified personal bests",
               date: "LAST 30 DAYS",
             },
             {
-              title: "Academy athletes secured three competition medals",
+              id: "achievement-3",
+              title:
+                "Academy athletes secured three competition medals",
               date: "RECENT EVENT",
             },
           ],
   });
+
+  /*
+  ============================================================
+  FIELD UPDATE
+  ============================================================
+  */
 
   const updateField = (field, value) => {
     setForm((previous) => ({
@@ -371,33 +435,64 @@ function EditProfileModal({
     }));
   };
 
-  const handleImageUpload = async (e) => {
-    const file = e.target.files?.[0];
+  /*
+  ============================================================
+  IMAGE UPLOAD
+  ============================================================
+  */
+
+  const handleImageUpload = async (event) => {
+    const file = event.target.files?.[0];
+
     if (!file) return;
 
     try {
-      const res = await api.upload.image(file);
-      if (res.data?.url) {
-        if (form.image && form.image.includes('/uploads/')) {
+      const response = await api.upload.image(file);
+
+      if (response.data?.url) {
+        if (
+          form.image &&
+          form.image.includes("/uploads/")
+        ) {
           api.upload.deleteImage(form.image);
         }
-        updateField("image", res.data.url);
+
+        updateField("image", response.data.url);
       }
-    } catch (err) {
-      alert("Failed to upload logo: " + err.message);
+    } catch (error) {
+      alert(
+        "Failed to upload logo: " +
+          error.message
+      );
     }
   };
 
   const handleRemoveImage = () => {
-    if (form.image && form.image.includes('/uploads/')) {
+    if (
+      form.image &&
+      form.image.includes("/uploads/")
+    ) {
       api.upload.deleteImage(form.image);
     }
+
     updateField("image", "");
   };
 
-  const updateProgram = (index, field, value) => {
+  /*
+  ============================================================
+  PROGRAMS
+  ============================================================
+  */
+
+  const updateProgram = (
+    index,
+    field,
+    value
+  ) => {
     setForm((previous) => {
-      const programs = [...previous.programs];
+      const programs = [
+        ...previous.programs,
+      ];
 
       programs[index] = {
         ...programs[index],
@@ -414,9 +509,12 @@ function EditProfileModal({
   const addProgram = () => {
     setForm((previous) => ({
       ...previous,
+
       programs: [
         ...previous.programs,
+
         {
+          id: `program-${Date.now()}`,
           title: "New Training Program",
           discipline: "PROGRAM",
           description:
@@ -429,11 +527,20 @@ function EditProfileModal({
   const removeProgram = (index) => {
     setForm((previous) => ({
       ...previous,
-      programs: previous.programs.filter(
-        (_, itemIndex) => itemIndex !== index
-      ),
+
+      programs:
+        previous.programs.filter(
+          (_, itemIndex) =>
+            itemIndex !== index
+        ),
     }));
   };
+
+  /*
+  ============================================================
+  ACHIEVEMENTS
+  ============================================================
+  */
 
   const updateAchievement = (
     index,
@@ -457,14 +564,23 @@ function EditProfileModal({
     });
   };
 
+  /*
+  ------------------------------------------------------------
+  ADD ACHIEVEMENT
+  ------------------------------------------------------------
+  */
+
   const addAchievement = () => {
     setForm((previous) => ({
       ...previous,
+
       achievements: [
         ...previous.achievements,
+
         {
-          title: "New Academy Achievement",
-          date: "RECENT",
+          id: `achievement-${Date.now()}`,
+          title: "",
+          date: "",
         },
       ],
     }));
@@ -473,6 +589,7 @@ function EditProfileModal({
   const removeAchievement = (index) => {
     setForm((previous) => ({
       ...previous,
+
       achievements:
         previous.achievements.filter(
           (_, itemIndex) =>
@@ -481,398 +598,1398 @@ function EditProfileModal({
     }));
   };
 
+  /*
+  ============================================================
+  AUTO-SCROLL TO NEW ACHIEVEMENT
+  ============================================================
+  */
+
+  useEffect(() => {
+    const currentCount =
+      form.achievements.length;
+
+    const previousCount =
+      previousAchievementCount.current;
+
+    if (currentCount > previousCount) {
+      const newestAchievement =
+        form.achievements[
+          form.achievements.length - 1
+        ];
+
+      if (newestAchievement?.id) {
+        requestAnimationFrame(() => {
+          const element =
+            achievementRefs.current[
+              newestAchievement.id
+            ];
+
+          if (element) {
+            element.scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+            });
+
+            const input =
+              element.querySelector(
+                "input"
+              );
+
+            if (input) {
+              setTimeout(() => {
+                input.focus();
+              }, 350);
+            }
+          }
+        });
+      }
+    }
+
+    previousAchievementCount.current =
+      currentCount;
+  }, [form.achievements.length]);
+
+  /*
+  ============================================================
+  SAVE
+  ============================================================
+  */
+
   const handleSave = () => {
     const sportsList = form.primarySports
-      ? form.primarySports.split(',').map((s) => s.trim()).filter(Boolean)
-      : ['General Sports'];
+      ? form.primarySports
+          .split(",")
+          .map((sport) => sport.trim())
+          .filter(Boolean)
+      : ["General Sports"];
+
+    const activeAthletesNum = parseInt(form.activeAthletes, 10) || 0;
+    const personalBestsNum = parseInt(form.personalBests, 10) || 0;
+    const competitionMedalsNum = parseInt(form.competitionMedals, 10) || 0;
+    const nationalQualifiersNum = parseInt(form.nationalQualifiers, 10) || 0;
+    const scholarshipsNum = parseInt(form.scholarships, 10) || 0;
 
     onSave?.({
       ...academy,
+
       academy_name: form.name.trim(),
       name: form.name.trim(),
       academyName: form.name.trim(),
+
       tagline: form.tagline.trim(),
       description: form.tagline.trim(),
+
       location: form.location.trim(),
       city: form.location.trim(),
+
+      founded: String(form.founded).trim(),
+      competitive_level: String(form.competitiveLevel).trim(),
+      competitiveLevel: String(form.competitiveLevel).trim(),
+
       primary_sports: sportsList,
       sports_offered: sportsList,
       primarySports: form.primarySports,
+
       logo_url: form.image,
       logo: form.image,
       image: form.image,
+
+      stats: {
+        ...(academy.stats || {}),
+        active_athletes: activeAthletesNum,
+        personal_bests: personalBestsNum,
+        competition_medals: competitionMedalsNum,
+        national_qualifiers: nationalQualifiersNum,
+        scholarships: scholarshipsNum,
+      },
+
+      activeAthletes: activeAthletesNum,
+      personalBests: personalBestsNum,
+      competitionMedals: competitionMedalsNum,
+      nationalQualifiers: nationalQualifiersNum,
+      scholarships: scholarshipsNum,
+
       programs: form.programs,
+
+      recent_achievements: form.achievements,
       recentAchievements: form.achievements,
     });
 
     onClose();
   };
 
+  /*
+  ============================================================
+  UI
+  ============================================================
+  */
+
   return (
     <div
-      className="fixed inset-0 z-[80] flex items-center justify-center bg-[#07130D]/85 p-4 backdrop-blur-md sm:p-6"
+      className="
+        fixed inset-0 z-[80]
+        flex items-center justify-center
+        bg-[#030704]/90
+        p-3
+        backdrop-blur-xl
+        sm:p-6
+      "
       role="dialog"
       aria-modal="true"
       aria-label="Edit academy profile"
     >
-      <div className="flex max-h-[92vh] w-full max-w-4xl flex-col overflow-hidden rounded-xl border border-lime/20 bg-[#315038] shadow-2xl">
-        {/* Header */}
 
-        <div className="flex shrink-0 items-start justify-between border-b border-lime/15 p-5 sm:p-6">
-          <div>
-            <p className="font-mono text-[9px] font-bold tracking-[0.18em] text-lime/55">
-              ACADEMY PROFILE // EDIT MODE
-            </p>
+      {/* =====================================================
+          MODAL
+      ====================================================== */}
 
-            <h2 className="mt-2 font-['Poppins'] text-2xl font-semibold tracking-[-0.045em] text-lime">
-              EDIT ACADEMY PROFILE
-            </h2>
+      <div
+        className="
+          flex
+          max-h-[94vh]
+          w-full
+          max-w-5xl
+          flex-col
+          overflow-hidden
+          rounded-2xl
+          border
+          border-[#F2FF65]/10
+          bg-[#090F0B]
+          shadow-[0_30px_100px_rgba(0,0,0,0.75)]
+        "
+      >
 
-            <p className="mt-1 text-sm text-[#F7F5ED]/50">
-              Update the information displayed on your
-              public academy profile.
-            </p>
+        {/* ===================================================
+            HEADER
+        ==================================================== */}
+
+        <div
+          className="
+            shrink-0
+            border-b
+            border-white/[0.06]
+            bg-[#0D1710]
+            px-5
+            py-5
+            sm:px-7
+            sm:py-6
+          "
+        >
+          <div className="flex items-start justify-between gap-5">
+
+            <div>
+
+              <div className="flex items-center gap-2">
+
+                <span
+                  className="
+                    h-1.5
+                    w-1.5
+                    rounded-full
+                    bg-[#F2FF65]
+                    shadow-[0_0_10px_rgba(242,255,101,0.5)]
+                  "
+                />
+
+                <p
+                  className="
+                    font-mono
+                    text-xs
+                    font-bold
+                    uppercase
+                    tracking-[0.2em]
+                    text-[#F2FF65]
+                  "
+                >
+                  Academy Identity
+                </p>
+
+              </div>
+
+              <h2
+                className="
+                  mt-2
+                  font-['Poppins']
+                  text-2xl
+                  font-black
+                  uppercase
+                  tracking-wider
+                  text-white
+                  sm:text-3xl
+                "
+              >
+                Edit your academy
+                <span className="text-[#F2FF65]">
+                  {" "}profile
+                </span>
+              </h2>
+
+              <p
+                className="
+                  mt-1.5
+                  max-w-xl
+                  text-xs
+                  leading-relaxed
+                  text-white/70
+                "
+              >
+                Keep your academy presence
+                accurate, credible and ready
+                for athletes discovering
+                opportunities on Stride.
+              </p>
+
+            </div>
+
+            <button
+              type="button"
+              onClick={onClose}
+              className="
+                grid
+                h-9
+                w-9
+                shrink-0
+                place-items-center
+                rounded-lg
+                border
+                border-white/[0.08]
+                bg-white/[0.025]
+                text-[#F7F5ED]/50
+                transition-all
+                hover:border-[#F2FF65]/30
+                hover:bg-[#F2FF65]/5
+                hover:text-[#F2FF65]
+              "
+              aria-label="Close edit profile"
+            >
+              <X size={17} />
+            </button>
+
           </div>
-
-          <button
-            type="button"
-            onClick={onClose}
-            className="grid h-9 w-9 shrink-0 place-items-center rounded-md border border-lime/20 text-lime hover:bg-white/5"
-            aria-label="Close edit profile"
-          >
-            <X size={18} />
-          </button>
         </div>
 
-        {/* Body */}
+        {/* ===================================================
+            SCROLLABLE BODY
+        ==================================================== */}
 
-        <div className="overflow-y-auto p-5 sm:p-6">
-          {/* BASIC INFORMATION */}
+        <div
+          className="
+            min-h-0
+            flex-1
+            overflow-y-auto
+            bg-[#090F0B]
+            px-5
+            py-6
+            sm:px-7
+            sm:py-7
 
-          <div>
-            <p className="font-mono text-[9px] font-bold tracking-[0.16em] text-lime/55">
-              BASIC INFORMATION
-            </p>
+            [&::-webkit-scrollbar]:w-1.5
+            [&::-webkit-scrollbar-track]:bg-transparent
+            [&::-webkit-scrollbar-thumb]:rounded-full
+            [&::-webkit-scrollbar-thumb]:bg-white/10
+            hover:[&::-webkit-scrollbar-thumb]:bg-white/15
+          "
+        >
 
-            <div className="mt-4 grid gap-4 md:grid-cols-2">
-              <EditField
-                label="Academy Name"
-                value={form.name}
-                onChange={(value) =>
-                  updateField("name", value)
-                }
-              />
+          {/* =================================================
+              01 / IDENTITY
+          ================================================== */}
 
-              <EditField
-                label="Location"
-                value={form.location}
-                onChange={(value) =>
-                  updateField(
-                    "location",
-                    value
-                  )
-                }
-              />
+          <section>
 
-              <EditField
-                label="Primary Sports"
-                value={form.primarySports}
-                onChange={(value) =>
-                  updateField(
-                    "primarySports",
-                    value
-                  )
-                }
-              />
+            <SectionHeading
+              eyebrow="01 / IDENTITY"
+              title="Academy presence"
+              description="The information athletes see first."
+            />
 
-              <div className="flex flex-col gap-2">
-                <span className="flex items-center gap-1.5 font-mono text-[8px] font-bold tracking-[0.12em] text-lime/55">
-                  <ImageIcon size={11} />
-                  ACADEMY LOGO / IMAGE
-                </span>
-                <div className="flex items-center gap-3 rounded-md border border-lime/15 bg-[#2A3C2E] p-2.5">
-                  <div className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-lg border border-lime/20 bg-[#16251B]">
-                    {form.image ? (
-                      <img src={form.image} alt="Logo Preview" className="h-full w-full object-cover" />
-                    ) : (
-                      <Building2 size={20} className="text-lime/60" />
-                    )}
-                  </div>
-                  <div className="flex flex-1 flex-col gap-1.5">
-                    <input
-                      type="text"
-                      placeholder="Paste Image URL or Upload File"
-                      value={form.image}
-                      onChange={(e) => updateField("image", e.target.value)}
-                      className="w-full rounded border border-lime/15 bg-[#1F2E24] px-2.5 py-1.5 text-xs text-[#F7F5ED] outline-none focus:border-lime/50"
+            <div
+              className="
+                mt-5
+                grid
+                gap-5
+                lg:grid-cols-[minmax(0,1fr)_280px]
+              "
+            >
+
+              {/* BASIC INFORMATION */}
+
+              <div
+                className="
+                  rounded-xl
+                  border
+                  border-white/[0.06]
+                  bg-[#0D1710]
+                  p-5
+                "
+              >
+
+                <div className="grid gap-4 sm:grid-cols-2">
+
+                  <EditField
+                    label="Academy Name"
+                    value={form.name}
+                    onChange={(value) =>
+                      updateField(
+                        "name",
+                        value
+                      )
+                    }
+                  />
+
+                  <EditField
+                    label="Location"
+                    value={form.location}
+                    onChange={(value) =>
+                      updateField(
+                        "location",
+                        value
+                      )
+                    }
+                  />
+
+                  <EditField
+                    label="Primary Sports"
+                    value={
+                      form.primarySports
+                    }
+                    onChange={(value) =>
+                      updateField(
+                        "primarySports",
+                        value
+                      )
+                    }
+                  />
+
+                  <EditField
+                    label="Founded Year"
+                    value={form.founded}
+                    onChange={(value) =>
+                      updateField(
+                        "founded",
+                        value
+                      )
+                    }
+                  />
+
+                  <div className="sm:col-span-2">
+
+                    <EditField
+                      label="Competitive Level"
+                      value={form.competitiveLevel}
+                      onChange={(value) =>
+                        updateField(
+                          "competitiveLevel",
+                          value
+                        )
+                      }
                     />
-                    <div className="flex items-center gap-2">
+
+                  </div>
+
+                  <div className="sm:col-span-2">
+
+                    <EditField
+                      label="About the Academy"
+                      value={form.tagline}
+                      onChange={(value) =>
+                        updateField(
+                          "tagline",
+                          value
+                        )
+                      }
+                      textarea
+                    />
+
+                  </div>
+
+                </div>
+
+              </div>
+
+              {/* LOGO */}
+
+              <div
+                className="
+                  rounded-xl
+                  border
+                  border-white/[0.06]
+                  bg-[#0D1710]
+                  p-5
+                "
+              >
+
+                <div className="flex items-center justify-between">
+
+                  <div>
+
+                    <p
+                      className="
+                        font-mono
+                        text-[8px]
+                        font-bold
+                        uppercase
+                        tracking-[0.15em]
+                        text-[#F2FF65]/55
+                      "
+                    >
+                      Brand Asset
+                    </p>
+
+                    <p
+                      className="
+                        mt-1
+                        text-xs
+                        font-medium
+                        text-[#F7F5ED]/75
+                      "
+                    >
+                      Academy logo
+                    </p>
+
+                  </div>
+
+                  <ImageIcon
+                    size={15}
+                    className="text-[#F2FF65]/50"
+                  />
+
+                </div>
+
+                <div
+                  className="
+                    mt-5
+                    flex
+                    flex-col
+                    items-center
+                  "
+                >
+
+                  <div
+                    className="
+                      grid
+                      h-24
+                      w-24
+                      place-items-center
+                      overflow-hidden
+                      rounded-2xl
+                      border
+                      border-[#F2FF65]/15
+                      bg-[#080E0A]
+                      shadow-inner
+                    "
+                  >
+
+                    {form.image ? (
+                      <img
+                        src={form.image}
+                        alt="Academy logo preview"
+                        className="
+                          h-full
+                          w-full
+                          object-cover
+                        "
+                      />
+                    ) : (
+                      <Building2
+                        size={30}
+                        strokeWidth={1.4}
+                        className="text-[#F2FF65]/45"
+                      />
+                    )}
+
+                  </div>
+
+                  <p
+                    className="
+                      mt-3
+                      text-center
+                      text-[10px]
+                      leading-4
+                      text-[#F7F5ED]/35
+                    "
+                  >
+                    Use a clear logo or academy
+                    <br />
+                    identity image.
+                  </p>
+
+                  <div
+                    className="
+                      mt-4
+                      flex
+                      items-center
+                      gap-2
+                    "
+                  >
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        fileInputRef.current?.click()
+                      }
+                      className="
+                        inline-flex
+                        items-center
+                        gap-1.5
+                        rounded-lg
+                        border
+                        border-[#F2FF65]/15
+                        bg-[#F2FF65]/5
+                        px-3
+                        py-2
+                        font-mono
+                        text-[8px]
+                        font-bold
+                        uppercase
+                        tracking-[0.08em]
+                        text-[#F2FF65]
+                        transition-all
+                        hover:border-[#F2FF65]/30
+                        hover:bg-[#F2FF65]/10
+                      "
+                    >
+                      <Camera size={11} />
+                      Upload
+                    </button>
+
+                    {form.image && (
                       <button
                         type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        className="inline-flex items-center gap-1 rounded bg-lime/15 px-2.5 py-1 font-mono text-[9px] font-bold text-lime hover:bg-lime/25"
+                        onClick={
+                          handleRemoveImage
+                        }
+                        className="
+                          inline-flex
+                          items-center
+                          gap-1.5
+                          rounded-lg
+                          border
+                          border-red-500/10
+                          bg-red-500/5
+                          px-3
+                          py-2
+                          font-mono
+                          text-[8px]
+                          font-bold
+                          uppercase
+                          tracking-[0.08em]
+                          text-red-400
+                          transition-all
+                          hover:bg-red-500/10
+                        "
                       >
-                        <Camera size={11} />
-                        Upload File
+                        <Trash2 size={11} />
+                        Remove
                       </button>
-                      {form.image && (
-                        <button
-                          type="button"
-                          onClick={handleRemoveImage}
-                          className="inline-flex items-center gap-1 rounded bg-red-500/15 px-2.5 py-1 font-mono text-[9px] font-bold text-red-400 hover:bg-red-500/25"
-                        >
-                          <Trash2 size={11} />
-                          Remove
-                        </button>
-                      )}
-                    </div>
+                    )}
+
                   </div>
+
                   <input
                     ref={fileInputRef}
                     type="file"
                     accept="image/*"
-                    onChange={handleImageUpload}
+                    onChange={
+                      handleImageUpload
+                    }
                     className="hidden"
                   />
+
                 </div>
+
               </div>
 
-              <div className="md:col-span-2">
+            </div>
+
+          </section>
+
+          {/* =================================================
+              02 / ACADEMY IMPACT
+          ================================================== */}
+
+          <section
+            className="
+              mt-10
+              border-t
+              border-white/[0.06]
+              pt-8
+            "
+          >
+
+            <SectionHeading
+              eyebrow="02 / ACADEMY IMPACT"
+              title="Impact & Active Metrics"
+              description="Update your academy's numbers displayed across Stride."
+            />
+
+            <div
+              className="
+                mt-5
+                rounded-xl
+                border
+                border-white/[0.06]
+                bg-[#0D1710]
+                p-5
+              "
+            >
+
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+
                 <EditField
-                  label="About the Academy"
-                  value={form.tagline}
+                  label="Active Athletes"
+                  value={form.activeAthletes}
                   onChange={(value) =>
                     updateField(
-                      "tagline",
+                      "activeAthletes",
                       value
                     )
                   }
-                  textarea
                 />
+
+                <EditField
+                  label="Personal Bests"
+                  value={form.personalBests}
+                  onChange={(value) =>
+                    updateField(
+                      "personalBests",
+                      value
+                    )
+                  }
+                />
+
+                <EditField
+                  label="Competition Medals"
+                  value={form.competitionMedals}
+                  onChange={(value) =>
+                    updateField(
+                      "competitionMedals",
+                      value
+                    )
+                  }
+                />
+
+                <EditField
+                  label="National Qualifiers"
+                  value={form.nationalQualifiers}
+                  onChange={(value) =>
+                    updateField(
+                      "nationalQualifiers",
+                      value
+                    )
+                  }
+                />
+
+                <EditField
+                  label="Scholarships / Placements"
+                  value={form.scholarships}
+                  onChange={(value) =>
+                    updateField(
+                      "scholarships",
+                      value
+                    )
+                  }
+                />
+
               </div>
+
             </div>
-          </div>
 
-          {/* TRAINING PROGRAMS */}
+          </section>
 
-          <div className="mt-8 border-t border-lime/10 pt-7">
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <p className="font-mono text-[9px] font-bold tracking-[0.16em] text-lime/55">
-                  DEVELOPMENT PATHWAYS
-                </p>
+          {/* =================================================
+              03 / PROGRAMS
+          ================================================== */}
 
-                <h3 className="mt-1 font-['Poppins'] text-lg font-semibold text-lime">
-                  TRAINING PROGRAMS
-                </h3>
-              </div>
+          <section
+            className="
+              mt-10
+              border-t
+              border-white/[0.06]
+              pt-8
+            "
+          >
+
+            <div
+              className="
+                flex
+                flex-col
+                gap-4
+                sm:flex-row
+                sm:items-end
+                sm:justify-between
+              "
+            >
+
+              <SectionHeading
+                eyebrow="03 / DEVELOPMENT"
+                title="Training programs"
+                description="Define the pathways athletes can pursue."
+              />
 
               <button
                 type="button"
                 onClick={addProgram}
-                className="inline-flex items-center gap-1.5 rounded-md border border-lime/25 bg-lime/10 px-3 py-2 font-mono text-[9px] font-bold tracking-[0.08em] text-lime hover:bg-lime/15"
+                className="
+                  inline-flex
+                  w-fit
+                  items-center
+                  gap-1.5
+                  rounded-lg
+                  border
+                  border-[#F2FF65]/15
+                  bg-[#F2FF65]/5
+                  px-3
+                  py-2
+                  font-mono
+                  text-[8px]
+                  font-bold
+                  uppercase
+                  tracking-[0.1em]
+                  text-[#F2FF65]
+                  transition-all
+                  hover:border-[#F2FF65]/30
+                  hover:bg-[#F2FF65]/10
+                "
               >
-                <Plus size={13} />
-                ADD PROGRAM
+                <Plus size={12} />
+                Add program
               </button>
+
             </div>
 
-            <div className="mt-4 space-y-3">
-              {form.programs.map(
-                (program, index) => (
-                  <div
-                    key={`${program.title}-${index}`}
-                    className="rounded-lg border border-lime/10 bg-white/5 p-4"
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <p className="font-mono text-[8px] font-bold tracking-[0.12em] text-lime/45">
-                        PROGRAM {String(index + 1).padStart(2, "0")}
-                      </p>
+            <div className="mt-5 grid gap-3">
 
-                      <button
-                        type="button"
-                        onClick={() =>
-                          removeProgram(index)
-                        }
-                        className="text-[#F7F5ED]/40 hover:text-red-300"
-                        aria-label="Remove program"
+              {Array.isArray(form.programs) &&
+                form.programs.map(
+                  (program, index) => (
+                    <div
+                      key={
+                        program.id ||
+                        `${program.title}-${index}`
+                      }
+                      className="
+                        group
+                        rounded-xl
+                        border
+                        border-white/[0.06]
+                        bg-[#0D1710]
+                        p-4
+                        transition-colors
+                        hover:border-[#F2FF65]/10
+                        sm:p-5
+                      "
+                    >
+
+                      <div
+                        className="
+                          flex
+                          items-center
+                          justify-between
+                        "
                       >
-                        <X size={15} />
-                      </button>
-                    </div>
 
-                    <div className="mt-3 grid gap-3 md:grid-cols-2">
-                      <EditField
-                        label="Program Title"
-                        value={
-                          program.title
-                        }
-                        onChange={(value) =>
-                          updateProgram(
-                            index,
-                            "title",
-                            value
-                          )
-                        }
-                      />
+                        <div
+                          className="
+                            flex
+                            items-center
+                            gap-2.5
+                          "
+                        >
 
-                      <EditField
-                        label="Discipline"
-                        value={
-                          program.discipline ||
-                          ""
-                        }
-                        onChange={(value) =>
-                          updateProgram(
-                            index,
-                            "discipline",
-                            value
-                          )
-                        }
-                      />
+                          <span
+                            className="
+                              grid
+                              h-7
+                              w-7
+                              place-items-center
+                              rounded-md
+                              bg-[#080E0A]
+                              font-mono
+                              text-[8px]
+                              font-bold
+                              text-[#F2FF65]/60
+                            "
+                          >
+                            {String(
+                              index + 1
+                            ).padStart(2, "0")}
+                          </span>
 
-                      <div className="md:col-span-2">
+                          <p
+                            className="
+                              font-mono
+                              text-[8px]
+                              font-bold
+                              uppercase
+                              tracking-[0.12em]
+                              text-[#F7F5ED]/35
+                            "
+                          >
+                            Training pathway
+                          </p>
+
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            removeProgram(
+                              index
+                            )
+                          }
+                          className="
+                            text-[#F7F5ED]/25
+                            transition-colors
+                            hover:text-red-400
+                          "
+                          aria-label="Remove program"
+                        >
+                          <X size={15} />
+                        </button>
+
+                      </div>
+
+                      <div
+                        className="
+                          mt-4
+                          grid
+                          gap-4
+                          sm:grid-cols-2
+                        "
+                      >
+
                         <EditField
-                          label="Description"
+                          label="Program Title"
                           value={
-                            program.description ||
+                            program.title ||
                             ""
                           }
                           onChange={(value) =>
                             updateProgram(
                               index,
-                              "description",
+                              "title",
                               value
                             )
                           }
-                          textarea
                         />
+
+                        <EditField
+                          label="Discipline"
+                          value={
+                            program.discipline ||
+                            ""
+                          }
+                          onChange={(value) =>
+                            updateProgram(
+                              index,
+                              "discipline",
+                              value
+                            )
+                          }
+                        />
+
+                        <div className="sm:col-span-2">
+
+                          <EditField
+                            label="Program Description"
+                            value={
+                              program.description ||
+                              ""
+                            }
+                            onChange={(value) =>
+                              updateProgram(
+                                index,
+                                "description",
+                                value
+                              )
+                            }
+                            textarea
+                          />
+
+                        </div>
+
                       </div>
+
                     </div>
-                  </div>
-                )
-              )}
+                  )
+                )}
+
             </div>
-          </div>
 
-          {/* ACHIEVEMENTS */}
+          </section>
 
-          <div className="mt-8 border-t border-lime/10 pt-7">
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <p className="font-mono text-[9px] font-bold tracking-[0.16em] text-lime/55">
-                  LATEST PERFORMANCE
-                </p>
+          {/* =================================================
+              03 / ACHIEVEMENTS
+          ================================================== */}
 
-                <h3 className="mt-1 font-['Poppins'] text-lg font-semibold text-lime">
-                  RECENT ACHIEVEMENTS
-                </h3>
-              </div>
+          <section
+            className="
+              mt-10
+              border-t
+              border-white/[0.06]
+              pt-8
+            "
+          >
+
+            <div
+              className="
+                flex
+                flex-col
+                gap-4
+                sm:flex-row
+                sm:items-end
+                sm:justify-between
+              "
+            >
+
+              <SectionHeading
+                eyebrow="04 / PROOF OF PERFORMANCE"
+                title="Recent achievements"
+                description="Show athletes what your academy is accomplishing."
+              />
 
               <button
                 type="button"
                 onClick={addAchievement}
-                className="inline-flex items-center gap-1.5 rounded-md border border-lime/25 bg-lime/10 px-3 py-2 font-mono text-[9px] font-bold tracking-[0.08em] text-lime hover:bg-lime/15"
+                className="
+                  inline-flex
+                  w-fit
+                  items-center
+                  gap-1.5
+                  rounded-lg
+                  border
+                  border-[#F2FF65]/20
+                  bg-[#F2FF65]/5
+                  px-3
+                  py-2
+                  font-mono
+                  text-[8px]
+                  font-bold
+                  uppercase
+                  tracking-[0.1em]
+                  text-[#F2FF65]
+                  transition-all
+                  hover:border-[#F2FF65]/40
+                  hover:bg-[#F2FF65]/10
+                  hover:shadow-[0_0_20px_rgba(242,255,101,0.05)]
+                  active:scale-[0.98]
+                "
               >
-                <Plus size={13} />
-                ADD ACHIEVEMENT
+                <Plus size={12} />
+                Add achievement
               </button>
+
             </div>
 
-            <div className="mt-4 space-y-3">
-              {form.achievements.map(
-                (
-                  achievement,
-                  index
-                ) => (
-                  <div
-                    key={`${achievement.title}-${index}`}
-                    className="rounded-lg border border-lime/10 bg-white/5 p-4"
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <p className="font-mono text-[8px] font-bold tracking-[0.12em] text-lime/45">
-                        ACHIEVEMENT{" "}
-                        {String(
-                          index + 1
-                        ).padStart(2, "0")}
-                      </p>
+            {/* ACHIEVEMENT LIST */}
 
-                      <button
-                        type="button"
-                        onClick={() =>
-                          removeAchievement(
-                            index
-                          )
+            <div className="mt-5 grid gap-3">
+
+              {Array.isArray(form.achievements) &&
+                form.achievements.map(
+                  (
+                    achievement,
+                    index
+                  ) => (
+                    <div
+                      key={
+                        achievement.id ||
+                        `achievement-${index}`
+                      }
+                      ref={(element) => {
+                        if (
+                          achievement.id
+                        ) {
+                          achievementRefs.current[
+                            achievement.id
+                          ] = element;
                         }
-                        className="text-[#F7F5ED]/40 hover:text-red-300"
-                        aria-label="Remove achievement"
+                      }}
+                      className="
+                        group
+                        rounded-xl
+                        border
+                        border-white/[0.06]
+                        bg-[#0D1710]
+                        p-4
+                        transition-all
+                        duration-300
+                        hover:border-[#F2FF65]/10
+                        sm:p-5
+                      "
+                    >
+
+                      <div
+                        className="
+                          flex
+                          items-center
+                          justify-between
+                          gap-3
+                        "
                       >
-                        <X size={15} />
-                      </button>
-                    </div>
 
-                    <div className="mt-3 grid gap-3 md:grid-cols-[1fr_180px]">
-                      <EditField
-                        label="Achievement"
-                        value={
-                          achievement.title ||
-                          ""
-                        }
-                        onChange={(value) =>
-                          updateAchievement(
-                            index,
-                            "title",
-                            value
-                          )
-                        }
-                      />
+                        <div
+                          className="
+                            flex
+                            items-center
+                            gap-2.5
+                          "
+                        >
 
-                      <EditField
-                        label="Date / Period"
-                        value={
-                          achievement.date ||
-                          ""
-                        }
-                        onChange={(value) =>
-                          updateAchievement(
-                            index,
-                            "date",
-                            value
-                          )
-                        }
-                      />
+                          <span
+                            className="
+                              grid
+                              h-7
+                              w-7
+                              place-items-center
+                              rounded-md
+                              bg-[#080E0A]
+                              font-mono
+                              text-[8px]
+                              font-bold
+                              text-[#F2FF65]/60
+                            "
+                          >
+                            {String(
+                              index + 1
+                            ).padStart(2, "0")}
+                          </span>
+
+                          <div>
+
+                            <p
+                              className="
+                                font-mono
+                                text-[8px]
+                                font-bold
+                                uppercase
+                                tracking-[0.12em]
+                                text-[#F7F5ED]/35
+                              "
+                            >
+                              Achievement
+                            </p>
+
+                            {achievement.title ===
+                              "" && (
+                              <p
+                                className="
+                                  mt-0.5
+                                  text-[9px]
+                                  text-[#F2FF65]/40
+                                "
+                              >
+                                New achievement
+                              </p>
+                            )}
+
+                          </div>
+
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            removeAchievement(
+                              index
+                            )
+                          }
+                          className="
+                            rounded-md
+                            p-1
+                            text-[#F7F5ED]/25
+                            transition-all
+                            hover:bg-red-500/5
+                            hover:text-red-400
+                          "
+                          aria-label="Remove achievement"
+                        >
+                          <X size={15} />
+                        </button>
+
+                      </div>
+
+                      <div
+                        className="
+                          mt-4
+                          grid
+                          gap-4
+                          sm:grid-cols-[minmax(0,1fr)_180px]
+                        "
+                      >
+
+                        <EditField
+                          label="Achievement"
+                          value={
+                            achievement.title ||
+                            ""
+                          }
+                          onChange={(value) =>
+                            updateAchievement(
+                              index,
+                              "title",
+                              value
+                            )
+                          }
+                        />
+
+                        <EditField
+                          label="Date / Period"
+                          value={
+                            achievement.date ||
+                            ""
+                          }
+                          onChange={(value) =>
+                            updateAchievement(
+                              index,
+                              "date",
+                              value
+                            )
+                          }
+                        />
+
+                      </div>
+
                     </div>
-                  </div>
-                )
-              )}
+                  )
+                )}
+
             </div>
+
+            {/* EMPTY STATE */}
+
+            {(!Array.isArray(
+              form.achievements
+            ) ||
+              form.achievements.length ===
+                0) && (
+              <div
+                className="
+                  mt-5
+                  rounded-xl
+                  border
+                  border-dashed
+                  border-white/[0.08]
+                  bg-[#0B130D]
+                  px-6
+                  py-10
+                  text-center
+                "
+              >
+
+                <div
+                  className="
+                    mx-auto
+                    grid
+                    h-10
+                    w-10
+                    place-items-center
+                    rounded-lg
+                    bg-[#F2FF65]/5
+                    text-[#F2FF65]/50
+                  "
+                >
+                  <Plus size={17} />
+                </div>
+
+                <p
+                  className="
+                    mt-3
+                    text-[11px]
+                    font-medium
+                    text-[#F7F5ED]/55
+                  "
+                >
+                  No achievements added yet
+                </p>
+
+                <p
+                  className="
+                    mt-1
+                    text-[9px]
+                    text-[#F7F5ED]/25
+                  "
+                >
+                  Add your academy's latest
+                  performance milestones.
+                </p>
+
+              </div>
+            )}
+
+          </section>
+
+        </div>
+
+        {/* ===================================================
+            FOOTER
+        ==================================================== */}
+
+        <div
+          className="
+            flex
+            shrink-0
+            items-center
+            justify-between
+            gap-3
+            border-t
+            border-white/[0.06]
+            bg-[#0D1710]
+            px-5
+            py-4
+            sm:px-7
+          "
+        >
+
+          <p
+            className="
+              hidden
+              text-xs
+              font-medium
+              text-white/60
+              sm:block
+            "
+          >
+            Changes will appear on your
+            public academy profile.
+          </p>
+
+          <div
+            className="
+              flex
+              w-full
+              gap-3
+              sm:w-auto
+            "
+          >
+
+            <button
+              type="button"
+              onClick={onClose}
+              className="
+                flex-1
+                rounded-xl
+                border
+                border-white/15
+                px-5
+                py-2.5
+                font-mono
+                text-xs
+                font-bold
+                uppercase
+                tracking-wider
+                text-white/80
+                transition-all
+                hover:border-white/30
+                hover:bg-white/10
+                hover:text-white
+                sm:flex-none
+              "
+            >
+              Cancel
+            </button>
+
+            <button
+              type="button"
+              onClick={handleSave}
+              className="
+                inline-flex
+                flex-1
+                items-center
+                justify-center
+                gap-2
+                rounded-xl
+                bg-[#F2FF65]
+                px-6
+                py-2.5
+                font-mono
+                text-xs
+                font-extrabold
+                uppercase
+                tracking-wider
+                text-[#07130D]
+                transition-all
+                hover:-translate-y-0.5
+                hover:shadow-[0_8px_25px_rgba(242,255,101,0.2)]
+                sm:flex-none
+              "
+            >
+              <Save size={14} />
+              Save changes
+            </button>
+
           </div>
+
         </div>
 
-        {/* Footer */}
-
-        <div className="flex shrink-0 flex-col-reverse gap-3 border-t border-lime/15 bg-[#2A3C2E] p-4 sm:flex-row sm:justify-end sm:p-5">
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-md border border-lime/20 px-5 py-3 font-mono text-[10px] font-bold tracking-[0.08em] text-[#F7F5ED]/65 transition-colors hover:bg-white/5 hover:text-[#F7F5ED]"
-          >
-            CANCEL
-          </button>
-
-          <button
-            type="button"
-            onClick={handleSave}
-            className="inline-flex items-center justify-center gap-2 rounded-md bg-lime px-5 py-3 font-mono text-[10px] font-bold tracking-[0.08em] text-[#07130D] transition-transform hover:-translate-y-0.5"
-          >
-            <Save size={14} />
-            SAVE CHANGES
-          </button>
-        </div>
       </div>
+
     </div>
   );
 }
+
+
+/* ============================================================
+   SECTION HEADING
+============================================================ */
+
+function SectionHeading({
+  eyebrow,
+  title,
+  description,
+}) {
+  return (
+    <div>
+
+      <p
+        className="
+          font-mono
+          text-xs
+          font-bold
+          uppercase
+          tracking-[0.18em]
+          text-[#F2FF65]
+        "
+      >
+        {eyebrow}
+      </p>
+
+      <h3
+        className="
+          mt-1
+          font-['Poppins']
+          text-xl
+          font-extrabold
+          uppercase
+          tracking-wide
+          text-white
+        "
+      >
+        {title}
+      </h3>
+
+      {description && (
+        <p
+          className="
+            mt-1
+            text-xs
+            leading-relaxed
+            text-white/75
+          "
+        >
+          {description}
+        </p>
+      )}
+
+    </div>
+  );
+}
+
+
+/* ============================================================
+   EDIT FIELD
+============================================================ */
 
 function EditField({
   label,
@@ -883,34 +2000,94 @@ function EditField({
 }) {
   return (
     <label className="block">
-      <span className="mb-1.5 flex items-center gap-1.5 font-mono text-[8px] font-bold tracking-[0.12em] text-lime/55">
-        {Icon && <Icon size={11} />}
-        {label.toUpperCase()}
+
+      <span
+        className="
+          mb-2
+          flex
+          items-center
+          gap-1.5
+          font-mono
+          text-xs
+          font-bold
+          uppercase
+          tracking-wider
+          text-[#F2FF65]
+        "
+      >
+
+        {Icon && (
+          <Icon size={12} />
+        )}
+
+        {label}
+
       </span>
 
       {textarea ? (
         <textarea
           value={value}
           onChange={(event) =>
-            onChange(event.target.value)
+            onChange(
+              event.target.value
+            )
           }
           rows={3}
-          className="w-full resize-none rounded-md border border-lime/15 bg-[#2A3C2E] px-3 py-2.5 text-sm text-[#F7F5ED] outline-none transition-colors placeholder:text-[#F7F5ED]/25 focus:border-lime/50"
+          className="
+            w-full
+            resize-none
+            rounded-xl
+            border
+            border-white/15
+            bg-[#17231A]
+            px-3.5
+            py-2.5
+            text-sm
+            font-medium
+            text-white
+            outline-none
+            transition-all
+            placeholder:text-white/30
+            focus:border-[#F2FF65]
+            focus:bg-[#19271C]
+            focus:ring-1
+            focus:ring-[#F2FF65]/20
+          "
         />
       ) : (
         <input
           type="text"
           value={value}
           onChange={(event) =>
-            onChange(event.target.value)
+            onChange(
+              event.target.value
+            )
           }
-          className="w-full rounded-md border border-lime/15 bg-[#2A3C2E] px-3 py-2.5 text-sm text-[#F7F5ED] outline-none transition-colors placeholder:text-[#F7F5ED]/25 focus:border-lime/50"
+          className="
+            w-full
+            rounded-xl
+            border
+            border-white/15
+            bg-[#17231A]
+            px-3.5
+            py-2.5
+            text-sm
+            font-medium
+            text-white
+            outline-none
+            transition-all
+            placeholder:text-white/30
+            focus:border-[#F2FF65]
+            focus:bg-[#19271C]
+            focus:ring-1
+            focus:ring-[#F2FF65]/20
+          "
         />
       )}
+
     </label>
   );
 }
-
 /* =========================================================
    MAIN PROFILE PAGE
 ========================================================= */
@@ -968,6 +2145,14 @@ export default function AcademyProfilePage({
     localAcademy.city ||
     "Pune, Maharashtra";
 
+  const founded =
+    localAcademy.founded || "2018";
+
+  const competitiveLevel =
+    localAcademy.competitive_level ||
+    localAcademy.competitiveLevel ||
+    "National / State";
+
   const academyId =
     localAcademy.id ? `STR-ACD-${String(localAcademy.id).padStart(5, '0')}` : "STR-ACD-00001";
 
@@ -996,53 +2181,53 @@ export default function AcademyProfilePage({
     localAcademy.verification ||
     fallbackVerification;
 
-  const coaches =
-    Array.isArray(localAcademy.coaches) && localAcademy.coaches.length
-      ? localAcademy.coaches
-      : fallbackCoaches;
-
   const programs =
     Array.isArray(localAcademy.programs) && localAcademy.programs.length
       ? localAcademy.programs
       : fallbackPrograms;
 
-  const opportunities =
-    Array.isArray(localAcademy.opportunities) && localAcademy.opportunities.length
-      ? localAcademy.opportunities
-      : fallbackOpportunities;
+  const activeAthletes =
+    localAcademy.stats?.active_athletes ?? (localAcademy.activeAthletes ?? 48);
+
+  const personalBests =
+    localAcademy.stats?.personal_bests ?? (localAcademy.personalBests ?? 27);
+
+  const competitionMedals =
+    localAcademy.stats?.competition_medals ?? (localAcademy.competitionMedals ?? 14);
+
+  const nationalQualifiers =
+    localAcademy.stats?.national_qualifiers ?? (localAcademy.nationalQualifiers ?? 11);
+
+  const scholarships =
+    localAcademy.stats?.scholarships ?? (localAcademy.scholarships ?? 6);
 
   const stats = [
     {
       label: "ACTIVE ATHLETES",
-      value:
-        localAcademy.activeAthletes ?? (localAcademy.stats?.active_athletes ?? 48),
+      value: activeAthletes,
       icon: Users,
     },
     {
-      label: "VERIFIED COACHES",
-      value:
-        localAcademy.verifiedCoaches ??
-        coaches.filter((coach) => coach.verified).length,
-      icon: ShieldCheck,
-    },
-    {
       label: "NATIONAL QUALIFIERS",
-      value:
-        localAcademy.nationalQualifiers ?? (localAcademy.stats?.national_qualifiers ?? 11),
+      value: nationalQualifiers,
       icon: Trophy,
     },
     {
       label: "ATHLETE PERSONAL BESTS",
-      value:
-        localAcademy.personalBests ?? (localAcademy.stats?.personal_bests ?? 27),
+      value: personalBests,
       icon: Star,
+    },
+    {
+      label: "COMPETITION MEDALS",
+      value: competitionMedals,
+      icon: Medal,
     },
   ];
 
   const overview = [
     [
       "Founded",
-      localAcademy.founded || "2018",
+      founded,
     ],
     ["Location", location],
     [
@@ -1051,7 +2236,7 @@ export default function AcademyProfilePage({
     ],
     [
       "Active Athletes",
-      localAcademy.activeAthletes ?? (localAcademy.stats?.active_athletes ?? 48),
+      activeAthletes,
     ],
     [
       "Training Programs",
@@ -1059,39 +2244,37 @@ export default function AcademyProfilePage({
     ],
     [
       "Competitive Level",
-      localAcademy.competitiveLevel || "National / State",
+      competitiveLevel,
     ],
   ];
 
   const outcomes = [
     {
       label: "PERSONAL BESTS",
-      value:
-        localAcademy.personalBests ?? 27,
+      value: personalBests,
       icon: Star,
     },
     {
       label: "COMPETITION MEDALS",
-      value:
-        localAcademy.competitionMedals ?? 14,
+      value: competitionMedals,
       icon: Medal,
     },
     {
       label: "NATIONAL QUALIFIERS",
-      value:
-        localAcademy.nationalQualifiers ?? 11,
+      value: nationalQualifiers,
       icon: Trophy,
     },
     {
       label: "SCHOLARSHIPS / PLACEMENTS",
-      value:
-        localAcademy.scholarships ?? 6,
+      value: scholarships,
       icon: Award,
     },
   ];
 
   const recentAchievements =
-    localAcademy.recentAchievements?.length
+    Array.isArray(localAcademy.recent_achievements) && localAcademy.recent_achievements.length
+      ? localAcademy.recent_achievements
+      : Array.isArray(localAcademy.recentAchievements) && localAcademy.recentAchievements.length
       ? localAcademy.recentAchievements
       : [
           {
@@ -1114,14 +2297,20 @@ export default function AcademyProfilePage({
           },
         ];
 
-  /*
-   * Save profile changes.
-   * Parent receives the updated academy through
-   * onSaveProfile if provided.
-   */
-  const handleSaveProfile = (updatedAcademy) => {
+  const handleSaveProfile = async (updatedAcademy) => {
     setLocalAcademy(updatedAcademy);
-    onSaveProfile?.(updatedAcademy);
+    try {
+      const res = await api.profiles.updateMyProfile(updatedAcademy);
+      if (res?.data?.profile) {
+        setLocalAcademy(res.data.profile);
+        onSaveProfile?.(res.data.profile);
+      } else {
+        onSaveProfile?.(updatedAcademy);
+      }
+    } catch (err) {
+      console.error('Failed to save profile to backend:', err);
+      onSaveProfile?.(updatedAcademy);
+    }
   };
 
   /*
@@ -1187,11 +2376,11 @@ export default function AcademyProfilePage({
               </span>
             </div>
 
-            <h1 className="profile-hero-name">
+            <h1 className="font-['Poppins'] text-2xl font-black uppercase tracking-wider text-white sm:text-3xl lg:text-4xl">
               {name}
             </h1>
 
-            <p className="profile-hero-discipline">
+            <p className="mt-1 text-base font-semibold text-white/90">
               {localAcademy.primarySports ||
                 localAcademy.sports?.join(
                   " · "
@@ -1199,19 +2388,19 @@ export default function AcademyProfilePage({
                 "Athletics · Performance"}
             </p>
 
-            <div className="flex flex-wrap gap-x-4 gap-y-2">
-              <span className="profile-location-tag">
+            <div className="mt-2 flex flex-wrap gap-x-4 gap-y-2">
+              <span className="inline-flex items-center gap-1.5 text-sm font-medium text-white/90">
                 <MapPin
-                  size={14}
-                  className="text-lime"
+                  size={15}
+                  className="text-[#F2FF65]"
                 />
                 {location}
               </span>
 
-              <span className="profile-location-tag">
+              <span className="inline-flex items-center gap-1.5 text-sm font-medium text-white/90">
                 <Building2
-                  size={14}
-                  className="text-lime"
+                  size={15}
+                  className="text-[#F2FF65]"
                 />
                 ID: {academyId}
               </span>
@@ -1219,7 +2408,7 @@ export default function AcademyProfilePage({
           </div>
 
           <button
-            className="matchpoint-pill-btn primary ms-auto"
+            className="matchpoint-pill-btn primary ms-auto font-mono text-xs font-bold tracking-wider"
             onClick={() => {
               onEdit?.(localAcademy);
               setShowEditModal(true);
@@ -1240,16 +2429,16 @@ export default function AcademyProfilePage({
                 key={label}
               >
                 <Icon
-                  size={16}
-                  className="mb-2 text-lime"
+                  size={18}
+                  className="mb-2 text-[#F2FF65]"
                   strokeWidth={1.5}
                 />
 
-                <span className="stat-box-label font-mono">
+                <span className="stat-box-label font-mono text-xs font-bold uppercase tracking-wider text-white/80">
                   {label}
                 </span>
 
-                <span className="stat-box-val text-lime">
+                <span className="stat-box-val font-mono text-2xl font-black text-[#F2FF65]">
                   {value}
                 </span>
               </div>
@@ -1270,7 +2459,7 @@ export default function AcademyProfilePage({
             icon={Building2}
           />
 
-          <p className="bio-text">
+          <p className="bio-text text-base font-medium leading-relaxed text-white/90">
             {tagline}
           </p>
 
@@ -1279,13 +2468,13 @@ export default function AcademyProfilePage({
               ([label, value]) => (
                 <div
                   key={label}
-                  className="border-t border-lime/15 pt-3"
+                  className="border-t border-white/15 pt-3"
                 >
-                  <p className="font-mono text-[9px] font-bold tracking-[0.12em] text-lime/55">
+                  <p className="font-mono text-xs font-bold uppercase tracking-wider text-[#F2FF65]">
                     {label.toUpperCase()}
                   </p>
 
-                  <p className="mt-1 text-sm text-[#F7F5ED]/80">
+                  <p className="mt-1 text-base font-semibold text-white">
                     {value}
                   </p>
                 </div>
@@ -1317,25 +2506,25 @@ export default function AcademyProfilePage({
                 return (
                   <div
                     key={`${item.level}-${item.title}`}
-                    className={`flex items-center justify-between gap-3 border-b border-lime/10 pb-3 ${
+                    className={`flex items-center justify-between gap-3 border-b border-white/10 pb-3 ${
                       !verified
                         ? "opacity-50"
                         : ""
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <span className="grid h-8 w-8 place-items-center border border-lime/20 bg-white/5 font-mono text-[9px] font-bold text-lime">
+                      <span className="grid h-8 w-8 place-items-center border border-[#F2FF65]/30 bg-white/5 font-mono text-xs font-bold text-[#F2FF65]">
                         {String(
                           index + 1
                         ).padStart(2, "0")}
                       </span>
 
                       <div>
-                        <p className="font-mono text-[9px] font-bold tracking-[0.1em] text-lime/55">
+                        <p className="font-mono text-xs font-bold uppercase tracking-wider text-[#F2FF65]">
                           {item.level}
                         </p>
 
-                        <p className="mt-1 text-xs font-semibold text-[#F7F5ED]">
+                        <p className="mt-0.5 text-sm font-bold text-white">
                           {item.title}
                         </p>
                       </div>
@@ -1352,8 +2541,6 @@ export default function AcademyProfilePage({
               }
             )}
           </div>
-
-          {/* VIEW FULL RECORD REMOVED FOR MVP */}
         </GlassPanel>
       </div>
 
@@ -1368,7 +2555,7 @@ export default function AcademyProfilePage({
           icon={Trophy}
         />
 
-        <div className="grid grid-cols-2 gap-px bg-lime/15 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-px bg-white/15 sm:grid-cols-4">
           {outcomes.map(
             ({ label, value, icon: Icon }) => (
               <div
@@ -1376,16 +2563,16 @@ export default function AcademyProfilePage({
                 className="bg-[#2C337F]/60 p-5"
               >
                 <Icon
-                  size={19}
-                  className="text-lime"
+                  size={20}
+                  className="text-[#F2FF65]"
                   strokeWidth={1.5}
                 />
 
-                <p className="mt-7 font-mono text-3xl font-bold tracking-[-0.06em] text-lime">
+                <p className="mt-5 font-mono text-3xl font-black tracking-tight text-[#F2FF65]">
                   {value}
                 </p>
 
-                <p className="mt-2 font-mono text-[9px] font-bold leading-4 tracking-[0.1em] text-[#F7F5ED]/55">
+                <p className="mt-2 font-mono text-xs font-bold uppercase leading-snug tracking-wider text-white/90">
                   {label}
                 </p>
               </div>
@@ -1394,80 +2581,7 @@ export default function AcademyProfilePage({
         </div>
       </GlassPanel>
 
-      {/* =====================================================
-    COACHING STAFF
-====================================================== */}
 
-<GlassPanel className="mt-5">
-  <SectionHeader
-    eyebrow="PEOPLE BEHIND PERFORMANCE"
-    title="VERIFIED COACHING STAFF"
-    icon={Users}
-  />
-
-  <div
-    className="flex gap-4 overflow-x-auto pb-3 snap-x snap-mandatory"
-    style={{ scrollbarWidth: "thin" }}
-  >
-    {coaches.map((coach) => (
-      <article
-        key={coach.id || coach.name}
-        className="w-[280px] shrink-0 snap-start border border-lime/15 bg-[#315038]/50 p-5 transition-transform duration-200 hover:-translate-y-1"
-      >
-        <div className="flex items-start justify-between">
-          <div className="grid h-14 w-14 place-items-center overflow-hidden bg-[#2C337F] text-lime">
-            {coach.avatar || coach.image ? (
-              <img
-                src={coach.avatar || coach.image}
-                alt={coach.name}
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              <UserRound
-                size={23}
-                strokeWidth={1.5}
-              />
-            )}
-          </div>
-
-          {coach.verified && (
-            <BadgeCheck
-              size={20}
-              className="text-[#3B82F6]"
-              fill="currentColor"
-              strokeWidth={2.2}
-            />
-          )}
-        </div>
-
-        <h3 className="mt-5 font-mono text-sm font-bold tracking-[0.05em] text-lime">
-          {coach.name}
-        </h3>
-
-        <p className="mt-1 text-sm text-[#F7F5ED]/70">
-          {coach.role}
-        </p>
-
-        <div className="mt-4 border-t border-lime/15 pt-3">
-          <p className="font-mono text-[9px] font-bold tracking-[0.1em] text-[#F7F5ED]/50">
-            {coach.experience ||
-              coach.experienceYears ||
-              "—"}{" "}
-            EXPERIENCE
-          </p>
-        </div>
-      </article>
-    ))}
-  </div>
-
-  {/* Swipe hint */}
-  {coaches.length > 3 && (
-    <div className="mt-3 flex items-center justify-end gap-1 font-mono text-[8px] font-bold tracking-[0.12em] text-lime/40">
-      SWIPE TO EXPLORE
-      <ChevronRight size={12} />
-    </div>
-  )}
-</GlassPanel>
 
 
 {/* =====================================================
@@ -1488,25 +2602,25 @@ export default function AcademyProfilePage({
     {programs.map((program) => (
       <article
         key={program.id || program.title}
-        className="w-[280px] shrink-0 snap-start border border-lime/15 bg-[#315038]/50 p-5 transition-transform duration-200 hover:-translate-y-1"
+        className="w-[280px] shrink-0 snap-start border border-white/15 bg-[#315038]/50 p-5 transition-transform duration-200 hover:-translate-y-1"
       >
         <Dumbbell
           size={20}
-          className="text-lime"
+          className="text-[#F2FF65]"
           strokeWidth={1.5}
         />
 
-        <p className="mt-6 font-mono text-[9px] font-bold tracking-[0.13em] text-lime/55">
+        <p className="mt-5 font-mono text-xs font-bold uppercase tracking-wider text-[#F2FF65]">
           {program.discipline ||
             program.sport ||
             "PROGRAM"}
         </p>
 
-        <h3 className="mt-2 font-mono text-sm font-bold leading-5 tracking-[0.04em] text-lime">
+        <h3 className="mt-2 font-['Poppins'] text-base font-extrabold uppercase tracking-wide text-white">
           {program.title}
         </h3>
 
-        <p className="mt-3 text-sm leading-6 text-[#F7F5ED]/65">
+        <p className="mt-2 text-sm leading-relaxed text-white/80">
           {program.description}
         </p>
       </article>
@@ -1515,12 +2629,13 @@ export default function AcademyProfilePage({
 
   {/* Swipe hint */}
   {programs.length > 3 && (
-    <div className="mt-3 flex items-center justify-end gap-1 font-mono text-[8px] font-bold tracking-[0.12em] text-lime/40">
+    <div className="mt-3 flex items-center justify-end gap-1 font-mono text-xs font-bold tracking-wider text-[#F2FF65]/60">
       SWIPE TO EXPLORE
-      <ChevronRight size={12} />
+      <ChevronRight size={14} />
     </div>
   )}
 </GlassPanel>
+
       {/* =====================================================
           ACHIEVEMENTS + OUTCOMES
       ====================================================== */}
@@ -1533,7 +2648,7 @@ export default function AcademyProfilePage({
             icon={Trophy}
           />
 
-          <div className="achievements-list">
+          <div className="achievements-list space-y-4">
             {recentAchievements.map(
               (
                 achievement,
@@ -1551,22 +2666,22 @@ export default function AcademyProfilePage({
                       achievement.id ||
                       achievement.title
                     }
-                    className="achievement-item"
+                    className="flex items-start gap-3 border-b border-white/10 pb-3"
                   >
                     <Icon
-                      size={20}
-                      className="text-lime"
+                      size={22}
+                      className="mt-0.5 shrink-0 text-[#F2FF65]"
                       strokeWidth={1.5}
                     />
 
                     <div>
-                      <h4 className="item-title">
+                      <h4 className="text-base font-bold text-white leading-snug">
                         {
                           achievement.title
                         }
                       </h4>
 
-                      <p className="item-sub-org">
+                      <p className="mt-1 font-mono text-xs font-semibold uppercase tracking-wider text-[#F2FF65]">
                         {
                           achievement.date
                         }
@@ -1595,19 +2710,19 @@ export default function AcademyProfilePage({
               }) => (
                 <div
                   key={label}
-                  className="border border-lime/10 bg-white/5 p-4"
+                  className="border border-white/10 bg-white/5 p-4"
                 >
                   <Icon
-                    size={17}
-                    className="text-lime"
+                    size={18}
+                    className="text-[#F2FF65]"
                     strokeWidth={1.5}
                   />
 
-                  <p className="mt-5 font-mono text-2xl font-bold text-lime">
+                  <p className="mt-4 font-mono text-3xl font-black text-[#F2FF65]">
                     {value}
                   </p>
 
-                  <p className="mt-1 font-mono text-[8px] font-bold leading-4 tracking-[0.08em] text-[#F7F5ED]/50">
+                  <p className="mt-1.5 font-mono text-xs font-bold uppercase leading-snug tracking-wider text-white/90">
                     {label}
                   </p>
                 </div>
@@ -1618,136 +2733,68 @@ export default function AcademyProfilePage({
       </div>
 
       {/* =====================================================
-          OPEN OPPORTUNITIES
-      ====================================================== */}
-
-      <GlassPanel className="mt-5">
-        <SectionHeader
-          eyebrow="CURRENTLY RECRUITING"
-          title="OPEN ACADEMY OPPORTUNITIES"
-          icon={ClipboardCheck}
-        />
-
-        <div className="grid gap-4 md:grid-cols-2">
-          {opportunities.map(
-            (opportunity) => (
-              <article
-                key={
-                  opportunity.id ||
-                  opportunity.title
-                }
-                className="border border-lime/15 bg-[#315038]/50 p-5 transition-transform duration-200 hover:-translate-y-1"
-              >
-                <StatusBadge>
-                  {opportunity.status ||
-                    "OPEN"}
-                </StatusBadge>
-
-                <h3 className="mt-4 font-mono text-sm font-bold tracking-[0.05em] text-lime">
-                  {opportunity.title}
-                </h3>
-
-                <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-xs text-[#F7F5ED]/60">
-                  <span>
-                    {opportunity.sport ||
-                      "Sport"}
-                  </span>
-
-                  <span className="inline-flex items-center gap-1">
-                    <MapPin
-                      size={13}
-                      className="text-lime"
-                    />
-                    {opportunity.location ||
-                      location}
-                  </span>
-
-                  <span>
-                    {opportunity.positions ||
-                      "Positions available"}
-                  </span>
-                </div>
-
-                <button
-                  onClick={() =>
-                    handleViewOpportunity(
-                      opportunity
-                    )
-                  }
-                  className="mt-5 inline-flex items-center gap-1 border-b border-lime pb-1 font-mono text-[10px] font-bold tracking-[0.08em] text-lime"
-                >
-                  VIEW OPPORTUNITY
-                  <ChevronRight size={14} />
-                </button>
-              </article>
-            )
-          )}
-        </div>
-      </GlassPanel>
-
-      {/* =====================================================
           STRIDE CREDENTIAL
       ====================================================== */}
 
-      <div className="court-panel-container mt-5 overflow-hidden border-lime/25 bg-[#2C337F]">
+      <div className="court-panel-container mt-5 overflow-hidden border-white/20 bg-[#2C337F]">
         <div className="p-5 sm:p-7">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <div className="flex items-center gap-2">
                 <ShieldCheck
-                  size={19}
-                  className="text-lime"
+                  size={20}
+                  className="text-[#F2FF65]"
                 />
 
-                <p className="font-mono text-[9px] font-bold tracking-[0.18em] text-lime/60">
+                <p className="font-mono text-xs font-bold uppercase tracking-[0.18em] text-[#F2FF65]">
                   STRIDE VERIFIED RECORD
                 </p>
               </div>
 
-              <h2 className="mt-3 font-mono text-xl font-bold tracking-[-0.04em] text-lime sm:text-2xl">
+              <h2 className="mt-3 font-['Poppins'] text-2xl font-black uppercase tracking-wider text-white sm:text-3xl">
                 {name.toUpperCase()}{" "}
                 CREDENTIAL
               </h2>
 
               <div className="mt-6 grid gap-5 sm:grid-cols-2">
                 <div>
-                  <p className="font-mono text-[9px] font-bold tracking-[0.1em] text-lime/55">
+                  <p className="font-mono text-xs font-bold uppercase tracking-wider text-[#F2FF65]">
                     ACADEMY ID
                   </p>
 
-                  <p className="mt-1 text-sm text-[#F7F5ED]/75">
+                  <p className="mt-1 text-base font-semibold text-white">
                     {academyId}
                   </p>
                 </div>
 
                 <div>
-                  <p className="font-mono text-[9px] font-bold tracking-[0.1em] text-lime/55">
+                  <p className="font-mono text-xs font-bold uppercase tracking-wider text-[#F2FF65]">
                     VERIFICATION LEVEL
                   </p>
 
-                  <p className="mt-1 text-sm text-[#F7F5ED]/75">
+                  <p className="mt-1 text-base font-semibold text-white">
                     {verificationLevel}
                   </p>
                 </div>
 
                 <div>
-                  <p className="font-mono text-[9px] font-bold tracking-[0.1em] text-lime/55">
+                  <p className="font-mono text-xs font-bold uppercase tracking-wider text-[#F2FF65]">
                     LAST AUDIT
                   </p>
 
-                  <p className="mt-1 text-sm text-[#F7F5ED]/75">
+                  <p className="mt-1 text-base font-semibold text-white">
                     {localAcademy.lastAuditDate ||
                       "14 AUG 2026"}
                   </p>
                 </div>
 
                 <div>
-                  <p className="font-mono text-[9px] font-bold tracking-[0.1em] text-lime/55">
+                  <p className="font-mono text-xs font-bold uppercase tracking-wider text-[#F2FF65]">
                     STATUS
                   </p>
 
-                  <p className="mt-1 inline-flex items-center gap-1.5 text-sm font-semibold text-lime">
-                    <CheckCircle2 size={14} />
+                  <p className="mt-1 inline-flex items-center gap-1.5 text-base font-bold text-[#F2FF65]">
+                    <CheckCircle2 size={16} />
                     VERIFIED ORGANIZATION
                   </p>
                 </div>
@@ -1756,21 +2803,18 @@ export default function AcademyProfilePage({
               <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2">
                 {[
                   "VERIFIED ORGANIZATION",
-                  "VERIFIED COACHES",
                   "VERIFIED FACILITY",
                 ].map((item) => (
                   <span
                     key={item}
-                    className="inline-flex items-center gap-1.5 font-mono text-[9px] font-bold tracking-[0.08em] text-lime"
+                    className="inline-flex items-center gap-1.5 font-mono text-xs font-bold uppercase tracking-wider text-[#F2FF65]"
                   >
-                    <CheckCircle2 size={12} />
+                    <CheckCircle2 size={14} />
                     {item}
                   </span>
                 ))}
               </div>
             </div>
-
-            {/* VIEW VERIFICATION RECORD REMOVED FOR MVP */}
           </div>
         </div>
       </div>
