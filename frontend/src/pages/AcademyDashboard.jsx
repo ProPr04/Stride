@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import AcademySidebar from '../academics/AcademySidebar';
 import AcademyHeader from '../academics/AcademyHeader';
 import AcademyOverviewSection from '../academics/AcademyOverviewSection';
@@ -10,7 +11,16 @@ import AcademyEngagementsSection from '../academics/AcademyEngagementsSection';
 import AcademyProfilePage from '../academics/AcademyProfilePage';
 
 export default function AcademyDashboard({ onLogout }) {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('dashboard');
+
+  const handleLogout = () => {
+    if (onLogout) {
+      onLogout();
+    } else {
+      navigate('/');
+    }
+  };
 
   const academy = {
     name: 'Stride Sports Academy',
@@ -132,7 +142,7 @@ export default function AcademyDashboard({ onLogout }) {
       <AcademySidebar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
-        onLogout={onLogout}
+        onLogout={handleLogout}
       />
 
       {/* MAIN AREA */}

@@ -26,7 +26,7 @@ function AthleteCard({ athlete, onViewProfile }) {
   const image = athlete.avatar || athlete.image || athlete.profileImage;
 
   return (
-    <article className="group overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#315038] via-[#223F31] to-[#166534] shadow-[0_12px_35px_rgba(0,0,0,0.18)] transition-all duration-300 hover:-translate-y-1.5 hover:border-[#F2FF65]/35 hover:shadow-[0_18px_45px_rgba(0,0,0,0.28)]">
+    <article className="group overflow-hidden rounded-2xl border border-white/10 bg-[#315038] shadow-[0_12px_35px_rgba(0,0,0,0.18)] transition-all duration-300 hover:-translate-y-1.5 hover:border-[#F2FF65]/35 hover:shadow-[0_18px_45px_rgba(0,0,0,0.28)]">
       <div className="relative overflow-hidden border-b border-white/10 p-5">
         <div className="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-[#F2FF65]/10 blur-2xl transition-all duration-300 group-hover:bg-[#F2FF65]/20" />
 

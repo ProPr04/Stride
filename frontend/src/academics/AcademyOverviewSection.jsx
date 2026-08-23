@@ -130,7 +130,7 @@ function AthleteCard({ athlete, onViewProfile }) {
     null;
 
   return (
-    <article className="group min-w-[285px] snap-start overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#315038] via-[#223F31] to-[#166534] shadow-[0_12px_35px_rgba(0,0,0,0.18)] transition-all duration-300 hover:-translate-y-1.5 hover:border-[#F2FF65]/35 hover:shadow-[0_18px_45px_rgba(0,0,0,0.28)] sm:min-w-[320px]">
+    <article className="group min-w-[285px] snap-start overflow-hidden rounded-2xl border border-white/10 bg-[#315038] shadow-[0_12px_35px_rgba(0,0,0,0.18)] transition-all duration-300 hover:-translate-y-1.5 hover:border-[#F2FF65]/35 hover:shadow-[0_18px_45px_rgba(0,0,0,0.28)] sm:min-w-[320px]">
       {/* PROFILE IMAGE */}
       <div className="relative h-[250px] overflow-hidden bg-[#1B2B20]">
         {image ? (

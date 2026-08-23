@@ -98,7 +98,11 @@ function AppRoutes() {
       {/* Academy Dashboard Route */}
       <Route
         path="/academy"
-        element={<AcademyDashboard />}
+        element={
+          <AcademyDashboard
+            onLogout={() => navigate('/')}
+          />
+        }
       />
 
       {/* Unknown routes fallback to / */}

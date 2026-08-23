@@ -13,7 +13,7 @@ import {
 
 function AthleteCard({ athlete, onViewProfile }) {
   return (
-    <article className="group relative overflow-hidden rounded-xl border border-white/10 bg-[#223F31] p-5 transition-all duration-300 hover:-translate-y-1 hover:border-[#F2FF65]/35 hover:shadow-[0_15px_40px_rgba(0,0,0,0.22)]">
+    <article className="group relative overflow-hidden rounded-xl border border-white/10 bg-[#315038] p-5 transition-all duration-300 hover:-translate-y-1 hover:border-[#F2FF65]/35 hover:shadow-[0_15px_40px_rgba(0,0,0,0.22)]">
       {/* Subtle decorative glow */}
       <div className="absolute -right-12 -top-12 h-28 w-28 rounded-full bg-[#F2FF65]/5 blur-3xl transition-all duration-300 group-hover:bg-[#F2FF65]/10" />
 
