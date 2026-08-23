@@ -220,6 +220,7 @@ function ApplicationCard({
 
 /* =========================================================
    APPLICATION MODAL
+   Social-media / profile-request style
 ========================================================= */
 
 function ApplicationModal({
@@ -229,7 +230,6 @@ function ApplicationModal({
   onClose,
   onApprove,
   onDecline,
-  onViewAthlete,
 }) {
   if (!application) return null;
 
@@ -242,207 +242,137 @@ function ApplicationModal({
     athlete?.name ||
     "Athlete";
 
-  const opportunityName =
-    application.opportunityName ||
-    opportunity?.title ||
-    "Opportunity";
+  const sport =
+    athlete?.sport ||
+    application.sport ||
+    opportunity?.sport ||
+    "Athlete";
 
-  const details = [
-    [
-      "Application ID",
-      application.id || application.applicationId,
-    ],
-    [
-      "Applied on",
-      application.applicationDate ||
-        application.createdAt,
-    ],
-    [
-      "Sport",
-      opportunity?.sport || application.sport,
-    ],
-    [
-      "Location",
-      opportunity?.location ||
-        application.location,
-    ],
-    [
-      "Experience",
-      application.experience ||
-        athlete?.experience,
-    ],
-    [
-      "Message",
-      application.message ||
-        application.coverLetter ||
-        application.details,
-    ],
-  ].filter(
-    ([, value]) =>
-      value !== undefined &&
-      value !== null &&
-      value !== ""
-  );
+  /*
+    Supports common profile-image field names.
+    If your athlete object has one of these, it will automatically show.
+  */
+  const profileImage =
+    athlete?.profilePicture ||
+    athlete?.profileImage ||
+    athlete?.avatar ||
+    athlete?.image ||
+    application.profilePicture ||
+    application.profileImage ||
+    application.avatar ||
+    application.image ||
+    null;
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end bg-[#07130D]/80 p-4 backdrop-blur-sm sm:items-center sm:justify-center sm:p-6"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[#07130D]/80 p-4 backdrop-blur-md"
       role="dialog"
       aria-modal="true"
     >
-      <div className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-white/10 bg-gradient-to-br from-[#315038] via-[#223F31] to-[#141F16] shadow-[0_25px_80px_rgba(0,0,0,0.5)]">
+      <div className="w-full max-w-sm overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-b from-[#315038] to-[#141F16] shadow-[0_25px_80px_rgba(0,0,0,0.55)]">
 
-        {/* =============================================
-            MODAL HEADER
-        ============================================= */}
+        {/* =================================================
+            CLOSE BUTTON
+        ================================================= */}
 
-        <div className="flex items-start justify-between border-b border-white/10 p-5">
-          <div className="flex min-w-0 items-center gap-3">
-
-            <div className="grid h-12 w-12 shrink-0 place-items-center rounded-full border border-[#F2FF65]/20 bg-[#2C337F] text-[#F2FF65]">
-              <UserRound size={19} />
-            </div>
-
-            <div className="min-w-0">
-              {/* CLICKABLE ATHLETE NAME */}
-
-              <button
-                type="button"
-                onClick={() => {
-                  if (onViewAthlete) {
-                    onViewAthlete(
-                      athlete ||
-                        application.athlete ||
-                        application.athleteId
-                    );
-                  }
-                }}
-                className="text-left font-['Poppins'] text-lg font-semibold tracking-tight text-[#F7F5ED] transition-colors hover:text-[#F2FF65] hover:underline"
-              >
-                {athleteName}
-              </button>
-
-              <p className="mt-0.5 text-xs text-[#F7F5ED]/55">
-                {opportunityName}
-              </p>
-
-              <p className="mt-1 text-[10px] font-mono uppercase tracking-wider text-[#F2FF65]/50">
-                Click athlete name to view profile
-              </p>
-            </div>
-          </div>
-
+        <div className="flex justify-end px-4 pt-4">
           <button
+            type="button"
             onClick={onClose}
-            className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-white/10 bg-white/5 text-[#F2FF65] transition-all hover:border-[#F2FF65]/35 hover:bg-[#F2FF65]/10"
+            className="grid h-9 w-9 place-items-center rounded-full border border-white/10 bg-white/5 text-[#F7F5ED]/70 transition-all hover:border-[#F2FF65]/40 hover:bg-[#F2FF65]/10 hover:text-[#F2FF65]"
             aria-label="Close"
           >
-            <X size={16} />
+            <X size={17} />
           </button>
         </div>
 
-        {/* =============================================
-            MODAL CONTENT
-        ============================================= */}
+        {/* =================================================
+            PROFILE
+        ================================================= */}
 
-        <div className="p-5">
+        <div className="flex flex-col items-center px-6 pb-6 pt-2">
 
-          <div className="flex flex-wrap items-center gap-3">
+          {/* PROFILE PICTURE */}
+
+          <div className="relative">
+            <div className="h-24 w-24 overflow-hidden rounded-full border-2 border-[#F2FF65]/60 bg-[#2C337F] shadow-[0_0_0_5px_rgba(242,255,101,0.06)]">
+
+              {profileImage ? (
+                <img
+                  src={profileImage}
+                  alt={athleteName}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <div className="grid h-full w-full place-items-center text-[#F2FF65]">
+                  <UserRound size={36} strokeWidth={1.5} />
+                </div>
+              )}
+
+            </div>
+          </div>
+
+          {/* NAME */}
+
+          <h2 className="mt-4 text-center font-['Poppins'] text-xl font-bold tracking-tight text-[#F7F5ED]">
+            {athleteName}
+          </h2>
+
+          {/* SPORT */}
+
+          <p className="mt-1 text-sm font-medium text-[#F2FF65]">
+            {sport}
+          </p>
+
+          {/* STATUS */}
+
+          <div className="mt-4">
             <StatusBadge status={application.status} />
-
-            <span className="inline-flex items-center gap-1.5 font-mono text-[10px] text-[#F7F5ED]/50">
-              <CalendarDays size={12} />
-              {application.applicationDate ||
-                application.createdAt ||
-                "Date unavailable"}
-            </span>
           </div>
 
-          {/* DETAILS */}
-
-          <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            {details.map(([label, value]) => (
-              <div
-                key={label}
-                className={`rounded-xl border border-white/10 bg-[#2A3C2E] p-3.5 ${
-                  label === "Message"
-                    ? "sm:col-span-2"
-                    : ""
-                }`}
-              >
-                <p className="font-mono text-[9px] font-bold uppercase tracking-[0.14em] text-[#F2FF65]/60">
-                  {label}
-                </p>
-
-                <p className="mt-1.5 text-xs leading-5 text-[#F7F5ED]/80">
-                  {String(value)}
-                </p>
-              </div>
-            ))}
-          </div>
-
-          {/* ===========================================
+          {/* =================================================
               DECISION BUTTONS
-              ONLY FOR NEEDS ATTENTION
-          =========================================== */}
+              ONLY FOR PENDING / UNDER REVIEW
+          ================================================= */}
 
           {!isProcessed && (
-            <div className="mt-6 border-t border-white/10 pt-5">
-              <p className="mb-3 font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-[#F7F5ED]/40">
-                Application Decision
-              </p>
+            <div className="mt-7 grid w-full grid-cols-2 gap-3">
 
-              <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => onDecline(application)}
+                className="flex items-center justify-center gap-2 rounded-xl border border-rose-400/30 bg-[#95402F]/30 px-4 py-3 text-xs font-bold uppercase tracking-wider text-rose-300 transition-all hover:border-rose-400/60 hover:bg-[#95402F]/50 hover:-translate-y-0.5"
+              >
+                <XCircle size={15} />
+                DECLINE
+              </button>
 
-                <button
-                  type="button"
-                  onClick={() =>
-                    onDecline(application)
-                  }
-                  className="flex items-center justify-center gap-2 rounded-xl border border-rose-400/30 bg-[#95402F]/30 px-4 py-3 text-xs font-bold uppercase tracking-wider text-rose-300 transition-all hover:border-rose-400/60 hover:bg-[#95402F]/50"
-                >
-                  <XCircle size={15} />
-                  DECLINE
-                </button>
+              <button
+                type="button"
+                onClick={() => onApprove(application)}
+                className="flex items-center justify-center gap-2 rounded-xl bg-[#F2FF65] px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#07130D] transition-all hover:-translate-y-0.5 hover:shadow-lg"
+              >
+                <CheckCircle2 size={15} />
+                APPROVE
+              </button>
 
-                <button
-                  type="button"
-                  onClick={() =>
-                    onApprove(application)
-                  }
-                  className="flex items-center justify-center gap-2 rounded-xl bg-[#F2FF65] px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#07130D] transition-all hover:-translate-y-0.5 hover:shadow-lg"
-                >
-                  <CheckCircle2 size={15} />
-                  APPROVE
-                </button>
-
-              </div>
             </div>
           )}
 
-          {/* PROCESSED APPLICATION MESSAGE */}
-
-          {isProcessed && (
-            <div className="mt-6 rounded-xl border border-white/10 bg-[#141F16] p-4">
-              <p className="font-mono text-[9px] font-bold uppercase tracking-[0.14em] text-[#F2FF65]/60">
-                Decision
-              </p>
-
-              <p className="mt-1.5 text-xs text-[#F7F5ED]/65">
-                This application has already been processed.
-              </p>
-            </div>
-          )}
-
-          {/* CLOSE */}
+          {/* =================================================
+              CLOSE
+          ================================================= */}
 
           <button
             type="button"
             onClick={onClose}
-            className="mt-5 w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-bold text-[#F7F5ED]/70 transition-all hover:border-[#F2FF65]/30 hover:text-[#F2FF65]"
+            className={`w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#F7F5ED]/65 transition-all hover:border-[#F2FF65]/30 hover:bg-[#F2FF65]/10 hover:text-[#F2FF65] ${
+              !isProcessed ? "mt-3" : "mt-7"
+            }`}
           >
             CLOSE
           </button>
+
         </div>
       </div>
     </div>
