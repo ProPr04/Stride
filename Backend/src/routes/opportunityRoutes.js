@@ -1,6 +1,7 @@
 import express from 'express';
 import opportunityController from '../controllers/opportunityController.js';
 import { protect, authorize } from '../middlewares/authMiddleware.js';
+import { resolveDirectUrls } from '../middlewares/directUrlMiddleware.js';
 
 const router = express.Router();
 
@@ -12,7 +13,12 @@ router.use(protect);
  * @desc    Create a new active opportunity (mandates cash pay + perks)
  * @access  Private (Academy Only)
  */
-router.post('/', authorize('academy'), opportunityController.createOpportunity);
+router.post(
+  '/', 
+  authorize('academy'), 
+  resolveDirectUrls(['media_image', 'image']), 
+  opportunityController.createOpportunity
+);
 
 /**
  * @route   GET /api/opportunities
@@ -40,6 +46,11 @@ router.patch('/:id/status', authorize('academy'), opportunityController.updateOp
  * @desc    Update existing opportunity
  * @access  Private (Academy Only)
  */
-router.put('/:id', authorize('academy'), opportunityController.updateOpportunity);
+router.put(
+  '/:id', 
+  authorize('academy'), 
+  resolveDirectUrls(['media_image', 'image']), 
+  opportunityController.updateOpportunity
+);
 
 export default router;

@@ -406,7 +406,7 @@ function OpportunityFormModal({
     }));
   };
 
-  const handleImageChange = (event) => {
+  const handleImageChange = async (event) => {
     const file = event.target.files?.[0];
 
     if (!file) return;
@@ -416,20 +416,21 @@ function OpportunityFormModal({
       return;
     }
 
-    const reader = new FileReader();
+    try {
+      const res = await api.upload.image(file);
+      if (res.data?.url) {
+        setImagePreview(res.data.url);
+        updateField("image", res.data.url);
+      }
+    } catch (err) {
+      alert("Failed to upload image: " + err.message);
+    }
+  };
 
-    reader.onload = () => {
-      const result = String(reader.result || "");
-
-      setImagePreview(result);
-
-      setForm((previous) => ({
-        ...previous,
-        image: result,
-      }));
-    };
-
-    reader.readAsDataURL(file);
+  const handleRemoveImage = (e) => {
+    e.stopPropagation();
+    setImagePreview("");
+    updateField("image", "");
   };
 
   const handleSubmit = (mode) => {
@@ -556,11 +557,19 @@ function OpportunityFormModal({
                     className="h-[240px] w-full object-cover"
                   />
 
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/35 opacity-0 transition-opacity group-hover:opacity-100">
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/35 opacity-0 transition-opacity group-hover:opacity-100">
                     <div className="flex items-center gap-2 rounded-lg bg-[#F2FF65] px-4 py-2 text-xs font-bold text-[#141F16]">
                       <Upload size={14} />
                       Change Image
                     </div>
+                    <button
+                      type="button"
+                      onClick={handleRemoveImage}
+                      className="flex items-center gap-2 rounded-lg bg-red-500 px-4 py-2 text-xs font-bold text-white hover:bg-red-600"
+                    >
+                      <X size={14} />
+                      Remove Image
+                    </button>
                   </div>
                 </>
               ) : (

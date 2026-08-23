@@ -248,6 +248,44 @@ export const api = {
       method: 'DELETE',
     }),
   },
+
+  // Upload Endpoints
+  upload: {
+    image: async (file) => {
+      const formData = new FormData();
+      formData.append('image', file);
+
+      const url = `${API_BASE_URL}/upload/image`;
+      const token = authStorage.getToken();
+      const currentUser = authStorage.getUser();
+
+      const headers = {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(currentUser?.role ? { 'x-mock-role': currentUser.role } : {}),
+        ...(currentUser?.id ? { 'x-mock-user-id': String(currentUser.id) } : {}),
+      };
+      // Note: Do not set Content-Type here, let the browser set it to multipart/form-data with the correct boundary
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers,
+        body: formData,
+      });
+
+      if (response.status === 401) {
+        authStorage.clear();
+      }
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        const errorMessage = data.message || `Upload failed with status ${response.status}`;
+        throw new Error(errorMessage);
+      }
+
+      return data;
+    }
+  }
 };
 
 export default api;

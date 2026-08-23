@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   User,
+  UserRound,
   MapPin,
   Trophy,
   Activity,
@@ -25,7 +26,6 @@ import {
 } from 'lucide-react';
 import { api } from '../../../services/api';
 
-const DEFAULT_AVATAR = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80';
 const DEFAULT_COVER = 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=1200&auto=format&fit=crop&q=80';
 
 export default function AthleteProfileSection() {
@@ -47,7 +47,7 @@ export default function AthleteProfileSection() {
     location: 'India',
     verified: true,
     age: '21 Yrs',
-    avatar: DEFAULT_AVATAR,
+    avatar: '',
     cover: DEFAULT_COVER,
     bio: 'Dedicated athlete committed to training, competition, and sports excellence.',
     performanceMetrics: 'Add your personal best records, benchmark timings, and physical measurements here...',
@@ -79,7 +79,7 @@ export default function AthleteProfileSection() {
         location: p.location || 'India',
         verified: (p.verification_level || 1) >= 1,
         age: p.age || '21 Yrs',
-        avatar: p.avatar_url || DEFAULT_AVATAR,
+        avatar: p.avatar_url || '',
         cover: p.cover_url || DEFAULT_COVER,
         bio: p.bio || 'Dedicated athlete committed to regular training and championship events.',
         performanceMetrics: p.performance_metrics || 'Sprint Personal Best: 10.5s | Endurance Pace: 3:45/km | State Trials Completed',
@@ -119,25 +119,42 @@ export default function AthleteProfileSection() {
   };
 
   // Avatar Image Upload Handler
-  const handleAvatarChange = (e) => {
+  const handleAvatarChange = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      setEditForm(prev => ({ ...prev, avatar: String(reader.result) }));
-    };
-    reader.readAsDataURL(file);
+    
+    try {
+      // Show some loading indicator if needed (optional)
+      const res = await api.upload.image(file);
+      if (res.data?.url) {
+        setEditForm(prev => ({ ...prev, avatar: res.data.url }));
+      }
+    } catch (err) {
+      alert('Failed to upload avatar: ' + err.message);
+    }
+  };
+
+  const handleRemoveAvatar = () => {
+    setEditForm(prev => ({ ...prev, avatar: '' }));
   };
 
   // Cover Image Upload Handler
-  const handleCoverChange = (e) => {
+  const handleCoverChange = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      setEditForm(prev => ({ ...prev, cover: String(reader.result) }));
-    };
-    reader.readAsDataURL(file);
+
+    try {
+      const res = await api.upload.image(file);
+      if (res.data?.url) {
+        setEditForm(prev => ({ ...prev, cover: res.data.url }));
+      }
+    } catch (err) {
+      alert('Failed to upload cover image: ' + err.message);
+    }
+  };
+
+  const handleRemoveCover = () => {
+    setEditForm(prev => ({ ...prev, cover: '' }));
   };
 
   // Save changes to PostgreSQL
@@ -279,7 +296,12 @@ export default function AthleteProfileSection() {
       <div className="bg-[#141F16] border border-[#2A3C2E] rounded-2xl overflow-hidden shadow-xl">
         {/* Cover Photo */}
         <div className="h-44 sm:h-52 w-full relative bg-[#0B120D]">
-          <img src={athleteData.cover} alt="Cover" className="w-full h-full object-cover opacity-70" />
+          <img 
+            src={athleteData.cover || DEFAULT_COVER} 
+            alt="Cover" 
+            onError={(e) => { e.currentTarget.src = DEFAULT_COVER; }}
+            className="w-full h-full object-cover opacity-70" 
+          />
           <div className="absolute inset-0 bg-gradient-to-t from-[#141F16] via-transparent to-transparent" />
         </div>
 
@@ -287,8 +309,19 @@ export default function AthleteProfileSection() {
         <div className="px-6 pb-6 relative -mt-16 sm:-mt-20 flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-end gap-4">
             {/* Avatar Frame */}
-            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full border-4 border-[#141F16] overflow-hidden bg-[#0B120D] shadow-xl shrink-0">
-              <img src={athleteData.avatar} alt={athleteData.name} className="w-full h-full object-cover" />
+            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full border-4 border-[#141F16] overflow-hidden bg-[#1a291f] shadow-xl shrink-0 flex items-center justify-center relative">
+              {athleteData.avatar ? (
+                <img 
+                  src={athleteData.avatar} 
+                  alt={athleteData.name} 
+                  onError={() => setAthleteData(prev => ({ ...prev, avatar: '' }))}
+                  className="w-full h-full object-cover" 
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-[#203326] text-[#8ea895]">
+                  <UserRound size={54} strokeWidth={1.5} />
+                </div>
+              )}
             </div>
 
             <div className="space-y-1">
@@ -506,19 +539,39 @@ export default function AthleteProfileSection() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 bg-[#0B120D] rounded-xl border border-[#2A3C2E]">
                 {/* Avatar upload */}
                 <div className="flex items-center gap-3">
-                  <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-[#F2FF65]/40 shrink-0 bg-[#141F16]">
-                    <img src={editForm.avatar} alt="Avatar Preview" className="w-full h-full object-cover" />
+                  <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-[#F2FF65]/40 shrink-0 bg-[#1a291f] flex items-center justify-center relative">
+                    {editForm.avatar ? (
+                      <img 
+                        src={editForm.avatar} 
+                        alt="Avatar Preview" 
+                        onError={() => setEditForm(prev => ({ ...prev, avatar: '' }))}
+                        className="w-full h-full object-cover" 
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-[#203326] text-[#8ea895]">
+                        <UserRound size={26} strokeWidth={1.5} />
+                      </div>
+                    )}
                   </div>
                   <div className="space-y-1">
                     <span className="text-[10px] font-mono font-bold text-gray-300 uppercase block">Avatar Photo</span>
-                    <button
-                      type="button"
-                      onClick={() => avatarInputRef.current?.click()}
-                      className="px-2.5 py-1 bg-[#141F16] border border-[#2A3C2E] hover:border-[#F2FF65] text-[#F2FF65] rounded text-[11px] font-mono font-bold flex items-center gap-1 cursor-pointer"
-                    >
-                      <Camera size={12} />
-                      <span>Change</span>
-                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => avatarInputRef.current?.click()}
+                        className="px-2.5 py-1 bg-[#141F16] border border-[#2A3C2E] hover:border-[#F2FF65] text-[#F2FF65] rounded text-[11px] font-mono font-bold flex items-center gap-1 cursor-pointer"
+                      >
+                        <Camera size={12} />
+                        <span>Change</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleRemoveAvatar}
+                        className="px-2.5 py-1 bg-[#141F16] border border-[#2A3C2E] hover:border-red-500 text-red-500 rounded text-[11px] font-mono font-bold flex items-center gap-1 cursor-pointer"
+                      >
+                        <span>Remove</span>
+                      </button>
+                    </div>
                     <input
                       ref={avatarInputRef}
                       type="file"
@@ -532,18 +585,32 @@ export default function AthleteProfileSection() {
                 {/* Cover upload */}
                 <div className="flex items-center gap-3">
                   <div className="w-20 h-14 rounded-lg overflow-hidden border border-[#2A3C2E] shrink-0 bg-[#141F16]">
-                    <img src={editForm.cover} alt="Cover Preview" className="w-full h-full object-cover" />
+                    <img 
+                      src={editForm.cover || DEFAULT_COVER} 
+                      alt="Cover Preview" 
+                      onError={(e) => { e.currentTarget.src = DEFAULT_COVER; }}
+                      className="w-full h-full object-cover" 
+                    />
                   </div>
                   <div className="space-y-1">
                     <span className="text-[10px] font-mono font-bold text-gray-300 uppercase block">Banner Cover</span>
-                    <button
-                      type="button"
-                      onClick={() => coverInputRef.current?.click()}
-                      className="px-2.5 py-1 bg-[#141F16] border border-[#2A3C2E] hover:border-[#F2FF65] text-[#F2FF65] rounded text-[11px] font-mono font-bold flex items-center gap-1 cursor-pointer"
-                    >
-                      <ImageIcon size={12} />
-                      <span>Change</span>
-                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => coverInputRef.current?.click()}
+                        className="px-2.5 py-1 bg-[#141F16] border border-[#2A3C2E] hover:border-[#F2FF65] text-[#F2FF65] rounded text-[11px] font-mono font-bold flex items-center gap-1 cursor-pointer"
+                      >
+                        <ImageIcon size={12} />
+                        <span>Change</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleRemoveCover}
+                        className="px-2.5 py-1 bg-[#141F16] border border-[#2A3C2E] hover:border-red-500 text-red-500 rounded text-[11px] font-mono font-bold flex items-center gap-1 cursor-pointer"
+                      >
+                        <span>Remove</span>
+                      </button>
+                    </div>
                     <input
                       ref={coverInputRef}
                       type="file"

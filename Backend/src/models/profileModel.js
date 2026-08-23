@@ -241,37 +241,37 @@ export const upsertAthleteProfile = async (userId, profileData) => {
     verification_level = 1,
   } = profileData;
 
-  const effectiveFullName = full_name || name || null;
-  const effectiveAvatar = avatar_url || avatar || null;
-  const effectiveCover = cover_url || cover || null;
-  const effectiveMetrics = performance_metrics || performanceMetrics || null;
+    const effectiveFullName = full_name || name || null;
+    const effectiveAvatar = avatar_url !== undefined ? avatar_url : (avatar !== undefined ? avatar : null);
+    const effectiveCover = cover_url !== undefined ? cover_url : (cover !== undefined ? cover : null);
+    const effectiveMetrics = performance_metrics || performanceMetrics || null;
 
-  const queryText = `
-    INSERT INTO athlete_profiles (
-      user_id, sport, playing_level, skills, availability, bio,
-      full_name, location, age, avatar_url, cover_url,
-      performance_metrics, achievements, videos, certifications, verification_level
-    )
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
-    ON CONFLICT (user_id) DO UPDATE SET
-      sport = EXCLUDED.sport,
-      playing_level = EXCLUDED.playing_level,
-      skills = EXCLUDED.skills,
-      availability = EXCLUDED.availability,
-      bio = EXCLUDED.bio,
-      full_name = COALESCE(EXCLUDED.full_name, athlete_profiles.full_name),
-      location = COALESCE(EXCLUDED.location, athlete_profiles.location),
-      age = COALESCE(EXCLUDED.age, athlete_profiles.age),
-      avatar_url = COALESCE(EXCLUDED.avatar_url, athlete_profiles.avatar_url),
-      cover_url = COALESCE(EXCLUDED.cover_url, athlete_profiles.cover_url),
-      performance_metrics = COALESCE(EXCLUDED.performance_metrics, athlete_profiles.performance_metrics),
-      achievements = COALESCE(EXCLUDED.achievements, athlete_profiles.achievements),
-      videos = COALESCE(EXCLUDED.videos, athlete_profiles.videos),
-      certifications = COALESCE(EXCLUDED.certifications, athlete_profiles.certifications),
-      verification_level = COALESCE(EXCLUDED.verification_level, athlete_profiles.verification_level),
-      updated_at = CURRENT_TIMESTAMP
-    RETURNING *;
-  `;
+    const queryText = `
+      INSERT INTO athlete_profiles (
+        user_id, sport, playing_level, skills, availability, bio,
+        full_name, location, age, avatar_url, cover_url,
+        performance_metrics, achievements, videos, certifications, verification_level
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+      ON CONFLICT (user_id) DO UPDATE SET
+        sport = EXCLUDED.sport,
+        playing_level = EXCLUDED.playing_level,
+        skills = EXCLUDED.skills,
+        availability = EXCLUDED.availability,
+        bio = EXCLUDED.bio,
+        full_name = COALESCE(EXCLUDED.full_name, athlete_profiles.full_name),
+        location = COALESCE(EXCLUDED.location, athlete_profiles.location),
+        age = COALESCE(EXCLUDED.age, athlete_profiles.age),
+        avatar_url = EXCLUDED.avatar_url,
+        cover_url = EXCLUDED.cover_url,
+        performance_metrics = COALESCE(EXCLUDED.performance_metrics, athlete_profiles.performance_metrics),
+        achievements = COALESCE(EXCLUDED.achievements, athlete_profiles.achievements),
+        videos = COALESCE(EXCLUDED.videos, athlete_profiles.videos),
+        certifications = COALESCE(EXCLUDED.certifications, athlete_profiles.certifications),
+        verification_level = COALESCE(EXCLUDED.verification_level, athlete_profiles.verification_level),
+        updated_at = CURRENT_TIMESTAMP
+      RETURNING *;
+    `;
   const values = [
     userId,
     sport,
