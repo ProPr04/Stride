@@ -1,4 +1,6 @@
 import opportunityModel from '../models/opportunityModel.js';
+import { deleteUploadedFile } from '../utils/fileUtils.js';
+import pool from '../config/db.js';
 
 /**
  * Creates a new active opportunity.
@@ -191,6 +193,16 @@ export const updateOpportunity = async (req, res, next) => {
     const { id } = req.params;
     const data = req.body;
 
+    let oldImage = null;
+    if (data.media_image !== undefined || data.image !== undefined) {
+      try {
+        const oldRes = await pool.query('SELECT media_image FROM opportunities WHERE id = $1', [id]);
+        oldImage = oldRes.rows[0]?.media_image;
+      } catch (queryErr) {
+        console.warn('Could not query previous opportunity image:', queryErr.message);
+      }
+    }
+
     const updated = await opportunityModel.updateOpportunity(id, academyId, data);
 
     if (!updated) {
@@ -198,6 +210,11 @@ export const updateOpportunity = async (req, res, next) => {
         status: 'fail',
         message: 'Opportunity not found or you do not have permission to modify it.',
       });
+    }
+
+    const newImage = data.media_image !== undefined ? data.media_image : data.image;
+    if (oldImage && newImage !== undefined && oldImage !== newImage) {
+      await deleteUploadedFile(oldImage);
     }
 
     res.status(200).json({

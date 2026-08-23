@@ -1,4 +1,5 @@
 import profileModel from '../models/profileModel.js';
+import { deleteUploadedFile } from '../utils/fileUtils.js';
 
 /**
  * Retrieves the profile for the currently authenticated user.
@@ -55,11 +56,36 @@ export const updateMyProfile = async (req, res, next) => {
     const role = req.user.role;
     const profileData = req.body;
 
+    let oldProfile;
+    if (role === 'athlete') {
+      oldProfile = await profileModel.getAthleteProfileByUserId(userId);
+    } else if (role === 'academy') {
+      oldProfile = await profileModel.getAcademyProfileByUserId(userId);
+    }
+
     let updatedProfile;
     if (role === 'athlete') {
       updatedProfile = await profileModel.upsertAthleteProfile(userId, profileData);
+
+      // Clean up previous avatar if replaced or removed
+      const newAvatar = profileData.avatar_url !== undefined ? profileData.avatar_url : profileData.avatar;
+      if (oldProfile?.avatar_url && newAvatar !== undefined && oldProfile.avatar_url !== newAvatar) {
+        await deleteUploadedFile(oldProfile.avatar_url);
+      }
+
+      // Clean up previous cover if replaced or removed
+      const newCover = profileData.cover_url !== undefined ? profileData.cover_url : profileData.cover;
+      if (oldProfile?.cover_url && newCover !== undefined && oldProfile.cover_url !== newCover) {
+        await deleteUploadedFile(oldProfile.cover_url);
+      }
     } else if (role === 'academy') {
       updatedProfile = await profileModel.upsertAcademyProfile(userId, profileData);
+
+      // Clean up previous logo if replaced or removed
+      const newLogo = profileData.logo_url !== undefined ? profileData.logo_url : profileData.logo;
+      if (oldProfile?.logo_url && newLogo !== undefined && oldProfile.logo_url !== newLogo) {
+        await deleteUploadedFile(oldProfile.logo_url);
+      }
     }
 
     res.status(200).json({

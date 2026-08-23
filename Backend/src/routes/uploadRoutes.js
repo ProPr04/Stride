@@ -1,12 +1,13 @@
 import express from 'express';
 import { upload } from '../middlewares/uploadMiddleware.js';
+import { deleteUploadedFile } from '../utils/fileUtils.js';
 
 const router = express.Router();
 
 /**
  * @route   POST /api/upload/image
  * @desc    Upload an image file
- * @access  Public (or could be Private, but keeping it simple for now)
+ * @access  Public (or Private)
  */
 router.post('/image', upload.single('image'), (req, res, next) => {
   try {
@@ -17,9 +18,6 @@ router.post('/image', upload.single('image'), (req, res, next) => {
       });
     }
 
-    // Construct the accessible URL based on the static path setup in app.js
-    // Assuming backend is serving on same host/port or via proxy. 
-    // We just return the relative path that the frontend can append to its backend URL.
     const fileUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
 
     res.status(200).json({
@@ -28,6 +26,32 @@ router.post('/image', upload.single('image'), (req, res, next) => {
         url: fileUrl,
         filename: req.file.filename
       }
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * @route   DELETE /api/upload/image
+ * @desc    Delete an uploaded image file from the server
+ * @access  Public (or Private)
+ */
+router.delete('/image', async (req, res, next) => {
+  try {
+    const url = req.body?.url || req.query?.url;
+    if (!url) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Please provide the file url to delete.'
+      });
+    }
+
+    const deleted = await deleteUploadedFile(url);
+
+    res.status(200).json({
+      status: 'success',
+      message: deleted ? 'File deleted successfully from disk.' : 'File not found or already removed.'
     });
   } catch (error) {
     next(error);

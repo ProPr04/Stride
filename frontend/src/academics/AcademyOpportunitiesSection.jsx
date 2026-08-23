@@ -419,6 +419,9 @@ function OpportunityFormModal({
     try {
       const res = await api.upload.image(file);
       if (res.data?.url) {
+        if (imagePreview && imagePreview !== opportunity?.media_image && imagePreview.includes('/uploads/')) {
+          api.upload.deleteImage(imagePreview);
+        }
         setImagePreview(res.data.url);
         updateField("image", res.data.url);
       }
@@ -429,6 +432,9 @@ function OpportunityFormModal({
 
   const handleRemoveImage = (e) => {
     e.stopPropagation();
+    if (imagePreview && imagePreview.includes('/uploads/')) {
+      api.upload.deleteImage(imagePreview);
+    }
     setImagePreview("");
     updateField("image", "");
   };

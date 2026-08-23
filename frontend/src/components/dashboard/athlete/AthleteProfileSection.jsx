@@ -124,9 +124,11 @@ export default function AthleteProfileSection() {
     if (!file) return;
     
     try {
-      // Show some loading indicator if needed (optional)
       const res = await api.upload.image(file);
       if (res.data?.url) {
+        if (editForm.avatar && editForm.avatar !== athleteData.avatar && editForm.avatar.includes('/uploads/')) {
+          api.upload.deleteImage(editForm.avatar);
+        }
         setEditForm(prev => ({ ...prev, avatar: res.data.url }));
       }
     } catch (err) {
@@ -135,6 +137,9 @@ export default function AthleteProfileSection() {
   };
 
   const handleRemoveAvatar = () => {
+    if (editForm.avatar && editForm.avatar.includes('/uploads/')) {
+      api.upload.deleteImage(editForm.avatar);
+    }
     setEditForm(prev => ({ ...prev, avatar: '' }));
   };
 
@@ -146,6 +151,9 @@ export default function AthleteProfileSection() {
     try {
       const res = await api.upload.image(file);
       if (res.data?.url) {
+        if (editForm.cover && editForm.cover !== athleteData.cover && editForm.cover.includes('/uploads/')) {
+          api.upload.deleteImage(editForm.cover);
+        }
         setEditForm(prev => ({ ...prev, cover: res.data.url }));
       }
     } catch (err) {
@@ -154,6 +162,9 @@ export default function AthleteProfileSection() {
   };
 
   const handleRemoveCover = () => {
+    if (editForm.cover && editForm.cover.includes('/uploads/')) {
+      api.upload.deleteImage(editForm.cover);
+    }
     setEditForm(prev => ({ ...prev, cover: '' }));
   };
 

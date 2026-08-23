@@ -284,6 +284,31 @@ export const api = {
       }
 
       return data;
+    },
+
+    deleteImage: async (fileUrl) => {
+      if (!fileUrl) return;
+      const url = `${API_BASE_URL}/upload/image`;
+      const token = authStorage.getToken();
+      const currentUser = authStorage.getUser();
+
+      const headers = {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(currentUser?.role ? { 'x-mock-role': currentUser.role } : {}),
+        ...(currentUser?.id ? { 'x-mock-user-id': String(currentUser.id) } : {}),
+      };
+
+      try {
+        const response = await fetch(url, {
+          method: 'DELETE',
+          headers,
+          body: JSON.stringify({ url: fileUrl }),
+        });
+        return await response.json().catch(() => ({}));
+      } catch (err) {
+        console.warn('Failed to delete image on server:', err.message);
+      }
     }
   }
 };
