@@ -38,7 +38,7 @@ function StatusBadge({ status }) {
     Upcoming: {
       icon: Clock3,
       className:
-        "border-[#3B82F6]/50 bg-[#2C337F]/60 text-[#93C5FD]",
+        "border-[#F2FF65]/30 bg-[#F2FF65]/10 text-white",
     },
 
     Completed: {
@@ -59,7 +59,7 @@ function StatusBadge({ status }) {
 
   return (
     <span
-      className={`inline-flex shrink-0 items-center gap-1.5 rounded-md border px-2.5 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.08em] ${current.className}`}
+      className={`inline-flex shrink-0 items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-[11px] font-mono font-bold uppercase tracking-[0.08em] ${current.className}`}
     >
       <Icon size={11} strokeWidth={2.5} />
       {status}
@@ -95,11 +95,11 @@ function EngagementCard({ engagement, onClick, index }) {
               {engagement.id} // ENGAGEMENT
             </p>
 
-            <h3 className="font-['Poppins'] text-lg font-bold tracking-wide text-white uppercase">
+            <h3 className="font-['Poppins'] text-xl font-bold tracking-wide text-white uppercase">
               {engagement.athleteName}
             </h3>
 
-            <p className="mt-1 text-xs font-semibold text-gray-300">
+            <p className="mt-1 text-base font-semibold text-white">
               {engagement.opportunityName}
             </p>
           </div>
@@ -108,7 +108,7 @@ function EngagementCard({ engagement, onClick, index }) {
         </div>
 
         {/* LOCATION */}
-        <div className="flex items-center gap-1.5 text-xs text-[#F2FF65]">
+        <div className="flex items-center gap-1.5 text-sm text-white">
           <MapPin size={14} />
           <span>{engagement.location}</span>
         </div>
@@ -119,7 +119,7 @@ function EngagementCard({ engagement, onClick, index }) {
         </div>
 
         {/* DURATION */}
-        <div className="flex items-center gap-1.5 text-xs text-sky-400 font-mono font-medium">
+        <div className="flex items-center gap-1.5 text-sm text-white font-mono font-medium">
           <Clock3 size={13} />
           <span>
             {engagement.startDate} – {engagement.endDate}
@@ -129,7 +129,7 @@ function EngagementCard({ engagement, onClick, index }) {
         {/* PROGRESS */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <span className="font-mono text-[9px] uppercase tracking-[0.12em] text-gray-300">
+            <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-white/80">
               Engagement Progress
             </span>
 
@@ -156,11 +156,11 @@ function EngagementCard({ engagement, onClick, index }) {
       </div>
 
       {/* FOOTER */}
-      <div className="mt-auto flex items-center justify-between border-t border-white/15 pt-4">
-        <div className="flex items-center gap-1.5 text-[11px] text-gray-300 font-mono">
+        <div className="mt-auto flex items-center justify-between border-t border-white/15 pt-4">
+        <div className="flex items-center gap-1.5 text-xs text-white font-mono">
           <CalendarDays
             size={13}
-            className="text-gray-400"
+            className="text-white"
           />
 
           <span>
@@ -222,7 +222,7 @@ function EngagementModal({ engagement, onClose }) {
                 {engagement.opportunityName}
               </h2>
 
-              <p className="mt-1 flex items-center gap-2 text-sm text-[#F7F5ED]/65">
+          <p className="mt-1 flex items-center gap-2 text-base text-white/80">
                 <UserRound size={14} />
                 {engagement.athleteName}
               </p>
@@ -257,7 +257,7 @@ function EngagementModal({ engagement, onClose }) {
                   Engagement Verification
                 </p>
 
-                <p className="mt-1 text-xs text-[#F7F5ED]/65">
+                <p className="mt-1 text-sm text-white/80">
                   {engagement.verification}
                 </p>
               </div>
@@ -318,7 +318,7 @@ function EngagementModal({ engagement, onClose }) {
                   Engagement Progress
                 </p>
 
-                <p className="mt-1 text-sm text-[#F7F5ED]">
+                <p className="mt-1 text-base text-white">
                   {engagement.progress}% complete
                 </p>
               </div>
@@ -349,7 +349,7 @@ function EngagementModal({ engagement, onClose }) {
               Engagement Brief
             </p>
 
-            <p className="mt-2 text-sm leading-6 text-[#F7F5ED]/75">
+            <p className="mt-2 text-base leading-6 text-white/80">
               {engagement.details}
             </p>
           </div>
@@ -385,7 +385,7 @@ function DetailBox({ label, value, icon: Icon }) {
         </p>
       </div>
 
-      <p className="mt-2 text-sm text-[#F7F5ED]">
+      <p className="mt-2 text-base text-white">
         {value}
       </p>
     </div>
@@ -467,7 +467,7 @@ export default function AcademyEngagementsSection({ agreements = [], setActiveTa
   }, [statusFilter, searchTerm]);
 
   return (
-    <section className="min-h-full w-full bg-[#14241A] font-['Inter'] text-[#F7F5ED]">
+    <section className="applications-pane matchpoint-fade-in mx-auto min-h-full w-full max-w-6xl space-y-6 pb-16 font-['Inter'] text-[#F7F5ED]">
 
       {/* =====================================================
           PAGE HEADER
@@ -483,7 +483,7 @@ export default function AcademyEngagementsSection({ agreements = [], setActiveTa
             Engagements
           </h1>
 
-          <p className="mt-1.5 text-xs text-[#F7F5ED]/50">
+          <p className="mt-1.5 text-sm text-white/70">
             Track active, upcoming and completed athlete engagements.
           </p>
         </div>
@@ -506,7 +506,7 @@ export default function AcademyEngagementsSection({ agreements = [], setActiveTa
 
           <div className="relative min-w-0 flex-1">
             <Search
-              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/70"
               size={16}
             />
 
@@ -517,7 +517,7 @@ export default function AcademyEngagementsSection({ agreements = [], setActiveTa
               onChange={(event) =>
                 setSearchTerm(event.target.value)
               }
-              className="w-full rounded-xl border border-[#2A3C2E] bg-[#0B120D] py-2.5 pl-10 pr-4 text-xs text-white placeholder-gray-500 outline-none transition-colors focus:border-[#F2FF65] font-['Inter',sans-serif]"
+              className="w-full rounded-xl border border-[#2A3C2E] bg-[#0B120D] py-3 pl-11 pr-4 text-xs text-white placeholder:text-white/45 outline-none transition-colors focus:border-[#F2FF65] font-['Inter',sans-serif]"
             />
           </div>
 
@@ -533,7 +533,7 @@ export default function AcademyEngagementsSection({ agreements = [], setActiveTa
                 className={`shrink-0 rounded-xl border px-3.5 py-2 text-[10px] font-['Poppins'] font-bold uppercase tracking-wider transition-all ${
                   statusFilter === status
                     ? "border-[#F2FF65] bg-[#F2FF65] text-[#141F16] shadow-sm"
-                    : "border-[#2A3C2E] bg-[#0B120D] text-gray-300 hover:border-[#F2FF65]/50 hover:text-white"
+                    : "border-[#2A3C2E] bg-[#0B120D] text-white hover:border-[#F2FF65]/50 hover:text-[#F2FF65]"
                 }`}
               >
                 {status}
@@ -553,7 +553,7 @@ export default function AcademyEngagementsSection({ agreements = [], setActiveTa
             Athlete Engagements
           </h2>
 
-          <p className="mt-1 font-mono text-[9px] uppercase tracking-[0.12em] text-[#F7F5ED]/40">
+          <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.12em] text-white/65">
             {visibleEngagements.length} matching records
           </p>
         </div>
@@ -588,7 +588,7 @@ export default function AcademyEngagementsSection({ agreements = [], setActiveTa
             No engagements found
           </p>
 
-          <p className="mt-1 text-xs text-gray-400">
+          <p className="mt-1 text-sm text-white/65">
             Try adjusting your search or status filter.
           </p>
         </div>

@@ -80,8 +80,10 @@ export default function AcademyDashboard({ onLogout }) {
             : a
         )
       );
+      return true;
     } catch (err) {
       console.error(err);
+      return false;
     }
   };
 
@@ -103,8 +105,10 @@ export default function AcademyDashboard({ onLogout }) {
             : a
         )
       );
+      return true;
     } catch (err) {
       console.error(err);
+      return false;
     }
   };
 

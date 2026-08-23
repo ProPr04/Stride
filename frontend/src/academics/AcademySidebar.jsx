@@ -28,24 +28,18 @@ const navigationItems = [
   },
   {
     number: "03",
-    label: "Athletes",
-    tab: "athletes",
-    icon: Users,
-  },
-  {
-    number: "04",
     label: "Applications",
     tab: "applications",
     icon: ClipboardList,
   },
   {
-    number: "05",
+    number: "04",
     label: "Engagements",
     tab: "engagements",
     icon: Sparkles,
   },
   {
-    number: "06",
+    number: "05",
     label: "Academy Profile",
     tab: "profile",
     icon: Building2,
