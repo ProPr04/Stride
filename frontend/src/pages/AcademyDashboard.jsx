@@ -15,7 +15,7 @@ import AcademyProfilePage from '../academics/AcademyProfilePage';
 
 export default function AcademyDashboard({ onLogout }) {
   const [activeTab, setActiveTab] = useState('dashboard');
-  
+
   const [academy, setAcademy] = useState(null);
   const [opportunities, setOpportunities] = useState([]);
   const [agreements, setAgreements] = useState([]);
@@ -24,68 +24,150 @@ export default function AcademyDashboard({ onLogout }) {
 
   useEffect(() => {
     Promise.all([
-      api.profiles.getMyProfile().catch(() => ({ data: { profile: null } })),
-      api.opportunities.getMyPosted().catch(() => ({ data: { opportunities: [] } })),
-      api.agreements.getMyAgreements().catch(() => ({ data: { agreements: [] } })),
-      api.profiles.getAllAthletes().catch(() => ({ data: { athletes: [] } })),
-    ]).then(([profileRes, oppsRes, agreementsRes, athletesRes]) => {
-      setAcademy(profileRes.data?.profile || null);
-      setOpportunities(oppsRes.data?.opportunities || []);
-      setAgreements(agreementsRes.data?.agreements || []);
-      setAthletes(athletesRes.data?.athletes || []);
-    }).finally(() => setLoading(false));
+      api.profiles
+        .getMyProfile()
+        .catch(() => ({ data: { profile: null } })),
+
+      api.opportunities
+        .getMyPosted()
+        .catch(() => ({ data: { opportunities: [] } })),
+
+      api.agreements
+        .getMyAgreements()
+        .catch(() => ({ data: { agreements: [] } })),
+
+      api.profiles
+        .getAllAthletes()
+        .catch(() => ({ data: { athletes: [] } })),
+    ])
+      .then(
+        ([
+          profileRes,
+          oppsRes,
+          agreementsRes,
+          athletesRes,
+        ]) => {
+          setAcademy(profileRes.data?.profile || null);
+          setOpportunities(
+            oppsRes.data?.opportunities || []
+          );
+          setAgreements(
+            agreementsRes.data?.agreements || []
+          );
+          setAthletes(
+            athletesRes.data?.athletes || []
+          );
+        }
+      )
+      .finally(() => setLoading(false));
   }, []);
+
+  /* =========================================================
+     APPROVE AGREEMENT
+  ========================================================= */
 
   const handleApprove = async (id) => {
     try {
-      await api.agreements.updateStatus(id, 'accepted');
-      setAgreements(prev => prev.map(a => a.id === id ? { ...a, status: 'accepted' } : a));
+      await api.agreements.updateStatus(
+        id,
+        'accepted'
+      );
+
+      setAgreements((prev) =>
+        prev.map((a) =>
+          a.id === id
+            ? { ...a, status: 'accepted' }
+            : a
+        )
+      );
     } catch (err) {
       console.error(err);
     }
   };
+
+  /* =========================================================
+     DECLINE AGREEMENT
+  ========================================================= */
 
   const handleDecline = async (id) => {
     try {
-      await api.agreements.updateStatus(id, 'rejected');
-      setAgreements(prev => prev.map(a => a.id === id ? { ...a, status: 'rejected' } : a));
+      await api.agreements.updateStatus(
+        id,
+        'rejected'
+      );
+
+      setAgreements((prev) =>
+        prev.map((a) =>
+          a.id === id
+            ? { ...a, status: 'rejected' }
+            : a
+        )
+      );
     } catch (err) {
       console.error(err);
     }
   };
 
+  /* =========================================================
+     SAVE ACADEMY PROFILE
+  ========================================================= */
+
   const handleSaveProfile = async (data) => {
     try {
-      const res = await api.profiles.updateMyProfile(data);
+      const res =
+        await api.profiles.updateMyProfile(data);
+
       setAcademy(res.data.profile);
     } catch (err) {
       console.error(err);
     }
   };
 
+  /* =========================================================
+     LOADING
+  ========================================================= */
+
   if (loading) {
-    return <div className="flex justify-center items-center h-screen bg-[#2A3C2E] text-[#F7F5ED]">Loading...</div>;
+    return (
+      <div className="flex h-screen items-center justify-center bg-[#14241A] text-[#F7F5ED]">
+        Loading...
+      </div>
+    );
   }
 
   return (
-    <div className="matchpoint-dashboard-layout min-h-screen">
-      {/* SIDEBAR */}
+    <div className="matchpoint-dashboard-layout min-h-screen bg-[#14241A]">
+      {/* =====================================================
+          SIDEBAR
+      ===================================================== */}
+
       <AcademySidebar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         onLogout={onLogout}
       />
 
-      {/* MAIN AREA */}
-      <div className="matchpoint-dashboard-main min-w-0 lg:ml-[308px]">
-        <AcademyHeader
-          academy={academy}
-          onProfileClick={() => setActiveTab('profile')}
-        />
+      {/* =====================================================
+          MAIN AREA
+      ===================================================== */}
 
-        {/* PAGE CONTENT */}
-        <main className="matchpoint-content-viewport min-w-0 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-7">
-          {/* HOME */}
+      <div className="matchpoint-dashboard-main min-w-0 bg-[#14241A] lg:ml-[308px]">
+        {/* ===================================================
+            HEADER
+        =================================================== */}
+
+        
+
+        {/* ===================================================
+            PAGE CONTENT
+        =================================================== */}
+
+        <main className="matchpoint-content-viewport min-w-0 bg-[#14241A] px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-7">
+
+          {/* =================================================
+              HOME
+          ================================================= */}
+
           {activeTab === 'dashboard' && (
             <AcademyOverviewSection
               academy={academy}
@@ -96,7 +178,10 @@ export default function AcademyDashboard({ onLogout }) {
             />
           )}
 
-          {/* OPPORTUNITIES */}
+          {/* =================================================
+              OPPORTUNITIES
+          ================================================= */}
+
           {activeTab === 'opportunities' && (
             <AcademyOpportunitiesSection
               opportunities={opportunities}
@@ -105,7 +190,10 @@ export default function AcademyDashboard({ onLogout }) {
             />
           )}
 
-          {/* ATHLETES SCOUTING & DIRECTORY */}
+          {/* =================================================
+              ATHLETES
+          ================================================= */}
+
           {activeTab === 'athletes' && (
             <AcademyAthletesSection
               athletes={athletes}
@@ -113,7 +201,10 @@ export default function AcademyDashboard({ onLogout }) {
             />
           )}
 
-          {/* APPLICATIONS */}
+          {/* =================================================
+              APPLICATIONS
+          ================================================= */}
+
           {activeTab === 'applications' && (
             <AcademyApplicationsSection
               agreements={agreements}
@@ -122,7 +213,10 @@ export default function AcademyDashboard({ onLogout }) {
             />
           )}
 
-          {/* ENGAGEMENTS */}
+          {/* =================================================
+              ENGAGEMENTS
+          ================================================= */}
+
           {activeTab === 'engagements' && (
             <AcademyEngagementsSection
               agreements={agreements}
@@ -130,29 +224,45 @@ export default function AcademyDashboard({ onLogout }) {
             />
           )}
 
-          {/* AGREEMENTS */}
+          {/* =================================================
+              AGREEMENTS
+          ================================================= */}
+
           {activeTab === 'agreements' && (
             <AcademyAgreementsSection
               agreements={agreements}
             />
           )}
 
-          {/* REVIEWS */}
+          {/* =================================================
+              REVIEWS
+          ================================================= */}
+
           {activeTab === 'reviews' && (
             <AcademyReviewsSection />
           )}
 
-          {/* SETTINGS */}
+          {/* =================================================
+              SETTINGS
+          ================================================= */}
+
           {activeTab === 'settings' && (
-            <AcademySettingsSection onLogout={onLogout} />
+            <AcademySettingsSection
+              onLogout={onLogout}
+            />
           )}
 
-          {/* ACADEMY PROFILE */}
+          {/* =================================================
+              ACADEMY PROFILE
+          ================================================= */}
+
           {activeTab === 'profile' && (
             <AcademyProfilePage
               academy={academy}
               onSaveProfile={handleSaveProfile}
-              onViewOpportunity={() => setActiveTab('opportunities')}
+              onViewOpportunity={() =>
+                setActiveTab('opportunities')
+              }
             />
           )}
         </main>

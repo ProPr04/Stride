@@ -491,7 +491,7 @@ export default function AcademyOverviewSection({
   });
 
   return (
-    <section className="min-h-full w-full bg-[#2A3C2E] font-['Inter'] text-[#F7F5ED]">
+    <section className="min-h-full w-full bg-[#14241A] font-['Inter'] text-[#F7F5ED]">
       {/* =====================================================
           HERO
       ===================================================== */}
@@ -510,9 +510,10 @@ export default function AcademyOverviewSection({
             </p>
           </div>
 
-          <h1 className="font-['Poppins'] text-2xl font-bold tracking-[-0.055em] text-[#F2FF65] sm:text-3xl">
-            Discover Athletes
-          </h1>
+         <h1 className="font-['Poppins'] text-2xl font-bold tracking-[-0.055em] sm:text-3xl">
+          <span className="text-[#F7F5ED]">Discover </span>
+          <span className="text-[#F2FF65]">Athletes</span>
+        </h1>
 
           <p className="mt-1.5 max-w-xl text-xs leading-5 text-[#F7F5ED]/65">
             Find emerging sporting talent and build your academy's
@@ -537,7 +538,7 @@ export default function AcademyOverviewSection({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search athletes, sports or skills..."
-            className="w-full rounded-full border border-white/10 bg-[#315038]/80 py-4 pl-12 pr-12 text-sm text-[#F7F5ED] shadow-[0_10px_30px_rgba(0,0,0,0.15)] outline-none placeholder:text-[#F7F5ED]/35 transition-all focus:border-[#F2FF65]/50 focus:ring-2 focus:ring-[#F2FF65]/10"
+            className="w-full rounded-full border border-white/10 bg-[#0B120D]/80 py-4 pl-12 pr-12 text-sm text-[#F7F5ED] shadow-[0_10px_30px_rgba(0,0,0,0.15)] outline-none placeholder:text-[#F7F5ED]/35 transition-all focus:border-[#F2FF65]/50 focus:ring-2 focus:ring-[#F2FF65]/10"
           />
 
           {searchQuery && (
@@ -564,7 +565,7 @@ export default function AcademyOverviewSection({
           <div className="flex items-center gap-2">
             <span className="h-4 w-1 rounded-full bg-[#F2FF65]" />
 
-            <h2 className="font-['Poppins'] text-lg font-semibold tracking-[-0.04em] text-[#F7F5ED] sm:text-xl">
+            <h2 className="font-['Poppins'] text-xs font-semibold tracking-[-0.04em] text-[#FFFFFF] sm:text-sm">
               Discover Athletes
             </h2>
           </div>

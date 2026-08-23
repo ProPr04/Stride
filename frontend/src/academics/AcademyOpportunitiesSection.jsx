@@ -961,7 +961,7 @@ export default function AcademyOpportunitiesSection({
   };
 
   return (
-    <section className="min-h-full w-full bg-[#2A3C2E] font-['Inter'] text-[#F7F5ED]">
+    <section className="min-h-full w-full bg-[#14241A] font-['Inter'] text-[#F7F5ED]">
       {/* =================================================
           HEADER
       ================================================= */}
@@ -978,11 +978,12 @@ export default function AcademyOpportunitiesSection({
               </p>
             </div>
 
-            <h1 className="font-['Poppins'] text-3xl font-bold tracking-[-0.055em] text-[#F2FF65] sm:text-4xl">
-              Your Opportunities
-            </h1>
+            <h1 className="font-['Poppins'] text-3xl font-bold tracking-[-0.055em] sm:text-3xl">
+            <span className="text-[#F2FF65]">Your </span>
+            <span className="text-[#F7F5ED]">Opportunities</span>
+          </h1>
 
-            <p className="mt-2 max-w-xl text-sm leading-6 text-[#F7F5ED]/65">
+            <p className="mt-2 max-w-xl text-sm leading-5 text-[#F7F5ED]/65">
               Manage the opportunities posted by your academy.
             </p>
           </div>
@@ -1002,16 +1003,16 @@ export default function AcademyOpportunitiesSection({
       {/* =================================================
           FILTER BAR
       ================================================= */}
-      <div className="mb-7 flex flex-wrap items-center gap-2 rounded-2xl border border-[#F2FF65]/10 bg-[#315038]/70 p-3">
+      <div className="mb-7 flex flex-wrap items-center gap-2 rounded-2xl border border-[#2A3C2E] bg-[#141F16] p-3">
         {["All", "Open", "Draft", "Closed"].map((status) => (
           <button
             key={status}
             type="button"
             onClick={() => setStatusFilter(status)}
-            className={`rounded-xl border px-4 py-2.5 text-xs font-bold transition-all ${
-              statusFilter === status
-                ? "border-[#F2FF65] bg-[#F2FF65] text-[#07130D]"
-                : "border-white/10 bg-white/5 text-white/60 hover:border-[#F2FF65]/30 hover:text-[#F2FF65]"
+            className={`shrink-0 rounded-xl border px-3.5 py-2 text-[10px] font-['Poppins'] font-bold uppercase tracking-wider transition-all ${
+                  statusFilter === status
+                    ? "border-[#F2FF65] bg-[#F2FF65] text-[#141F16] shadow-sm"
+                    : "border-[#2A3C2E] bg-[#0B120D] text-gray-300 hover:border-[#F2FF65]/50 hover:text-white"
             }`}
           >
             {status}
@@ -1051,7 +1052,7 @@ export default function AcademyOpportunitiesSection({
           ))}
         </div>
       ) : (
-        <div className="flex min-h-[320px] flex-col items-center justify-center rounded-2xl border border-white/10 bg-gradient-to-br from-[#315038] to-[#166534] px-6 text-center">
+        <div className="flex min-h-[320px] flex-col items-center justify-center rounded-2xl border border-white/10 bg-[141F16] px-6 text-center">
           <div className="grid h-14 w-14 place-items-center rounded-2xl border border-[#F2FF65]/20 bg-[#F2FF65]/5">
             <BriefcaseBusiness
               size={25}
