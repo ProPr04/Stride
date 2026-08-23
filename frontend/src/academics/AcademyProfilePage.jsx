@@ -1,29 +1,55 @@
-import React from "react";
+
+import React, { useMemo, useState } from "react";
 import {
   Award,
   BadgeCheck,
   Building2,
   CheckCircle2,
+  ChevronLeft,
   ChevronRight,
   ClipboardCheck,
   Dumbbell,
   Edit3,
+  Image as ImageIcon,
   Lock,
   MapPin,
   Medal,
+  Plus,
+  Save,
   ShieldCheck,
   Star,
   Trophy,
-  Users,
   UserRound,
+  Users,
+  X,
 } from "lucide-react";
 
 const fallbackVerification = [
-  { level: "LEVEL 01", title: "ORGANIZATION IDENTITY", status: "VERIFIED" },
-  { level: "LEVEL 02", title: "COACHING STAFF", status: "VERIFIED" },
-  { level: "LEVEL 03", title: "TRAINING FACILITY", status: "VERIFIED" },
-  { level: "LEVEL 04", title: "COMPETITION AFFILIATION", status: "VERIFIED" },
-  { level: "LEVEL 05", title: "FEDERATION / OFFICIAL", status: "PENDING" },
+  {
+    level: "LEVEL 01",
+    title: "ORGANIZATION IDENTITY",
+    status: "VERIFIED",
+  },
+  {
+    level: "LEVEL 02",
+    title: "COACHING STAFF",
+    status: "VERIFIED",
+  },
+  {
+    level: "LEVEL 03",
+    title: "TRAINING FACILITY",
+    status: "VERIFIED",
+  },
+  {
+    level: "LEVEL 04",
+    title: "COMPETITION AFFILIATION",
+    status: "VERIFIED",
+  },
+  {
+    level: "LEVEL 05",
+    title: "FEDERATION / OFFICIAL",
+    status: "PENDING",
+  },
 ];
 
 const fallbackCoaches = [
@@ -43,6 +69,18 @@ const fallbackCoaches = [
     name: "Rahul Shah",
     role: "Strength Coach",
     experience: "10 yrs",
+    verified: true,
+  },
+  {
+    name: "Arjun Patel",
+    role: "Performance Coach",
+    experience: "7 yrs",
+    verified: true,
+  },
+  {
+    name: "Priya Nair",
+    role: "Youth Development Coach",
+    experience: "6 yrs",
     verified: true,
   },
 ];
@@ -71,6 +109,18 @@ const fallbackPrograms = [
     discipline: "Athletics",
     description:
       "Race strategy, tapering and event-readiness support.",
+  },
+  {
+    title: "Speed & Agility",
+    discipline: "Performance",
+    description:
+      "Explosive movement, acceleration and change-of-direction training.",
+  },
+  {
+    title: "Athlete Recovery",
+    discipline: "Performance",
+    description:
+      "Recovery protocols designed to maintain athlete readiness.",
   },
 ];
 
@@ -146,128 +196,909 @@ function GlassPanel({ children, className = "" }) {
   );
 }
 
+/* =========================================================
+   HORIZONTAL CAROUSEL
+========================================================= */
+
+function HorizontalCarousel({
+  children,
+  itemCount,
+  title,
+  onViewMore,
+}) {
+  const [scrollContainer, setScrollContainer] =
+    useState(null);
+
+  const scroll = (direction) => {
+    if (!scrollContainer) return;
+
+    scrollContainer.scrollBy({
+      left: direction === "left" ? -360 : 360,
+      behavior: "smooth",
+    });
+  };
+
+  return (
+    <div>
+      <div className="mb-4 flex items-center justify-between gap-4">
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => scroll("left")}
+            className="grid h-8 w-8 place-items-center rounded-full border border-lime/20 bg-white/5 text-lime transition-colors hover:border-lime/50 hover:bg-lime/10"
+            aria-label={`Previous ${title}`}
+          >
+            <ChevronLeft size={15} />
+          </button>
+
+          <button
+            type="button"
+            onClick={() => scroll("right")}
+            className="grid h-8 w-8 place-items-center rounded-full border border-lime/20 bg-white/5 text-lime transition-colors hover:border-lime/50 hover:bg-lime/10"
+            aria-label={`Next ${title}`}
+          >
+            <ChevronRight size={15} />
+          </button>
+        </div>
+
+        {itemCount > 3 && onViewMore && (
+          <button
+            type="button"
+            onClick={onViewMore}
+            className="inline-flex items-center gap-1 border-b border-lime pb-1 font-mono text-[10px] font-bold tracking-[0.08em] text-lime transition-opacity hover:opacity-75"
+          >
+            VIEW MORE
+            <ChevronRight size={14} />
+          </button>
+        )}
+      </div>
+
+      <div
+        ref={setScrollContainer}
+        className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3 scrollbar-hide"
+        style={{
+          scrollbarWidth: "none",
+          msOverflowStyle: "none",
+        }}
+      >
+        {children}
+      </div>
+    </div>
+  );
+}
+
+/* =========================================================
+   VIEW MORE MODAL
+========================================================= */
+
+function CollectionModal({
+  title,
+  eyebrow,
+  items,
+  type,
+  onClose,
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-[70] flex items-center justify-center bg-[#07130D]/80 p-4 backdrop-blur-md sm:p-6"
+      role="dialog"
+      aria-modal="true"
+    >
+      <div className="max-h-[90vh] w-full max-w-5xl overflow-hidden rounded-xl border border-lime/20 bg-[#315038] shadow-2xl">
+        <div className="flex items-start justify-between border-b border-lime/15 p-5 sm:p-6">
+          <div>
+            <p className="font-mono text-[9px] font-bold tracking-[0.18em] text-lime/55">
+              {eyebrow}
+            </p>
+
+            <h2 className="mt-2 font-['Poppins'] text-2xl font-semibold tracking-[-0.04em] text-lime">
+              {title}
+            </h2>
+
+            <p className="mt-1 font-mono text-[9px] uppercase tracking-[0.12em] text-[#F7F5ED]/40">
+              {items.length} RECORDS
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={onClose}
+            className="grid h-9 w-9 shrink-0 place-items-center rounded-md border border-lime/20 text-lime transition-colors hover:bg-white/5"
+            aria-label="Close"
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        <div className="max-h-[72vh] overflow-y-auto p-5 sm:p-6">
+          {type === "programs" ? (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {items.map((program) => (
+                <article
+                  key={program.id || program.title}
+                  className="border border-lime/15 bg-[#315038]/60 p-5"
+                >
+                  <Dumbbell
+                    size={20}
+                    className="text-lime"
+                    strokeWidth={1.5}
+                  />
+
+                  <p className="mt-6 font-mono text-[9px] font-bold tracking-[0.13em] text-lime/55">
+                    {program.discipline ||
+                      program.sport ||
+                      "PROGRAM"}
+                  </p>
+
+                  <h3 className="mt-2 font-mono text-sm font-bold leading-5 tracking-[0.04em] text-lime">
+                    {program.title}
+                  </h3>
+
+                  <p className="mt-3 text-sm leading-6 text-[#F7F5ED]/65">
+                    {program.description}
+                  </p>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {items.map((coach) => (
+                <article
+                  key={coach.id || coach.name}
+                  className="border border-lime/15 bg-[#315038]/60 p-5"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="grid h-14 w-14 place-items-center overflow-hidden bg-[#2C337F] text-lime">
+                      {coach.avatar || coach.image ? (
+                        <img
+                          src={coach.avatar || coach.image}
+                          alt={coach.name}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <UserRound
+                          size={23}
+                          strokeWidth={1.5}
+                        />
+                      )}
+                    </div>
+
+                    {coach.verified && (
+                      <BadgeCheck
+                        size={20}
+                        className="text-[#3B82F6]"
+                        fill="currentColor"
+                        strokeWidth={2.2}
+                      />
+                    )}
+                  </div>
+
+                  <h3 className="mt-5 font-mono text-sm font-bold tracking-[0.05em] text-lime">
+                    {coach.name}
+                  </h3>
+
+                  <p className="mt-1 text-sm text-[#F7F5ED]/70">
+                    {coach.role}
+                  </p>
+
+                  <div className="mt-4 border-t border-lime/15 pt-3">
+                    <p className="font-mono text-[9px] font-bold tracking-[0.1em] text-[#F7F5ED]/50">
+                      {coach.experience ||
+                        coach.experienceYears ||
+                        "—"}{" "}
+                      EXPERIENCE
+                    </p>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* =========================================================
+   EDIT PROFILE MODAL
+========================================================= */
+
+function EditProfileModal({
+  academy,
+  onClose,
+  onSave,
+}) {
+  const [form, setForm] = useState({
+    name:
+      academy.name ||
+      academy.academyName ||
+      "Metro Track Academy",
+
+    tagline:
+      academy.tagline ||
+      academy.description ||
+      "",
+
+    location:
+      academy.location ||
+      academy.city ||
+      "Mumbai, India",
+
+    primarySports:
+      academy.primarySports ||
+      academy.sports?.join(", ") ||
+      "Athletics, Performance",
+
+    image:
+      academy.logo ||
+      academy.avatar ||
+      academy.image ||
+      "",
+
+    programs:
+      academy.programs?.length
+        ? academy.programs
+        : fallbackPrograms,
+
+    achievements:
+      academy.recentAchievements?.length
+        ? academy.recentAchievements
+        : [
+            {
+              title:
+                "Four athletes reached national qualifying standards",
+              date: "THIS SEASON",
+            },
+            {
+              title:
+                "Sprint squad achieved seven verified personal bests",
+              date: "LAST 30 DAYS",
+            },
+            {
+              title:
+                "Academy athletes secured three competition medals",
+              date: "RECENT EVENT",
+            },
+          ],
+  });
+
+  const updateField = (field, value) => {
+    setForm((previous) => ({
+      ...previous,
+      [field]: value,
+    }));
+  };
+
+  const updateProgram = (index, field, value) => {
+    setForm((previous) => {
+      const programs = [...previous.programs];
+
+      programs[index] = {
+        ...programs[index],
+        [field]: value,
+      };
+
+      return {
+        ...previous,
+        programs,
+      };
+    });
+  };
+
+  const addProgram = () => {
+    setForm((previous) => ({
+      ...previous,
+      programs: [
+        ...previous.programs,
+        {
+          title: "New Training Program",
+          discipline: "PROGRAM",
+          description:
+            "Add a description for this training program.",
+        },
+      ],
+    }));
+  };
+
+  const removeProgram = (index) => {
+    setForm((previous) => ({
+      ...previous,
+      programs: previous.programs.filter(
+        (_, itemIndex) => itemIndex !== index
+      ),
+    }));
+  };
+
+  const updateAchievement = (
+    index,
+    field,
+    value
+  ) => {
+    setForm((previous) => {
+      const achievements = [
+        ...previous.achievements,
+      ];
+
+      achievements[index] = {
+        ...achievements[index],
+        [field]: value,
+      };
+
+      return {
+        ...previous,
+        achievements,
+      };
+    });
+  };
+
+  const addAchievement = () => {
+    setForm((previous) => ({
+      ...previous,
+      achievements: [
+        ...previous.achievements,
+        {
+          title: "New Academy Achievement",
+          date: "RECENT",
+        },
+      ],
+    }));
+  };
+
+  const removeAchievement = (index) => {
+    setForm((previous) => ({
+      ...previous,
+      achievements:
+        previous.achievements.filter(
+          (_, itemIndex) =>
+            itemIndex !== index
+        ),
+    }));
+  };
+
+  const handleSave = () => {
+    onSave?.({
+      ...academy,
+      name: form.name,
+      academyName: form.name,
+      tagline: form.tagline,
+      description: form.tagline,
+      location: form.location,
+      city: form.location,
+      primarySports: form.primarySports,
+      logo: form.image,
+      image: form.image,
+      programs: form.programs,
+      recentAchievements:
+        form.achievements,
+    });
+
+    onClose();
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-[80] flex items-center justify-center bg-[#07130D]/85 p-4 backdrop-blur-md sm:p-6"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Edit academy profile"
+    >
+      <div className="flex max-h-[92vh] w-full max-w-4xl flex-col overflow-hidden rounded-xl border border-lime/20 bg-[#315038] shadow-2xl">
+        {/* Header */}
+
+        <div className="flex shrink-0 items-start justify-between border-b border-lime/15 p-5 sm:p-6">
+          <div>
+            <p className="font-mono text-[9px] font-bold tracking-[0.18em] text-lime/55">
+              ACADEMY PROFILE // EDIT MODE
+            </p>
+
+            <h2 className="mt-2 font-['Poppins'] text-2xl font-semibold tracking-[-0.045em] text-lime">
+              EDIT ACADEMY PROFILE
+            </h2>
+
+            <p className="mt-1 text-sm text-[#F7F5ED]/50">
+              Update the information displayed on your
+              public academy profile.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={onClose}
+            className="grid h-9 w-9 shrink-0 place-items-center rounded-md border border-lime/20 text-lime hover:bg-white/5"
+            aria-label="Close edit profile"
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        {/* Body */}
+
+        <div className="overflow-y-auto p-5 sm:p-6">
+          {/* BASIC INFORMATION */}
+
+          <div>
+            <p className="font-mono text-[9px] font-bold tracking-[0.16em] text-lime/55">
+              BASIC INFORMATION
+            </p>
+
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
+              <EditField
+                label="Academy Name"
+                value={form.name}
+                onChange={(value) =>
+                  updateField("name", value)
+                }
+              />
+
+              <EditField
+                label="Location"
+                value={form.location}
+                onChange={(value) =>
+                  updateField(
+                    "location",
+                    value
+                  )
+                }
+              />
+
+              <EditField
+                label="Primary Sports"
+                value={form.primarySports}
+                onChange={(value) =>
+                  updateField(
+                    "primarySports",
+                    value
+                  )
+                }
+              />
+
+              <EditField
+                label="Profile Image URL"
+                value={form.image}
+                onChange={(value) =>
+                  updateField("image", value)
+                }
+                icon={ImageIcon}
+              />
+
+              <div className="md:col-span-2">
+                <EditField
+                  label="About the Academy"
+                  value={form.tagline}
+                  onChange={(value) =>
+                    updateField(
+                      "tagline",
+                      value
+                    )
+                  }
+                  textarea
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* TRAINING PROGRAMS */}
+
+          <div className="mt-8 border-t border-lime/10 pt-7">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="font-mono text-[9px] font-bold tracking-[0.16em] text-lime/55">
+                  DEVELOPMENT PATHWAYS
+                </p>
+
+                <h3 className="mt-1 font-['Poppins'] text-lg font-semibold text-lime">
+                  TRAINING PROGRAMS
+                </h3>
+              </div>
+
+              <button
+                type="button"
+                onClick={addProgram}
+                className="inline-flex items-center gap-1.5 rounded-md border border-lime/25 bg-lime/10 px-3 py-2 font-mono text-[9px] font-bold tracking-[0.08em] text-lime hover:bg-lime/15"
+              >
+                <Plus size={13} />
+                ADD PROGRAM
+              </button>
+            </div>
+
+            <div className="mt-4 space-y-3">
+              {form.programs.map(
+                (program, index) => (
+                  <div
+                    key={`${program.title}-${index}`}
+                    className="rounded-lg border border-lime/10 bg-white/5 p-4"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <p className="font-mono text-[8px] font-bold tracking-[0.12em] text-lime/45">
+                        PROGRAM {String(index + 1).padStart(2, "0")}
+                      </p>
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          removeProgram(index)
+                        }
+                        className="text-[#F7F5ED]/40 hover:text-red-300"
+                        aria-label="Remove program"
+                      >
+                        <X size={15} />
+                      </button>
+                    </div>
+
+                    <div className="mt-3 grid gap-3 md:grid-cols-2">
+                      <EditField
+                        label="Program Title"
+                        value={
+                          program.title
+                        }
+                        onChange={(value) =>
+                          updateProgram(
+                            index,
+                            "title",
+                            value
+                          )
+                        }
+                      />
+
+                      <EditField
+                        label="Discipline"
+                        value={
+                          program.discipline ||
+                          ""
+                        }
+                        onChange={(value) =>
+                          updateProgram(
+                            index,
+                            "discipline",
+                            value
+                          )
+                        }
+                      />
+
+                      <div className="md:col-span-2">
+                        <EditField
+                          label="Description"
+                          value={
+                            program.description ||
+                            ""
+                          }
+                          onChange={(value) =>
+                            updateProgram(
+                              index,
+                              "description",
+                              value
+                            )
+                          }
+                          textarea
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )
+              )}
+            </div>
+          </div>
+
+          {/* ACHIEVEMENTS */}
+
+          <div className="mt-8 border-t border-lime/10 pt-7">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="font-mono text-[9px] font-bold tracking-[0.16em] text-lime/55">
+                  LATEST PERFORMANCE
+                </p>
+
+                <h3 className="mt-1 font-['Poppins'] text-lg font-semibold text-lime">
+                  RECENT ACHIEVEMENTS
+                </h3>
+              </div>
+
+              <button
+                type="button"
+                onClick={addAchievement}
+                className="inline-flex items-center gap-1.5 rounded-md border border-lime/25 bg-lime/10 px-3 py-2 font-mono text-[9px] font-bold tracking-[0.08em] text-lime hover:bg-lime/15"
+              >
+                <Plus size={13} />
+                ADD ACHIEVEMENT
+              </button>
+            </div>
+
+            <div className="mt-4 space-y-3">
+              {form.achievements.map(
+                (
+                  achievement,
+                  index
+                ) => (
+                  <div
+                    key={`${achievement.title}-${index}`}
+                    className="rounded-lg border border-lime/10 bg-white/5 p-4"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <p className="font-mono text-[8px] font-bold tracking-[0.12em] text-lime/45">
+                        ACHIEVEMENT{" "}
+                        {String(
+                          index + 1
+                        ).padStart(2, "0")}
+                      </p>
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          removeAchievement(
+                            index
+                          )
+                        }
+                        className="text-[#F7F5ED]/40 hover:text-red-300"
+                        aria-label="Remove achievement"
+                      >
+                        <X size={15} />
+                      </button>
+                    </div>
+
+                    <div className="mt-3 grid gap-3 md:grid-cols-[1fr_180px]">
+                      <EditField
+                        label="Achievement"
+                        value={
+                          achievement.title ||
+                          ""
+                        }
+                        onChange={(value) =>
+                          updateAchievement(
+                            index,
+                            "title",
+                            value
+                          )
+                        }
+                      />
+
+                      <EditField
+                        label="Date / Period"
+                        value={
+                          achievement.date ||
+                          ""
+                        }
+                        onChange={(value) =>
+                          updateAchievement(
+                            index,
+                            "date",
+                            value
+                          )
+                        }
+                      />
+                    </div>
+                  </div>
+                )
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+
+        <div className="flex shrink-0 flex-col-reverse gap-3 border-t border-lime/15 bg-[#2A3C2E] p-4 sm:flex-row sm:justify-end sm:p-5">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-md border border-lime/20 px-5 py-3 font-mono text-[10px] font-bold tracking-[0.08em] text-[#F7F5ED]/65 transition-colors hover:bg-white/5 hover:text-[#F7F5ED]"
+          >
+            CANCEL
+          </button>
+
+          <button
+            type="button"
+            onClick={handleSave}
+            className="inline-flex items-center justify-center gap-2 rounded-md bg-lime px-5 py-3 font-mono text-[10px] font-bold tracking-[0.08em] text-[#07130D] transition-transform hover:-translate-y-0.5"
+          >
+            <Save size={14} />
+            SAVE CHANGES
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function EditField({
+  label,
+  value,
+  onChange,
+  textarea = false,
+  icon: Icon,
+}) {
+  return (
+    <label className="block">
+      <span className="mb-1.5 flex items-center gap-1.5 font-mono text-[8px] font-bold tracking-[0.12em] text-lime/55">
+        {Icon && <Icon size={11} />}
+        {label.toUpperCase()}
+      </span>
+
+      {textarea ? (
+        <textarea
+          value={value}
+          onChange={(event) =>
+            onChange(event.target.value)
+          }
+          rows={3}
+          className="w-full resize-none rounded-md border border-lime/15 bg-[#2A3C2E] px-3 py-2.5 text-sm text-[#F7F5ED] outline-none transition-colors placeholder:text-[#F7F5ED]/25 focus:border-lime/50"
+        />
+      ) : (
+        <input
+          type="text"
+          value={value}
+          onChange={(event) =>
+            onChange(event.target.value)
+          }
+          className="w-full rounded-md border border-lime/15 bg-[#2A3C2E] px-3 py-2.5 text-sm text-[#F7F5ED] outline-none transition-colors placeholder:text-[#F7F5ED]/25 focus:border-lime/50"
+        />
+      )}
+    </label>
+  );
+}
+
+/* =========================================================
+   MAIN PROFILE PAGE
+========================================================= */
+
 export default function AcademyProfilePage({
   academy = {},
   onEdit,
   onViewOpportunity,
-  onViewVerificationRecord,
+  onSaveProfile,
 }) {
+  const [localAcademy, setLocalAcademy] =
+    useState(academy);
+
+  const [showEditModal, setShowEditModal] =
+    useState(false);
+
+  const [collectionModal, setCollectionModal] =
+    useState(null);
+
+  /*
+   * Keep local state synchronized when a parent
+   * provides a different academy.
+   */
+  React.useEffect(() => {
+    setLocalAcademy(academy);
+  }, [academy]);
+
   const name =
-    academy.name ||
-    academy.academyName ||
+    localAcademy.name ||
+    localAcademy.academyName ||
     "Metro Track Academy";
 
   const tagline =
-    academy.tagline ||
-    academy.description ||
+    localAcademy.tagline ||
+    localAcademy.description ||
     "Building confident athletes through verified coaching, disciplined training and competition-ready performance.";
 
   const location =
-    academy.location ||
-    academy.city ||
+    localAcademy.location ||
+    localAcademy.city ||
     "Mumbai, India";
 
   const academyId =
-    academy.academyId ||
-    academy.id ||
+    localAcademy.academyId ||
+    localAcademy.id ||
     "STR-ACD-00842";
 
   const avatar =
-    academy.logo ||
-    academy.avatar ||
-    academy.image;
+    localAcademy.logo ||
+    localAcademy.avatar ||
+    localAcademy.image;
 
   const verificationLevel =
-    academy.verificationLevel || "LEVEL 04";
+    localAcademy.verificationLevel ||
+    "LEVEL 04";
 
   const verification =
-    academy.verificationMatrix ||
-    academy.verification ||
+    localAcademy.verificationMatrix ||
+    localAcademy.verification ||
     fallbackVerification;
 
   const coaches =
-    academy.coaches?.length
-      ? academy.coaches
+    localAcademy.coaches?.length
+      ? localAcademy.coaches
       : fallbackCoaches;
 
   const programs =
-    academy.programs?.length
-      ? academy.programs
+    localAcademy.programs?.length
+      ? localAcademy.programs
       : fallbackPrograms;
 
   const opportunities =
-    academy.opportunities?.length
-      ? academy.opportunities
+    localAcademy.opportunities?.length
+      ? localAcademy.opportunities
       : fallbackOpportunities;
 
   const stats = [
     {
       label: "ACTIVE ATHLETES",
-      value: academy.activeAthletes ?? 84,
+      value:
+        localAcademy.activeAthletes ?? 84,
       icon: Users,
     },
     {
       label: "VERIFIED COACHES",
       value:
-        academy.verifiedCoaches ??
-        coaches.filter((coach) => coach.verified).length,
+        localAcademy.verifiedCoaches ??
+        coaches.filter(
+          (coach) => coach.verified
+        ).length,
       icon: ShieldCheck,
     },
     {
       label: "NATIONAL QUALIFIERS",
-      value: academy.nationalQualifiers ?? 11,
+      value:
+        localAcademy.nationalQualifiers ?? 11,
       icon: Trophy,
     },
     {
       label: "ATHLETE PERSONAL BESTS",
-      value: academy.personalBests ?? 27,
+      value:
+        localAcademy.personalBests ?? 27,
       icon: Star,
     },
   ];
 
   const overview = [
-    ["Founded", academy.founded || "2012"],
+    [
+      "Founded",
+      localAcademy.founded || "2012",
+    ],
     ["Location", location],
     [
       "Primary Sports",
-      academy.primarySports ||
-        academy.sports?.join(", ") ||
+      localAcademy.primarySports ||
+        localAcademy.sports?.join(", ") ||
         "Athletics, Performance",
     ],
-    ["Active Athletes", academy.activeAthletes ?? 84],
-    ["Training Programs", academy.trainingPrograms ?? programs.length],
+    [
+      "Active Athletes",
+      localAcademy.activeAthletes ?? 84,
+    ],
+    [
+      "Training Programs",
+      localAcademy.trainingPrograms ??
+        programs.length,
+    ],
     [
       "Competitive Level",
-      academy.competitiveLevel || "National",
+      localAcademy.competitiveLevel ||
+        "National",
     ],
   ];
 
   const outcomes = [
     {
       label: "PERSONAL BESTS",
-      value: academy.personalBests ?? 27,
+      value:
+        localAcademy.personalBests ?? 27,
       icon: Star,
     },
     {
       label: "COMPETITION MEDALS",
-      value: academy.competitionMedals ?? 14,
+      value:
+        localAcademy.competitionMedals ?? 14,
       icon: Medal,
     },
     {
       label: "NATIONAL QUALIFIERS",
-      value: academy.nationalQualifiers ?? 11,
+      value:
+        localAcademy.nationalQualifiers ?? 11,
       icon: Trophy,
     },
     {
       label: "SCHOLARSHIPS / PLACEMENTS",
-      value: academy.scholarships ?? 6,
+      value:
+        localAcademy.scholarships ?? 6,
       icon: Award,
     },
   ];
 
   const recentAchievements =
-    academy.recentAchievements?.length
-      ? academy.recentAchievements
+    localAcademy.recentAchievements?.length
+      ? localAcademy.recentAchievements
       : [
           {
             title:
@@ -288,6 +1119,32 @@ export default function AcademyProfilePage({
             icon: Medal,
           },
         ];
+
+  /*
+   * Save profile changes.
+   * Parent receives the updated academy through
+   * onSaveProfile if provided.
+   */
+  const handleSaveProfile = (updatedAcademy) => {
+    setLocalAcademy(updatedAcademy);
+    onSaveProfile?.(updatedAcademy);
+  };
+
+  /*
+   * Opportunity navigation.
+   * Parent callback is preferred. If unavailable,
+   * fallback to the opportunities route.
+   */
+  const handleViewOpportunity = (
+    opportunity
+  ) => {
+    if (onViewOpportunity) {
+      onViewOpportunity(opportunity);
+      return;
+    }
+
+    window.location.href = "/opportunities";
+  };
 
   return (
     <div className="profile-pane matchpoint-fade-in">
@@ -341,8 +1198,10 @@ export default function AcademyProfilePage({
             </h1>
 
             <p className="profile-hero-discipline">
-              {academy.primarySports ||
-                academy.sports?.join(" · ") ||
+              {localAcademy.primarySports ||
+                localAcademy.sports?.join(
+                  " · "
+                ) ||
                 "Athletics · Performance"}
             </p>
 
@@ -367,7 +1226,10 @@ export default function AcademyProfilePage({
 
           <button
             className="matchpoint-pill-btn primary ms-auto"
-            onClick={() => onEdit?.(academy)}
+            onClick={() => {
+              onEdit?.(localAcademy);
+              setShowEditModal(true);
+            }}
           >
             <Edit3 size={15} />
             EDIT PROFILE
@@ -377,26 +1239,28 @@ export default function AcademyProfilePage({
         {/* Stats */}
 
         <div className="matchpoint-stats-banner">
-          {stats.map(({ label, value, icon: Icon }) => (
-            <div
-              className="stat-box"
-              key={label}
-            >
-              <Icon
-                size={16}
-                className="mb-2 text-lime"
-                strokeWidth={1.5}
-              />
+          {stats.map(
+            ({ label, value, icon: Icon }) => (
+              <div
+                className="stat-box"
+                key={label}
+              >
+                <Icon
+                  size={16}
+                  className="mb-2 text-lime"
+                  strokeWidth={1.5}
+                />
 
-              <span className="stat-box-label font-mono">
-                {label}
-              </span>
+                <span className="stat-box-label font-mono">
+                  {label}
+                </span>
 
-              <span className="stat-box-val text-lime">
-                {value}
-              </span>
-            </div>
-          ))}
+                <span className="stat-box-val text-lime">
+                  {value}
+                </span>
+              </div>
+            )
+          )}
         </div>
       </div>
 
@@ -417,24 +1281,28 @@ export default function AcademyProfilePage({
           </p>
 
           <div className="mt-6 grid gap-4 sm:grid-cols-2">
-            {overview.map(([label, value]) => (
-              <div
-                key={label}
-                className="border-t border-lime/15 pt-3"
-              >
-                <p className="font-mono text-[9px] font-bold tracking-[0.12em] text-lime/55">
-                  {label.toUpperCase()}
-                </p>
+            {overview.map(
+              ([label, value]) => (
+                <div
+                  key={label}
+                  className="border-t border-lime/15 pt-3"
+                >
+                  <p className="font-mono text-[9px] font-bold tracking-[0.12em] text-lime/55">
+                    {label.toUpperCase()}
+                  </p>
 
-                <p className="mt-1 text-sm text-[#F7F5ED]/80">
-                  {value}
-                </p>
-              </div>
-            ))}
+                  <p className="mt-1 text-sm text-[#F7F5ED]/80">
+                    {value}
+                  </p>
+                </div>
+              )
+            )}
           </div>
         </GlassPanel>
 
-        {/* Verification */}
+        {/* =====================================================
+            VERIFICATION
+        ====================================================== */}
 
         <GlassPanel>
           <SectionHeader
@@ -444,51 +1312,54 @@ export default function AcademyProfilePage({
           />
 
           <div className="space-y-3">
-            {verification.map((item, index) => {
-              const verified =
-                String(item.status || "")
-                  .toUpperCase() === "VERIFIED";
+            {verification.map(
+              (item, index) => {
+                const verified =
+                  String(
+                    item.status || ""
+                  ).toUpperCase() ===
+                  "VERIFIED";
 
-              return (
-                <div
-                  key={`${item.level}-${item.title}`}
-                  className={`flex items-center justify-between gap-3 border-b border-lime/10 pb-3 ${
-                    !verified ? "opacity-50" : ""
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="grid h-8 w-8 place-items-center border border-lime/20 bg-white/5 font-mono text-[9px] font-bold text-lime">
-                      {String(index + 1).padStart(2, "0")}
-                    </span>
+                return (
+                  <div
+                    key={`${item.level}-${item.title}`}
+                    className={`flex items-center justify-between gap-3 border-b border-lime/10 pb-3 ${
+                      !verified
+                        ? "opacity-50"
+                        : ""
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="grid h-8 w-8 place-items-center border border-lime/20 bg-white/5 font-mono text-[9px] font-bold text-lime">
+                        {String(
+                          index + 1
+                        ).padStart(2, "0")}
+                      </span>
 
-                    <div>
-                      <p className="font-mono text-[9px] font-bold tracking-[0.1em] text-lime/55">
-                        {item.level}
-                      </p>
+                      <div>
+                        <p className="font-mono text-[9px] font-bold tracking-[0.1em] text-lime/55">
+                          {item.level}
+                        </p>
 
-                      <p className="mt-1 text-xs font-semibold text-[#F7F5ED]">
-                        {item.title}
-                      </p>
+                        <p className="mt-1 text-xs font-semibold text-[#F7F5ED]">
+                          {item.title}
+                        </p>
+                      </div>
                     </div>
-                  </div>
 
-                  <StatusBadge verified={verified}>
-                    {item.status || "PENDING"}
-                  </StatusBadge>
-                </div>
-              );
-            })}
+                    <StatusBadge
+                      verified={verified}
+                    >
+                      {item.status ||
+                        "PENDING"}
+                    </StatusBadge>
+                  </div>
+                );
+              }
+            )}
           </div>
 
-          <button
-            onClick={() =>
-              onViewVerificationRecord?.(academy)
-            }
-            className="mt-5 inline-flex items-center gap-1 border-b border-lime pb-1 font-mono text-[10px] font-bold tracking-[0.08em] text-lime"
-          >
-            VIEW FULL RECORD
-            <ChevronRight size={14} />
-          </button>
+          {/* VIEW FULL RECORD REMOVED FOR MVP */}
         </GlassPanel>
       </div>
 
@@ -530,110 +1401,132 @@ export default function AcademyProfilePage({
       </GlassPanel>
 
       {/* =====================================================
-          COACHING STAFF
-      ====================================================== */}
+    COACHING STAFF
+====================================================== */}
 
-      <GlassPanel className="mt-5">
-        <SectionHeader
-          eyebrow="PEOPLE BEHIND PERFORMANCE"
-          title="VERIFIED COACHING STAFF"
-          icon={Users}
-        />
+<GlassPanel className="mt-5">
+  <SectionHeader
+    eyebrow="PEOPLE BEHIND PERFORMANCE"
+    title="VERIFIED COACHING STAFF"
+    icon={Users}
+  />
 
-        <div className="grid gap-4 md:grid-cols-3">
-          {coaches.map((coach) => (
-            <article
-              key={coach.id || coach.name}
-              className="border border-lime/15 bg-[#315038]/50 p-5 transition-transform duration-200 hover:-translate-y-1"
-            >
-              <div className="flex items-start justify-between">
-                <div className="grid h-14 w-14 place-items-center overflow-hidden bg-[#2C337F] text-lime">
-                  {coach.avatar || coach.image ? (
-                    <img
-                      src={coach.avatar || coach.image}
-                      alt={coach.name}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <UserRound
-                      size={23}
-                      strokeWidth={1.5}
-                    />
-                  )}
-                </div>
-
-                {coach.verified && (
-                  <BadgeCheck
-                    size={20}
-                    className="text-[#3B82F6]"
-                    fill="currentColor"
-                    strokeWidth={2.2}
-                  />
-                )}
-              </div>
-
-              <h3 className="mt-5 font-mono text-sm font-bold tracking-[0.05em] text-lime">
-                {coach.name}
-              </h3>
-
-              <p className="mt-1 text-sm text-[#F7F5ED]/70">
-                {coach.role}
-              </p>
-
-              <div className="mt-4 border-t border-lime/15 pt-3">
-                <p className="font-mono text-[9px] font-bold tracking-[0.1em] text-[#F7F5ED]/50">
-                  {coach.experience ||
-                    coach.experienceYears ||
-                    "—"}{" "}
-                  EXPERIENCE
-                </p>
-              </div>
-            </article>
-          ))}
-        </div>
-      </GlassPanel>
-
-      {/* =====================================================
-          TRAINING PROGRAMS
-      ====================================================== */}
-
-      <GlassPanel className="mt-5">
-        <SectionHeader
-          eyebrow="DEVELOPMENT PATHWAYS"
-          title="TRAINING PROGRAMS"
-          icon={Dumbbell}
-        />
-
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {programs.map((program) => (
-            <article
-              key={program.id || program.title}
-              className="border border-lime/15 bg-[#315038]/50 p-5 transition-transform duration-200 hover:-translate-y-1"
-            >
-              <Dumbbell
-                size={20}
-                className="text-lime"
+  <div
+    className="flex gap-4 overflow-x-auto pb-3 snap-x snap-mandatory"
+    style={{ scrollbarWidth: "thin" }}
+  >
+    {coaches.map((coach) => (
+      <article
+        key={coach.id || coach.name}
+        className="w-[280px] shrink-0 snap-start border border-lime/15 bg-[#315038]/50 p-5 transition-transform duration-200 hover:-translate-y-1"
+      >
+        <div className="flex items-start justify-between">
+          <div className="grid h-14 w-14 place-items-center overflow-hidden bg-[#2C337F] text-lime">
+            {coach.avatar || coach.image ? (
+              <img
+                src={coach.avatar || coach.image}
+                alt={coach.name}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <UserRound
+                size={23}
                 strokeWidth={1.5}
               />
+            )}
+          </div>
 
-              <p className="mt-6 font-mono text-[9px] font-bold tracking-[0.13em] text-lime/55">
-                {program.discipline ||
-                  program.sport ||
-                  "PROGRAM"}
-              </p>
-
-              <h3 className="mt-2 font-mono text-sm font-bold leading-5 tracking-[0.04em] text-lime">
-                {program.title}
-              </h3>
-
-              <p className="mt-3 text-sm leading-6 text-[#F7F5ED]/65">
-                {program.description}
-              </p>
-            </article>
-          ))}
+          {coach.verified && (
+            <BadgeCheck
+              size={20}
+              className="text-[#3B82F6]"
+              fill="currentColor"
+              strokeWidth={2.2}
+            />
+          )}
         </div>
-      </GlassPanel>
 
+        <h3 className="mt-5 font-mono text-sm font-bold tracking-[0.05em] text-lime">
+          {coach.name}
+        </h3>
+
+        <p className="mt-1 text-sm text-[#F7F5ED]/70">
+          {coach.role}
+        </p>
+
+        <div className="mt-4 border-t border-lime/15 pt-3">
+          <p className="font-mono text-[9px] font-bold tracking-[0.1em] text-[#F7F5ED]/50">
+            {coach.experience ||
+              coach.experienceYears ||
+              "—"}{" "}
+            EXPERIENCE
+          </p>
+        </div>
+      </article>
+    ))}
+  </div>
+
+  {/* Swipe hint */}
+  {coaches.length > 3 && (
+    <div className="mt-3 flex items-center justify-end gap-1 font-mono text-[8px] font-bold tracking-[0.12em] text-lime/40">
+      SWIPE TO EXPLORE
+      <ChevronRight size={12} />
+    </div>
+  )}
+</GlassPanel>
+
+
+{/* =====================================================
+    TRAINING PROGRAMS
+====================================================== */}
+
+<GlassPanel className="mt-5">
+  <SectionHeader
+    eyebrow="DEVELOPMENT PATHWAYS"
+    title="TRAINING PROGRAMS"
+    icon={Dumbbell}
+  />
+
+  <div
+    className="flex gap-4 overflow-x-auto pb-3 snap-x snap-mandatory"
+    style={{ scrollbarWidth: "thin" }}
+  >
+    {programs.map((program) => (
+      <article
+        key={program.id || program.title}
+        className="w-[280px] shrink-0 snap-start border border-lime/15 bg-[#315038]/50 p-5 transition-transform duration-200 hover:-translate-y-1"
+      >
+        <Dumbbell
+          size={20}
+          className="text-lime"
+          strokeWidth={1.5}
+        />
+
+        <p className="mt-6 font-mono text-[9px] font-bold tracking-[0.13em] text-lime/55">
+          {program.discipline ||
+            program.sport ||
+            "PROGRAM"}
+        </p>
+
+        <h3 className="mt-2 font-mono text-sm font-bold leading-5 tracking-[0.04em] text-lime">
+          {program.title}
+        </h3>
+
+        <p className="mt-3 text-sm leading-6 text-[#F7F5ED]/65">
+          {program.description}
+        </p>
+      </article>
+    ))}
+  </div>
+
+  {/* Swipe hint */}
+  {programs.length > 3 && (
+    <div className="mt-3 flex items-center justify-end gap-1 font-mono text-[8px] font-bold tracking-[0.12em] text-lime/40">
+      SWIPE TO EXPLORE
+      <ChevronRight size={12} />
+    </div>
+  )}
+</GlassPanel>
       {/* =====================================================
           ACHIEVEMENTS + OUTCOMES
       ====================================================== */}
@@ -648,10 +1541,15 @@ export default function AcademyProfilePage({
 
           <div className="achievements-list">
             {recentAchievements.map(
-              (achievement, index) => {
+              (
+                achievement,
+                index
+              ) => {
                 const Icon =
                   achievement.icon ||
-                  (index % 2 ? Award : Trophy);
+                  (index % 2
+                    ? Award
+                    : Trophy);
 
                 return (
                   <div
@@ -669,11 +1567,15 @@ export default function AcademyProfilePage({
 
                     <div>
                       <h4 className="item-title">
-                        {achievement.title}
+                        {
+                          achievement.title
+                        }
                       </h4>
 
                       <p className="item-sub-org">
-                        {achievement.date}
+                        {
+                          achievement.date
+                        }
                       </p>
                     </div>
                   </div>
@@ -692,7 +1594,11 @@ export default function AcademyProfilePage({
 
           <div className="grid grid-cols-2 gap-3">
             {outcomes.map(
-              ({ label, value, icon: Icon }) => (
+              ({
+                label,
+                value,
+                icon: Icon,
+              }) => (
                 <div
                   key={label}
                   className="border border-lime/10 bg-white/5 p-4"
@@ -729,53 +1635,59 @@ export default function AcademyProfilePage({
         />
 
         <div className="grid gap-4 md:grid-cols-2">
-          {opportunities.map((opportunity) => (
-            <article
-              key={
-                opportunity.id ||
-                opportunity.title
-              }
-              className="border border-lime/15 bg-[#315038]/50 p-5 transition-transform duration-200 hover:-translate-y-1"
-            >
-              <StatusBadge>
-                {opportunity.status || "OPEN"}
-              </StatusBadge>
-
-              <h3 className="mt-4 font-mono text-sm font-bold tracking-[0.05em] text-lime">
-                {opportunity.title}
-              </h3>
-
-              <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-xs text-[#F7F5ED]/60">
-                <span>
-                  {opportunity.sport || "Sport"}
-                </span>
-
-                <span className="inline-flex items-center gap-1">
-                  <MapPin
-                    size={13}
-                    className="text-lime"
-                  />
-                  {opportunity.location ||
-                    location}
-                </span>
-
-                <span>
-                  {opportunity.positions ||
-                    "Positions available"}
-                </span>
-              </div>
-
-              <button
-                onClick={() =>
-                  onViewOpportunity?.(opportunity)
+          {opportunities.map(
+            (opportunity) => (
+              <article
+                key={
+                  opportunity.id ||
+                  opportunity.title
                 }
-                className="mt-5 inline-flex items-center gap-1 border-b border-lime pb-1 font-mono text-[10px] font-bold tracking-[0.08em] text-lime"
+                className="border border-lime/15 bg-[#315038]/50 p-5 transition-transform duration-200 hover:-translate-y-1"
               >
-                VIEW OPPORTUNITY
-                <ChevronRight size={14} />
-              </button>
-            </article>
-          ))}
+                <StatusBadge>
+                  {opportunity.status ||
+                    "OPEN"}
+                </StatusBadge>
+
+                <h3 className="mt-4 font-mono text-sm font-bold tracking-[0.05em] text-lime">
+                  {opportunity.title}
+                </h3>
+
+                <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-xs text-[#F7F5ED]/60">
+                  <span>
+                    {opportunity.sport ||
+                      "Sport"}
+                  </span>
+
+                  <span className="inline-flex items-center gap-1">
+                    <MapPin
+                      size={13}
+                      className="text-lime"
+                    />
+                    {opportunity.location ||
+                      location}
+                  </span>
+
+                  <span>
+                    {opportunity.positions ||
+                      "Positions available"}
+                  </span>
+                </div>
+
+                <button
+                  onClick={() =>
+                    handleViewOpportunity(
+                      opportunity
+                    )
+                  }
+                  className="mt-5 inline-flex items-center gap-1 border-b border-lime pb-1 font-mono text-[10px] font-bold tracking-[0.08em] text-lime"
+                >
+                  VIEW OPPORTUNITY
+                  <ChevronRight size={14} />
+                </button>
+              </article>
+            )
+          )}
         </div>
       </GlassPanel>
 
@@ -799,7 +1711,8 @@ export default function AcademyProfilePage({
               </div>
 
               <h2 className="mt-3 font-mono text-xl font-bold tracking-[-0.04em] text-lime sm:text-2xl">
-                {name.toUpperCase()} CREDENTIAL
+                {name.toUpperCase()}{" "}
+                CREDENTIAL
               </h2>
 
               <div className="mt-6 grid gap-5 sm:grid-cols-2">
@@ -829,7 +1742,7 @@ export default function AcademyProfilePage({
                   </p>
 
                   <p className="mt-1 text-sm text-[#F7F5ED]/75">
-                    {academy.lastAuditDate ||
+                    {localAcademy.lastAuditDate ||
                       "14 AUG 2026"}
                   </p>
                 </div>
@@ -863,18 +1776,41 @@ export default function AcademyProfilePage({
               </div>
             </div>
 
-            <button
-              onClick={() =>
-                onViewVerificationRecord?.(academy)
-              }
-              className="matchpoint-pill-btn"
-            >
-              VIEW VERIFICATION RECORD
-              <ChevronRight size={14} />
-            </button>
+            {/* VIEW VERIFICATION RECORD REMOVED FOR MVP */}
           </div>
         </div>
       </div>
+
+      {/* =====================================================
+          EDIT PROFILE MODAL
+      ====================================================== */}
+
+      {showEditModal && (
+        <EditProfileModal
+          academy={localAcademy}
+          onClose={() =>
+            setShowEditModal(false)
+          }
+          onSave={handleSaveProfile}
+        />
+      )}
+
+      {/* =====================================================
+          VIEW MORE MODAL
+      ====================================================== */}
+
+      {collectionModal && (
+        <CollectionModal
+          title={collectionModal.title}
+          eyebrow={collectionModal.eyebrow}
+          items={collectionModal.items}
+          type={collectionModal.type}
+          onClose={() =>
+            setCollectionModal(null)
+          }
+        />
+      )}
     </div>
   );
 }
+

@@ -1,3 +1,4 @@
+
 import React, { useMemo, useState } from "react";
 import {
   Activity,
@@ -8,6 +9,7 @@ import {
   ChevronRight,
   Clock3,
   MapPin,
+  Search,
   ShieldCheck,
   UserRound,
   X,
@@ -72,7 +74,17 @@ const mockEngagements = [
   },
 ];
 
-const statuses = ["All", "Active", "Upcoming", "Completed", "Cancelled"];
+const statuses = [
+  "All",
+  "Active",
+  "Upcoming",
+  "Completed",
+  "Cancelled",
+];
+
+/* =========================================================
+   STATUS BADGE
+========================================================= */
 
 function StatusBadge({ status }) {
   const config = {
@@ -81,20 +93,23 @@ function StatusBadge({ status }) {
       className:
         "border-[#F2FF65]/40 bg-[#F2FF65]/10 text-[#F2FF65]",
     },
+
     Upcoming: {
       icon: Clock3,
       className:
-        "border-[#3B82F6]/50 bg-[#2C337F] text-[#F7F5ED]",
+        "border-[#3B82F6]/50 bg-[#2C337F]/60 text-[#93C5FD]",
     },
+
     Completed: {
       icon: Check,
       className:
         "border-[#4ADE80]/30 bg-[#4ADE80]/10 text-[#4ADE80]",
     },
+
     Cancelled: {
       icon: X,
       className:
-        "border-[#95402F] bg-[#95402F]/35 text-[#F7F5ED]",
+        "border-[#FF6B4A]/35 bg-[#95402F]/25 text-[#FF9A7A]",
     },
   };
 
@@ -103,7 +118,7 @@ function StatusBadge({ status }) {
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.12em] ${current.className}`}
+      className={`inline-flex shrink-0 items-center gap-1.5 rounded-md border px-2.5 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.08em] ${current.className}`}
     >
       <Icon size={11} strokeWidth={2.5} />
       {status}
@@ -111,157 +126,130 @@ function StatusBadge({ status }) {
   );
 }
 
-function SummaryCard({ label, value, icon: Icon, accent = false }) {
-  return (
-    <div
-      className={`rounded-xl border p-5 ${
-        accent
-          ? "border-[#F2FF65]/35 bg-[#F2FF65]/10"
-          : "border-[#F2FF65]/15 bg-[#315038]"
-      }`}
-    >
-      <div className="flex items-start justify-between">
-        <span className="font-mono text-[9px] font-bold uppercase tracking-[0.15em] text-[#F2FF65]/65">
-          {label}
-        </span>
+/* =========================================================
+   ENGAGEMENT CARD
+   Same visual language as Athlete Applications
+========================================================= */
 
-        <Icon
-          size={17}
-          className={accent ? "text-[#F2FF65]" : "text-[#F2FF65]/75"}
-          strokeWidth={1.5}
-        />
-      </div>
+function EngagementCard({ engagement, onClick, index }) {
+  const cardBackgrounds = [
+    "bg-[#95402f] border-[#b24f3c]/40",
+    "bg-[#2C337F] border-[#3a44a6]/40",
+    "bg-[#141F16] border-[#2A3C2E]",
+  ];
 
-      <p className="mt-5 font-['Poppins'] text-3xl font-semibold tracking-[-0.05em] text-[#F2FF65]">
-        {value}
-      </p>
-    </div>
-  );
-}
-
-function EngagementCard({ engagement, onClick }) {
-  const isActive = engagement.status === "Active";
-  const isCompleted = engagement.status === "Completed";
-  const isCancelled = engagement.status === "Cancelled";
+  const cardStyle =
+    cardBackgrounds[index % cardBackgrounds.length];
 
   return (
     <button
       onClick={() => onClick(engagement)}
-      className={`group relative flex min-h-[300px] flex-col overflow-hidden rounded-xl border p-5 text-left transition-all duration-200 hover:-translate-y-1 ${
-        isActive
-          ? "border-[#F2FF65]/35 bg-[#315038]"
-          : "border-[#F2FF65]/15 bg-[#315038]"
-      }`}
+      className={`group flex min-h-[300px] w-full flex-col rounded-2xl border p-5 text-left text-[#F7F8FA] font-['Inter',sans-serif] shadow-xl transition-all duration-300 hover:-translate-y-1 ${cardStyle}`}
     >
-      {/* top accent */}
-      <div
-        className={`absolute left-0 top-0 h-1 w-full ${
-          isActive
-            ? "bg-[#F2FF65]"
-            : isCompleted
-            ? "bg-[#4ADE80]"
-            : isCancelled
-            ? "bg-[#95402F]"
-            : "bg-[#3B82F6]"
-        }`}
-      />
-
-      <div className="flex items-start justify-between gap-3">
-        <div className="grid h-12 w-12 place-items-center rounded-lg bg-[#2C337F] text-[#F2FF65]">
-          <UserRound size={21} strokeWidth={1.5} />
-        </div>
-
-        <StatusBadge status={engagement.status} />
-      </div>
-
-      <div className="mt-5">
-        <p className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-[#F2FF65]/50">
-          {engagement.id} // ATHLETE ENGAGEMENT
-        </p>
-
-        <h2 className="mt-2 truncate font-['Poppins'] text-xl font-semibold tracking-[-0.04em] text-[#F2FF65]">
-          {engagement.athleteName}
-        </h2>
-
-        <p className="mt-1 truncate text-sm font-medium text-[#F7F5ED]/80">
-          {engagement.opportunityName}
-        </p>
-      </div>
-
-      <div className="mt-5 grid grid-cols-2 gap-3">
-        <div className="rounded-lg border border-[#F2FF65]/10 bg-[#2A3C2E] p-3">
-          <span className="font-mono text-[8px] uppercase tracking-[0.12em] text-[#F2FF65]/50">
-            Sport
-          </span>
-          <p className="mt-1 text-xs text-[#F7F5ED]">{engagement.sport}</p>
-        </div>
-
-        <div className="rounded-lg border border-[#F2FF65]/10 bg-[#2A3C2E] p-3">
-          <span className="font-mono text-[8px] uppercase tracking-[0.12em] text-[#F2FF65]/50">
-            Location
-          </span>
-          <p className="mt-1 flex items-center gap-1 text-xs text-[#F7F5ED]">
-            <MapPin size={11} />
-            {engagement.location}
-          </p>
-        </div>
-      </div>
-
-      {/* Timeline */}
-      <div className="mt-5">
-        <div className="mb-2 flex items-center justify-between">
-          <span className="font-mono text-[9px] uppercase tracking-[0.12em] text-[#F2FF65]/50">
-            Engagement Progress
-          </span>
-
-          <span className="font-mono text-[9px] text-[#F2FF65]">
-            {engagement.progress}%
-          </span>
-        </div>
-
-        <div className="h-1.5 overflow-hidden rounded-full bg-[#2A3C2E]">
-          <div
-            className={`h-full rounded-full transition-all ${
-              isCancelled
-                ? "bg-[#95402F]"
-                : isCompleted
-                ? "bg-[#4ADE80]"
-                : "bg-[#F2FF65]"
-            }`}
-            style={{ width: `${engagement.progress}%` }}
-          />
-        </div>
-      </div>
-
-      <div className="mt-auto flex items-center justify-between border-t border-[#F2FF65]/12 pt-4">
-        <div className="flex items-center gap-2">
-          <CalendarDays size={13} className="text-[#F2FF65]" />
-
-          <div>
-            <p className="font-mono text-[8px] uppercase tracking-[0.1em] text-[#F2FF65]/45">
-              Duration
+      {/* HEADER */}
+      <div className="space-y-3">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="mb-1 font-mono text-[9px] font-bold uppercase tracking-[0.14em] text-[#F2FF65]/55">
+              {engagement.id} // ENGAGEMENT
             </p>
 
-            <p className="mt-0.5 text-[10px] text-[#F7F5ED]/75">
-              {engagement.startDate} — {engagement.endDate}
+            <h3 className="font-['Poppins'] text-lg font-bold tracking-wide text-white uppercase">
+              {engagement.athleteName}
+            </h3>
+
+            <p className="mt-1 text-xs font-semibold text-gray-300">
+              {engagement.opportunityName}
             </p>
           </div>
+
+          <StatusBadge status={engagement.status} />
         </div>
 
-        <ChevronRight
-          size={17}
-          className="text-[#F2FF65] transition-transform duration-200 group-hover:translate-x-1"
-        />
+        {/* LOCATION */}
+        <div className="flex items-center gap-1.5 text-xs text-[#F2FF65]">
+          <MapPin size={14} />
+          <span>{engagement.location}</span>
+        </div>
+
+        {/* SPORT */}
+        <div className="font-mono text-sm font-bold text-[#F2FF65]">
+          {engagement.sport}
+        </div>
+
+        {/* DURATION */}
+        <div className="flex items-center gap-1.5 text-xs text-sky-400 font-mono font-medium">
+          <Clock3 size={13} />
+          <span>
+            {engagement.startDate} – {engagement.endDate}
+          </span>
+        </div>
+
+        {/* PROGRESS */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="font-mono text-[9px] uppercase tracking-[0.12em] text-gray-300">
+              Engagement Progress
+            </span>
+
+            <span className="font-mono text-[10px] font-bold text-[#F2FF65]">
+              {engagement.progress}%
+            </span>
+          </div>
+
+          <div className="h-1.5 overflow-hidden rounded-full bg-black/20">
+            <div
+              className={`h-full rounded-full transition-all ${
+                engagement.status === "Completed"
+                  ? "bg-[#4ADE80]"
+                  : engagement.status === "Cancelled"
+                  ? "bg-[#FF6B4A]"
+                  : "bg-[#F2FF65]"
+              }`}
+              style={{
+                width: `${engagement.progress}%`,
+              }}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* FOOTER */}
+      <div className="mt-auto flex items-center justify-between border-t border-white/15 pt-4">
+        <div className="flex items-center gap-1.5 text-[11px] text-gray-300 font-mono">
+          <CalendarDays
+            size={13}
+            className="text-gray-400"
+          />
+
+          <span>
+            {engagement.startDate} — {engagement.endDate}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-1 text-[#F2FF65] font-bold text-[11px]">
+          <span>VIEW</span>
+
+          <ChevronRight
+            size={15}
+            className="transition-transform duration-200 group-hover:translate-x-1"
+          />
+        </div>
       </div>
     </button>
   );
 }
 
+/* =========================================================
+   MODAL
+   Kept essentially the same as your original modal
+========================================================= */
+
 function EngagementModal({ engagement, onClose }) {
   if (!engagement) return null;
 
-  const isActive = engagement.status === "Active";
-  const isCompleted = engagement.status === "Completed";
+  const isCompleted =
+    engagement.status === "Completed";
 
   return (
     <div
@@ -271,7 +259,9 @@ function EngagementModal({ engagement, onClose }) {
       aria-label={`${engagement.athleteName} engagement`}
     >
       <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl border border-[#F2FF65]/25 bg-[#315038] shadow-2xl">
-        {/* Header */}
+
+        {/* HEADER */}
+
         <div className="relative overflow-hidden border-b border-[#F2FF65]/15 p-5 sm:p-6">
           <div className="absolute right-0 top-0 h-32 w-32 rounded-full bg-[#F2FF65]/5 blur-3xl" />
 
@@ -282,7 +272,9 @@ function EngagementModal({ engagement, onClose }) {
               </p>
 
               <div className="mt-3">
-                <StatusBadge status={engagement.status} />
+                <StatusBadge
+                  status={engagement.status}
+                />
               </div>
 
               <h2 className="mt-4 font-['Poppins'] text-2xl font-semibold tracking-[-0.045em] text-[#F2FF65]">
@@ -306,7 +298,9 @@ function EngagementModal({ engagement, onClose }) {
         </div>
 
         <div className="p-5 sm:p-6">
-          {/* Verification strip */}
+
+          {/* VERIFICATION */}
+
           <div className="flex items-center justify-between rounded-lg border border-[#4ADE80]/20 bg-[#4ADE80]/5 p-4">
             <div className="flex items-center gap-3">
               <div className="grid h-9 w-9 place-items-center rounded-full bg-[#4ADE80]/10">
@@ -321,16 +315,21 @@ function EngagementModal({ engagement, onClose }) {
                 <p className="font-mono text-[9px] uppercase tracking-[0.12em] text-[#4ADE80]">
                   Engagement Verification
                 </p>
+
                 <p className="mt-1 text-xs text-[#F7F5ED]/65">
                   {engagement.verification}
                 </p>
               </div>
             </div>
 
-            <Check size={18} className="text-[#4ADE80]" />
+            <Check
+              size={18}
+              className="text-[#4ADE80]"
+            />
           </div>
 
-          {/* Details */}
+          {/* DETAILS */}
+
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
             <DetailBox
               label="Athlete"
@@ -369,13 +368,15 @@ function EngagementModal({ engagement, onClose }) {
             />
           </div>
 
-          {/* Progress */}
+          {/* PROGRESS */}
+
           <div className="mt-5 rounded-lg border border-[#F2FF65]/12 bg-[#2A3C2E] p-5">
             <div className="flex items-center justify-between">
               <div>
                 <p className="font-mono text-[9px] font-bold uppercase tracking-[0.14em] text-[#F2FF65]/55">
                   Engagement Progress
                 </p>
+
                 <p className="mt-1 text-sm text-[#F7F5ED]">
                   {engagement.progress}% complete
                 </p>
@@ -389,14 +390,19 @@ function EngagementModal({ engagement, onClose }) {
             <div className="mt-4 h-2 overflow-hidden rounded-full bg-[#315038]">
               <div
                 className={`h-full rounded-full ${
-                  isCompleted ? "bg-[#4ADE80]" : "bg-[#F2FF65]"
+                  isCompleted
+                    ? "bg-[#4ADE80]"
+                    : "bg-[#F2FF65]"
                 }`}
-                style={{ width: `${engagement.progress}%` }}
+                style={{
+                  width: `${engagement.progress}%`,
+                }}
               />
             </div>
           </div>
 
-          {/* Description */}
+          {/* DESCRIPTION */}
+
           <div className="mt-5 rounded-lg border border-[#F2FF65]/12 bg-[#2A3C2E] p-5">
             <p className="font-mono text-[9px] font-bold uppercase tracking-[0.14em] text-[#F2FF65]/55">
               Engagement Brief
@@ -419,238 +425,216 @@ function EngagementModal({ engagement, onClose }) {
   );
 }
 
+/* =========================================================
+   DETAIL BOX
+========================================================= */
+
 function DetailBox({ label, value, icon: Icon }) {
   return (
     <div className="rounded-lg border border-[#F2FF65]/12 bg-[#2A3C2E] p-4">
       <div className="flex items-center gap-2">
-        <Icon size={13} className="text-[#F2FF65]" strokeWidth={1.5} />
+        <Icon
+          size={13}
+          className="text-[#F2FF65]"
+          strokeWidth={1.5}
+        />
 
         <p className="font-mono text-[9px] font-bold uppercase tracking-[0.13em] text-[#F2FF65]/55">
           {label}
         </p>
       </div>
 
-      <p className="mt-2 text-sm text-[#F7F5ED]">{value}</p>
+      <p className="mt-2 text-sm text-[#F7F5ED]">
+        {value}
+      </p>
     </div>
   );
 }
 
+/* =========================================================
+   MAIN COMPONENT
+========================================================= */
+
 export default function AcademyEngagementsSection() {
-  const [statusFilter, setStatusFilter] = useState("All");
-  const [selectedEngagement, setSelectedEngagement] = useState(null);
+  const [statusFilter, setStatusFilter] =
+    useState("All");
+
+  const [searchTerm, setSearchTerm] =
+    useState("");
+
+  const [selectedEngagement, setSelectedEngagement] =
+    useState(null);
+
+  /* SEARCH + STATUS FILTER */
 
   const visibleEngagements = useMemo(() => {
-    if (statusFilter === "All") return mockEngagements;
+    const search = searchTerm
+      .trim()
+      .toLowerCase();
 
-    return mockEngagements.filter(
-      (engagement) => engagement.status === statusFilter
-    );
-  }, [statusFilter]);
+    return mockEngagements.filter((engagement) => {
+      const matchesStatus =
+        statusFilter === "All" ||
+        engagement.status === statusFilter;
 
-  const activeCount = mockEngagements.filter(
-    (item) => item.status === "Active"
-  ).length;
+      const matchesSearch =
+        !search ||
+        engagement.athleteName
+          .toLowerCase()
+          .includes(search) ||
+        engagement.opportunityName
+          .toLowerCase()
+          .includes(search) ||
+        engagement.sport
+          .toLowerCase()
+          .includes(search) ||
+        engagement.location
+          .toLowerCase()
+          .includes(search);
 
-  const upcomingCount = mockEngagements.filter(
-    (item) => item.status === "Upcoming"
-  ).length;
-
-  const completedCount = mockEngagements.filter(
-    (item) => item.status === "Completed"
-  ).length;
-
-  const verifiedCount = mockEngagements.filter(
-    (item) => item.verification === "Verified"
-  ).length;
+      return matchesStatus && matchesSearch;
+    });
+  }, [statusFilter, searchTerm]);
 
   return (
-    <section className="verification-pane w-full bg-[#2A3C2E] font-['Inter'] text-[#F7F5ED]">
+    <section className="min-h-full w-full bg-[#2A3C2E] font-['Inter'] text-[#F7F5ED]">
 
-      {/* HERO */}
-      <div className="rounded-xl border border-[#F2FF65]/20 bg-[#315038] p-6 sm:p-8">
-        <div className="grid items-center gap-8 lg:grid-cols-[1fr_280px]">
+      {/* =====================================================
+          PAGE HEADER
+      ===================================================== */}
 
-          <div>
-            <p className="font-mono text-[9px] font-bold tracking-[0.18em] text-[#F2FF65]/60">
-              06.5 // ACADEMY ENGAGEMENT MATRIX
-            </p>
-
-            <h1 className="mt-3 font-['Poppins'] text-3xl font-bold tracking-[-0.055em] text-[#F7F5ED] sm:text-4xl">
-              ATHLETE{" "}
-              <span className="text-[#F2FF65]">
-                ENGAGEMENTS
-              </span>
-            </h1>
-
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-[#F7F5ED]/65">
-              Track active placements, upcoming collaborations, completed
-              engagements and the current relationship status of your academy
-              athletes.
-            </p>
-
-            <div className="mt-6 flex flex-wrap items-center gap-3">
-              <span className="inline-flex items-center gap-2 rounded-full border border-[#F2FF65]/35 bg-[#F2FF65]/10 px-3 py-2 font-mono text-[9px] font-bold text-[#F2FF65]">
-                <BriefcaseBusiness size={13} />
-                {activeCount} ACTIVE ENGAGEMENT
-              </span>
-
-              <span className="font-mono text-[9px] text-[#F7F5ED]/50">
-                {verifiedCount}/{mockEngagements.length} VERIFIED RECORDS
-              </span>
-            </div>
-          </div>
-
-          <div className="hidden lg:block">
-            <div className="relative overflow-hidden rounded-lg border border-[#F2FF65]/15 bg-[#2A3C2E]">
-              <div className="p-5">
-                <div className="flex items-center justify-between">
-                  <span className="font-mono text-[8px] uppercase tracking-[0.15em] text-[#F2FF65]/55">
-                    Engagement Status
-                  </span>
-
-                  <Activity
-                    size={15}
-                    className="text-[#F2FF65]"
-                    strokeWidth={1.5}
-                  />
-                </div>
-
-                <div className="mt-6 flex items-end gap-2">
-                  <span className="font-['Poppins'] text-4xl font-semibold text-[#F2FF65]">
-                    {activeCount}
-                  </span>
-
-                  <span className="mb-1 font-mono text-[9px] text-[#F7F5ED]/50">
-                    CURRENT
-                  </span>
-                </div>
-
-                <div className="mt-5 h-1.5 overflow-hidden rounded-full bg-[#315038]">
-                  <div
-                    className="h-full rounded-full bg-[#F2FF65]"
-                    style={{
-                      width: `${(activeCount / mockEngagements.length) * 100}%`,
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* SUMMARY */}
-      <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <SummaryCard
-          label="Active"
-          value={activeCount}
-          icon={Activity}
-          accent
-        />
-
-        <SummaryCard
-          label="Upcoming"
-          value={upcomingCount}
-          icon={Clock3}
-        />
-
-        <SummaryCard
-          label="Completed"
-          value={completedCount}
-          icon={Check}
-        />
-
-        <SummaryCard
-          label="Verified Records"
-          value={verifiedCount}
-          icon={ShieldCheck}
-        />
-      </div>
-
-      {/* FILTER */}
-      <div className="mt-8 rounded-xl border border-[#F2FF65]/15 bg-[#315038] p-4">
-        <div className="mb-3 flex items-center justify-between">
-          <span className="font-mono text-[9px] font-bold uppercase tracking-[0.15em] text-[#F2FF65]/60">
-            Engagement Filter
-          </span>
-
-          <span className="font-mono text-[9px] text-[#F7F5ED]/45">
-            {visibleEngagements.length} RECORDS
-          </span>
-        </div>
-
-        <div className="flex flex-wrap gap-2">
-          {statuses.map((status) => (
-            <button
-              key={status}
-              onClick={() => setStatusFilter(status)}
-              className={`rounded-full border px-4 py-2 text-[10px] font-bold uppercase tracking-[0.08em] transition-all ${
-                statusFilter === status
-                  ? "border-[#F2FF65] bg-[#F2FF65] text-[#07130D]"
-                  : "border-[#F2FF65]/20 bg-[#2A3C2E] text-[#F7F5ED]/60 hover:border-[#F2FF65]/50 hover:text-[#F2FF65]"
-              }`}
-            >
-              {status}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* SECTION HEADER */}
-      <div className="mb-5 mt-10 flex items-end justify-between border-b border-[#F2FF65]/15 pb-4">
+      <header className="mb-7 flex items-end justify-between border-b border-white/10 pb-5">
         <div>
-          <p className="font-mono text-[9px] font-bold tracking-[0.16em] text-[#F2FF65]/55">
-            ENGAGEMENT RECORDS
+          <p className="mb-1.5 font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-[#F2FF65]/60">
+            Academy Management
           </p>
 
-          <h2 className="mt-1 font-['Poppins'] text-2xl font-semibold tracking-[-0.04em] text-[#F2FF65]">
-            Academy Work
-          </h2>
+          <h1 className="font-['Poppins'] text-2xl font-semibold tracking-[-0.045em] text-[#F7F5ED]">
+            Engagements
+          </h1>
+
+          <p className="mt-1.5 text-xs text-[#F7F5ED]/50">
+            Track active, upcoming and completed athlete engagements.
+          </p>
         </div>
 
-        <span className="hidden font-mono text-[9px] text-[#F7F5ED]/40 sm:block">
-          CLICK RECORD TO INSPECT
+        <span className="hidden rounded-xl border border-[#F2FF65]/20 bg-[#F2FF65]/10 px-3 py-1 font-mono text-xs font-bold text-[#F2FF65] sm:block">
+          {visibleEngagements.length} RECORDS
         </span>
+      </header>
+
+      {/* =====================================================
+          SEARCH + FILTER BAR
+          Search left / filters right
+      ===================================================== */}
+
+      <div className="rounded-2xl border border-[#2A3C2E] bg-[#141F16] p-4 shadow-lg">
+
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+
+          {/* SEARCH */}
+
+          <div className="relative min-w-0 flex-1">
+            <Search
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"
+              size={16}
+            />
+
+            <input
+              type="text"
+              placeholder="Search athlete, opportunity, sport, or location..."
+              value={searchTerm}
+              onChange={(event) =>
+                setSearchTerm(event.target.value)
+              }
+              className="w-full rounded-xl border border-[#2A3C2E] bg-[#0B120D] py-2.5 pl-10 pr-4 text-xs text-white placeholder-gray-500 outline-none transition-colors focus:border-[#F2FF65] font-['Inter',sans-serif]"
+            />
+          </div>
+
+          {/* FILTERS — SHIFTED TO RIGHT */}
+
+          <div className="flex shrink-0 items-center gap-2 overflow-x-auto scrollbar-none">
+            {statuses.map((status) => (
+              <button
+                key={status}
+                onClick={() =>
+                  setStatusFilter(status)
+                }
+                className={`shrink-0 rounded-xl border px-3.5 py-2 text-[10px] font-['Poppins'] font-bold uppercase tracking-wider transition-all ${
+                  statusFilter === status
+                    ? "border-[#F2FF65] bg-[#F2FF65] text-[#141F16] shadow-sm"
+                    : "border-[#2A3C2E] bg-[#0B120D] text-gray-300 hover:border-[#F2FF65]/50 hover:text-white"
+                }`}
+              >
+                {status}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
-      {/* CARDS */}
+      {/* =====================================================
+          SECTION HEADER
+      ===================================================== */}
+
+      <div className="mt-7 mb-4 flex items-center justify-between">
+        <div>
+          <h2 className="font-['Poppins'] text-lg font-semibold tracking-[-0.035em] text-[#F7F5ED]">
+            Athlete Engagements
+          </h2>
+
+          <p className="mt-1 font-mono text-[9px] uppercase tracking-[0.12em] text-[#F7F5ED]/40">
+            {visibleEngagements.length} matching records
+          </p>
+        </div>
+      </div>
+
+      {/* =====================================================
+          CARDS
+      ===================================================== */}
+
       {visibleEngagements.length ? (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {visibleEngagements.map((engagement) => (
-            <EngagementCard
-              key={engagement.id}
-              engagement={engagement}
-              onClick={setSelectedEngagement}
-            />
-          ))}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {visibleEngagements.map(
+            (engagement, index) => (
+              <EngagementCard
+                key={engagement.id}
+                engagement={engagement}
+                index={index}
+                onClick={setSelectedEngagement}
+              />
+            )
+          )}
         </div>
       ) : (
-        <div className="flex min-h-[280px] flex-col items-center justify-center rounded-xl border border-[#F2FF65]/15 bg-[#315038] px-6 text-center">
-          <BriefcaseBusiness
+        <div className="rounded-2xl border border-[#2A3C2E] bg-[#141F16] p-10 text-center">
+          <Search
             size={28}
-            className="mb-4 text-[#F2FF65]"
+            className="mx-auto mb-4 text-[#F2FF65]"
             strokeWidth={1.5}
           />
 
-          <p className="font-mono text-[9px] uppercase tracking-[0.15em] text-[#F2FF65]/55">
-            No Matching Records
+          <p className="text-sm font-semibold text-white">
+            No engagements found
           </p>
 
-          <h2 className="mt-2 font-['Poppins'] text-lg font-semibold text-[#F2FF65]">
-            No engagements found
-          </h2>
-
-          <p className="mt-2 text-sm text-[#F7F5ED]/55">
-            There are no engagements matching this status.
+          <p className="mt-1 text-xs text-gray-400">
+            Try adjusting your search or status filter.
           </p>
         </div>
       )}
 
-      {/* MODAL */}
+      {/* =====================================================
+          MODAL
+      ===================================================== */}
+
       <EngagementModal
         engagement={selectedEngagement}
-        onClose={() => setSelectedEngagement(null)}
+        onClose={() =>
+          setSelectedEngagement(null)
+        }
       />
     </section>
   );
 }
+

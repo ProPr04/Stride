@@ -1,16 +1,18 @@
-
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
+  Award,
   BadgeCheck,
-  BriefcaseBusiness,
+  Calendar,
   ChevronRight,
-  Filter,
   MapPin,
   Search,
   Star,
+  Trophy,
   UserRound,
+  X,
+  Zap,
 } from "lucide-react";
 
 const COLORS = {
@@ -23,49 +25,193 @@ const COLORS = {
   text: "#F7F5ED",
 };
 
+/* =========================================================
+   MOCK ATHLETE PROFILE DATA
+========================================================= */
+
+const MOCK_ATHLETE_PROFILES = {
+  "1": {
+    age: "21 Yrs",
+    bio: "Dedicated football midfielder focused on developing technical ability, game intelligence and match consistency. Currently competing at state-level competitions and actively looking for academy opportunities.",
+    performanceMetrics:
+      "Goals: 18 | Assists: 14 | Matches Played: 32 | Pass Accuracy: 87% | State Ranking: #6",
+    achievements: [
+      {
+        title: "Best Midfielder - Maharashtra State U-21 Championship",
+        date: "Dec 2025",
+      },
+      {
+        title: "Semi-Finalist - National Youth Football Championship",
+        date: "Oct 2025",
+      },
+      {
+        title: "Player of the Match - State League Finals",
+        date: "Aug 2025",
+      },
+    ],
+  },
+
+  "2": {
+    age: "19 Yrs",
+    bio: "Young cricket all-rounder with a strong batting foundation and developing bowling ability. Known for consistency, athletic fielding and calm decision-making under pressure.",
+    performanceMetrics:
+      "Batting Average: 42.8 | Strike Rate: 136.4 | Wickets: 28 | Best Score: 112* | Matches: 41",
+    achievements: [
+      {
+        title: "Top Run Scorer - Maharashtra U-19 League",
+        date: "Jan 2026",
+      },
+      {
+        title: "Player of the Tournament - District Cricket Cup",
+        date: "Nov 2025",
+      },
+      {
+        title: "Century - Inter-Academy Championship",
+        date: "Sep 2025",
+      },
+    ],
+  },
+
+  "3": {
+    age: "22 Yrs",
+    bio: "Competitive badminton athlete specialising in singles. Focused on explosive movement, endurance and tactical court coverage with experience across state-level tournaments.",
+    performanceMetrics:
+      "State Ranking: #8 | Matches Won: 36 | Win Rate: 78% | Tournament Finals: 7",
+    achievements: [
+      {
+        title: "Silver Medal - Maharashtra State Badminton Championship",
+        date: "Dec 2025",
+      },
+      {
+        title: "Winner - Pune Open Badminton Series",
+        date: "Oct 2025",
+      },
+      {
+        title: "Quarter Finalist - National Ranking Tournament",
+        date: "Jul 2025",
+      },
+    ],
+  },
+
+  "4": {
+    age: "20 Yrs",
+    bio: "Emerging athletics sprinter specialising in 100m and 200m events. Training with a focus on acceleration mechanics, strength development and competition performance.",
+    performanceMetrics:
+      "100m PB: 10.68s | 200m PB: 21.74s | State Ranking: #4 | Events: 24",
+    achievements: [
+      {
+        title: "Gold Medal - Maharashtra Senior Athletics Championship",
+        date: "Dec 2025",
+      },
+      {
+        title: "Finalist - Khelo India University Games",
+        date: "Oct 2025",
+      },
+      {
+        title: "Bronze Medal - West Zone Athletics Championship",
+        date: "Aug 2025",
+      },
+    ],
+  },
+};
+
+/* =========================================================
+   ATHLETE CARD
+========================================================= */
+
 function AthleteCard({ athlete, onViewProfile }) {
+  const profile = MOCK_ATHLETE_PROFILES[String(athlete.id)] || {};
+
+  const image =
+    athlete.image ||
+    athlete.avatar ||
+    athlete.profileImage ||
+    profile.image ||
+    null;
+
   return (
     <article className="group min-w-[285px] snap-start overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#315038] via-[#223F31] to-[#166534] shadow-[0_12px_35px_rgba(0,0,0,0.18)] transition-all duration-300 hover:-translate-y-1.5 hover:border-[#F2FF65]/35 hover:shadow-[0_18px_45px_rgba(0,0,0,0.28)] sm:min-w-[320px]">
-      <div className="relative overflow-hidden border-b border-white/10 p-5">
-        <div className="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-[#F2FF65]/10 blur-2xl transition-all duration-300 group-hover:bg-[#F2FF65]/20" />
+      {/* PROFILE IMAGE */}
+      <div className="relative h-[250px] overflow-hidden bg-[#1B2B20]">
+        {image ? (
+          <>
+            <img
+              src={image}
+              alt={athlete.name}
+              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            />
 
-        <div className="relative flex items-start justify-between">
-          <div className="flex items-center gap-4">
-            <div className="grid h-[68px] w-[68px] shrink-0 place-items-center rounded-full border-2 border-[#F2FF65]/25 bg-[#2A3C2E] shadow-lg">
+            <div className="absolute inset-0 bg-gradient-to-t from-[#16251B] via-transparent to-transparent" />
+          </>
+        ) : (
+          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#315038] to-[#166534]">
+            <div className="grid h-28 w-28 place-items-center rounded-full border-2 border-[#F2FF65]/25 bg-[#2A3C2E]">
               <UserRound
-                size={30}
-                strokeWidth={1.4}
+                size={52}
+                strokeWidth={1.2}
                 className="text-[#F2FF65]"
               />
             </div>
-
-            <div className="min-w-0">
-              <div className="flex items-center gap-1.5">
-                <h3 className="truncate font-['Poppins'] text-base font-semibold tracking-[-0.03em] text-[#F7F5ED]">
-                  {athlete.name}
-                </h3>
-
-                {athlete.verified && (
-                  <BadgeCheck
-                    size={16}
-                    className="shrink-0 text-[#3B82F6]"
-                    fill="currentColor"
-                    strokeWidth={2.2}
-                  />
-                )}
-              </div>
-
-              <p className="mt-1 text-xs text-[#F7F5ED]/65">
-                {athlete.sport}
-                {athlete.position ? ` · ${athlete.position}` : ""}
-              </p>
-            </div>
           </div>
+        )}
+
+        {/* VERIFIED BADGE */}
+        {athlete.verified && (
+          <div className="absolute right-4 top-4 grid h-8 w-8 place-items-center rounded-full border border-white/20 bg-[#141F16]/80 backdrop-blur-md">
+            <BadgeCheck
+              size={18}
+              className="text-[#F2FF65]"
+              fill="currentColor"
+              strokeWidth={2}
+            />
+          </div>
+        )}
+
+        {/* SPORT */}
+        <div className="absolute bottom-4 left-4">
+          <span className="rounded-full border border-[#F2FF65]/30 bg-[#141F16]/75 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-[#F2FF65] backdrop-blur-md">
+            {athlete.sport || "Athlete"}
+          </span>
+        </div>
+      </div>
+
+      {/* INFORMATION */}
+      <div className="p-5">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5">
+              <h3 className="truncate font-['Poppins'] text-base font-semibold tracking-[-0.03em] text-[#F7F5ED]">
+                {athlete.name}
+              </h3>
+
+              {athlete.verified && (
+                <BadgeCheck
+                  size={15}
+                  className="shrink-0 text-[#3B82F6]"
+                  fill="currentColor"
+                  strokeWidth={2.2}
+                />
+              )}
+            </div>
+
+            <p className="mt-1 text-xs text-[#F7F5ED]/60">
+              {athlete.position || athlete.role || athlete.sport}
+            </p>
+          </div>
+
+          {athlete.rating && (
+            <div className="flex shrink-0 items-center gap-1 text-[#F2FF65]">
+              <Star size={12} fill="currentColor" />
+              <span className="text-xs font-semibold">
+                {athlete.rating}
+              </span>
+            </div>
+          )}
         </div>
 
-        <div className="relative mt-4 flex flex-wrap gap-2">
+        <div className="mt-4 flex flex-wrap gap-2">
           {athlete.level && (
-            <span className="rounded-full border border-[#F2FF65]/25 bg-[#2A3C2E]/60 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-[#F2FF65]">
+            <span className="rounded-full border border-[#F2FF65]/20 bg-[#2A3C2E]/70 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-[#F2FF65]">
               {athlete.level}
             </span>
           )}
@@ -77,134 +223,268 @@ function AthleteCard({ athlete, onViewProfile }) {
             </span>
           )}
         </div>
-      </div>
-
-      <div className="flex items-center justify-between p-5">
-        <div>
-          <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-[#F7F5ED]/40">
-            Performance
-          </p>
-
-          <div className="mt-1 flex items-center gap-2">
-            <div className="flex items-center gap-0.5 text-[#F2FF65]">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <Star
-                  key={star}
-                  size={12}
-                  fill="currentColor"
-                  strokeWidth={1}
-                />
-              ))}
-            </div>
-
-            <span className="text-xs font-semibold text-[#F7F5ED]">
-              {athlete.rating ?? "—"}
-            </span>
-          </div>
-        </div>
 
         <button
           onClick={() => onViewProfile(athlete)}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-[#F2FF65]/45 px-3.5 py-2 text-[11px] font-bold text-[#F2FF65] transition-all duration-200 hover:bg-[#F2FF65] hover:text-[#16251B]"
+          className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl border border-[#F2FF65]/35 bg-[#F2FF65]/5 px-4 py-2.5 text-[11px] font-bold text-[#F2FF65] transition-all duration-200 hover:bg-[#F2FF65] hover:text-[#16251B]"
         >
-          View Profile
-          <ChevronRight
-            size={13}
-            className="transition-transform group-hover:translate-x-0.5"
-          />
+          View Athlete Profile
+          <ChevronRight size={14} />
         </button>
       </div>
     </article>
   );
 }
 
-function OpportunityCard({ opportunity, applicationCount, onClick }) {
+/* =========================================================
+   ATHLETE PROFILE MODAL
+========================================================= */
+
+function AthleteProfileModal({ athlete, onClose }) {
+  if (!athlete) return null;
+
+  const mockProfile =
+    MOCK_ATHLETE_PROFILES[String(athlete.id)] || {};
+
+  const image =
+    athlete.image ||
+    athlete.avatar ||
+    athlete.profileImage ||
+    mockProfile.image ||
+    null;
+
+  const age = athlete.age || mockProfile.age || "21 Yrs";
+
+  const bio =
+    athlete.bio ||
+    mockProfile.bio ||
+    "Athlete profile information will appear here.";
+
+  const performanceMetrics =
+    athlete.performanceMetrics ||
+    mockProfile.performanceMetrics ||
+    "Performance information will be updated by the athlete.";
+
+  const achievements =
+    athlete.achievements?.length
+      ? athlete.achievements
+      : mockProfile.achievements || [];
+
   return (
-    <button
-      onClick={() => onClick(opportunity)}
-      className="group relative flex min-w-[300px] snap-start flex-col justify-between overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#0F172A] via-[#172554] to-[#2C337F] p-5 text-left shadow-[0_12px_35px_rgba(0,0,0,0.2)] transition-all duration-300 hover:-translate-y-1.5 hover:border-[#F2FF65]/35 hover:shadow-[0_18px_45px_rgba(0,0,0,0.3)] sm:min-w-[335px]"
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 backdrop-blur-md"
+      onClick={onClose}
     >
-      <div className="absolute -right-16 -top-16 h-40 w-40 rounded-full bg-[#3B82F6]/15 blur-3xl transition-all duration-300 group-hover:bg-[#3B82F6]/25" />
+      <div
+        className="relative max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-3xl border border-white/10 bg-[#141F16] shadow-[0_30px_100px_rgba(0,0,0,0.55)] scrollbar-none"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* CLOSE */}
+        <button
+          onClick={onClose}
+          className="absolute right-5 top-5 z-20 grid h-9 w-9 place-items-center rounded-full border border-white/10 bg-[#0B120D]/80 text-gray-300 backdrop-blur-md transition hover:border-[#F2FF65]/40 hover:text-[#F2FF65]"
+        >
+          <X size={17} />
+        </button>
 
-      <div className="relative">
-        <div className="flex items-start justify-between gap-3">
-          <span className="rounded-full border border-[#F2FF65]/30 bg-[#F2FF65]/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.1em] text-[#F2FF65]">
-            {opportunity.status || "Draft"}
-          </span>
-
-          <div className="grid h-9 w-9 place-items-center rounded-lg border border-white/10 bg-white/5">
-            <BriefcaseBusiness
-              size={16}
-              className="text-[#F2FF65]"
-              strokeWidth={1.5}
+        {/* COVER / IMAGE */}
+        <div className="relative h-[260px] overflow-hidden bg-gradient-to-br from-[#315038] to-[#166534]">
+          {image ? (
+            <img
+              src={image}
+              alt={athlete.name}
+              className="h-full w-full object-cover"
             />
+          ) : (
+            <div className="flex h-full items-center justify-center">
+              <div className="grid h-32 w-32 place-items-center rounded-full border-2 border-[#F2FF65]/30 bg-[#2A3C2E]">
+                <UserRound
+                  size={58}
+                  className="text-[#F2FF65]"
+                  strokeWidth={1.2}
+                />
+              </div>
+            </div>
+          )}
+
+          <div className="absolute inset-0 bg-gradient-to-t from-[#141F16] via-[#141F16]/10 to-transparent" />
+
+          <div className="absolute bottom-5 left-6 right-6">
+            <div className="flex items-end gap-4">
+              <div className="h-24 w-24 shrink-0 overflow-hidden rounded-full border-4 border-[#141F16] bg-[#0B120D] shadow-xl">
+                {image ? (
+                  <img
+                    src={image}
+                    alt={athlete.name}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="grid h-full w-full place-items-center">
+                    <UserRound
+                      size={38}
+                      className="text-[#F2FF65]"
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="min-w-0 pb-1">
+                <div className="flex items-center gap-2">
+                  <h2 className="font-['Poppins'] text-xl font-bold tracking-[-0.03em] text-white sm:text-2xl">
+                    {athlete.name}
+                  </h2>
+
+                  {athlete.verified && (
+                    <BadgeCheck
+                      size={19}
+                      className="text-[#F2FF65]"
+                      fill="currentColor"
+                    />
+                  )}
+                </div>
+
+                <p className="mt-1 text-xs font-medium text-gray-300">
+                  {athlete.position ||
+                    athlete.role ||
+                    athlete.sport ||
+                    "Athlete"}
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
-        <h3 className="mt-7 max-w-[270px] font-['Poppins'] text-lg font-semibold leading-tight tracking-[-0.035em] text-[#F7F5ED]">
-          {opportunity.title}
-        </h3>
+        {/* BASIC INFORMATION */}
+        <div className="grid grid-cols-1 gap-3 border-b border-[#2A3C2E] bg-[#0B120D] p-5 sm:grid-cols-3">
+          <div className="rounded-xl border border-[#2A3C2E] bg-[#141F16] p-4">
+            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-gray-500">
+              <Calendar size={13} className="text-[#F2FF65]" />
+              Age
+            </div>
 
-        <p className="mt-2 text-xs text-[#F7F5ED]/60">
-          {[opportunity.sport, opportunity.location]
-            .filter(Boolean)
-            .join(" · ") || "Opportunity details available"}
-        </p>
-      </div>
+            <p className="mt-2 text-sm font-semibold text-white">
+              {age}
+            </p>
+          </div>
 
-      <div className="relative mt-8 flex items-center justify-between border-t border-white/10 pt-4">
-        <div>
-          <p className="text-[9px] uppercase tracking-wider text-[#F7F5ED]/40">
-            Applications
-          </p>
+          <div className="rounded-xl border border-[#2A3C2E] bg-[#141F16] p-4">
+            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-gray-500">
+              <MapPin size={13} className="text-[#F2FF65]" />
+              Location
+            </div>
 
-          <p className="mt-0.5 text-xs font-semibold text-[#F7F5ED]">
-            {applicationCount === null
-              ? "Unavailable"
-              : `${applicationCount} application${
-                  applicationCount === 1 ? "" : "s"
-                }`}
-          </p>
+            <p className="mt-2 text-sm font-semibold text-white">
+              {athlete.location || "Location not available"}
+            </p>
+          </div>
+
+          <div className="rounded-xl border border-[#2A3C2E] bg-[#141F16] p-4">
+            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-gray-500">
+              <Award size={13} className="text-[#F2FF65]" />
+              Sport
+            </div>
+
+            <p className="mt-2 text-sm font-semibold text-white">
+              {athlete.sport || "Sport not available"}
+            </p>
+          </div>
         </div>
 
-        <span className="grid h-9 w-9 place-items-center rounded-full border border-[#F2FF65]/30 text-[#F2FF65] transition-all duration-200 group-hover:bg-[#F2FF65] group-hover:text-[#16251B]">
-          <ChevronRight size={16} />
-        </span>
-      </div>
-    </button>
-  );
-}
+        {/* CONTENT */}
+        <div className="space-y-5 p-5 sm:p-6">
+          {/* PERFORMANCE */}
+          <section className="rounded-2xl border border-[#F2FF65]/15 bg-gradient-to-br from-[#315038] to-[#223F31] p-5">
+            <div className="mb-3 flex items-center gap-2">
+              <Zap size={16} className="text-[#F2FF65]" />
 
-function SectionHeader({ title, description, onViewAll }) {
-  return (
-    <div className="mb-5 flex items-end justify-between gap-4">
-      <div>
-        <div className="flex items-center gap-2">
-          <span className="h-4 w-1 rounded-full bg-[#F2FF65]" />
+              <h3 className="text-[11px] font-bold uppercase tracking-[0.15em] text-[#F2FF65]">
+                Key Performance Stats
+              </h3>
+            </div>
 
-          <h2 className="font-['Poppins'] text-lg font-semibold tracking-[-0.04em] text-[#F7F5ED] sm:text-xl">
-            {title}
-          </h2>
+            <p className="text-sm font-semibold leading-6 text-white">
+              {performanceMetrics}
+            </p>
+          </section>
+
+          {/* BIO */}
+          <section className="rounded-2xl border border-[#2A3C2E] bg-[#0B120D] p-5">
+            <h3 className="mb-3 text-[11px] font-bold uppercase tracking-[0.15em] text-[#F2FF65]">
+              Athlete Bio
+            </h3>
+
+            <p className="text-sm leading-6 text-gray-300">
+              {bio}
+            </p>
+          </section>
+
+          {/* ACCOMPLISHMENTS */}
+          <section className="rounded-2xl border border-[#2A3C2E] bg-[#0B120D] p-5">
+            <div className="mb-4 flex items-center gap-2">
+              <Trophy size={16} className="text-[#F2FF65]" />
+
+              <h3 className="text-[11px] font-bold uppercase tracking-[0.15em] text-[#F2FF65]">
+                Athlete Accomplishments
+              </h3>
+            </div>
+
+            {achievements.length > 0 ? (
+              <div className="space-y-3">
+                {achievements.map((achievement, index) => (
+                  <div
+                    key={index}
+                    className="flex items-start gap-3 rounded-xl border border-[#2A3C2E] bg-[#141F16] p-4"
+                  >
+                    <div className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-[#F2FF65]/10">
+                      <Trophy
+                        size={15}
+                        className="text-[#F2FF65]"
+                      />
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-semibold leading-5 text-white">
+                        {achievement.title}
+                      </p>
+
+                      {achievement.date && (
+                        <p className="mt-1 text-[10px] font-medium text-gray-500">
+                          {achievement.date}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-xs text-gray-500">
+                No accomplishments added yet.
+              </p>
+            )}
+          </section>
         </div>
 
-        <p className="mt-1.5 pl-3 text-xs text-[#F7F5ED]/50">
-          {description}
-        </p>
-      </div>
+        {/* FOOTER */}
+        <div className="flex items-center justify-between border-t border-[#2A3C2E] bg-[#0B120D] px-5 py-4">
+          <div className="text-[10px] uppercase tracking-wider text-gray-500">
+            Athlete Profile
+          </div>
 
-      <button
-        onClick={onViewAll}
-        className="group inline-flex shrink-0 items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-bold text-[#F2FF65] transition-colors hover:bg-[#F2FF65]/10"
-      >
-        View all
-        <ChevronRight
-          size={14}
-          className="transition-transform group-hover:translate-x-0.5"
-        />
-      </button>
+          <button
+            onClick={onClose}
+            className="rounded-xl border border-[#F2FF65]/30 px-4 py-2 text-[11px] font-bold text-[#F2FF65] transition hover:bg-[#F2FF65] hover:text-[#16251B]"
+          >
+            Close Profile
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
+
+/* =========================================================
+   CAROUSEL ARROW
+========================================================= */
 
 function CarouselArrow({ direction, onClick, label }) {
   const isLeft = direction === "left";
@@ -224,15 +504,20 @@ function CarouselArrow({ direction, onClick, label }) {
   );
 }
 
+/* =========================================================
+   MAIN ACADEMY OVERVIEW
+========================================================= */
+
 export default function AcademyOverviewSection({
   academy,
   athletes = [],
-  opportunities = [],
-  applications = [],
-  setActiveTab,
 }) {
   const athleteCarouselRef = useRef(null);
-  const opportunityCarouselRef = useRef(null);
+
+  const [selectedAthlete, setSelectedAthlete] = useState(null);
+
+  /* NEW: SEARCH STATE */
+  const [searchQuery, setSearchQuery] = useState("");
 
   const scrollCarousel = (ref, direction) => {
     ref.current?.scrollBy({
@@ -241,46 +526,77 @@ export default function AcademyOverviewSection({
     });
   };
 
+  /* =====================================================
+     ATHLETE PROFILE MODAL
+  ===================================================== */
+
   const handleAthleteProfile = (athlete) => {
-    setActiveTab?.("athletes", athlete.id);
+    setSelectedAthlete(athlete);
   };
 
-  const handleOpportunityClick = (opportunity) => {
-    setActiveTab?.("opportunities", opportunity.id);
-  };
+  /*
+   * Temporary visual images.
+   * Backend images automatically take priority.
+   */
+  const visualAthletes = athletes.map((athlete, index) => {
+    const mockImages = [
+      "https://images.unsplash.com/photo-1560089000-7433a4ebbd64?w=700&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=700&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=700&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=700&auto=format&fit=crop&q=80",
+    ];
 
-  const getApplicationCount = (opportunity) => {
-    if (typeof opportunity.applicationCount === "number") {
-      return opportunity.applicationCount;
-    }
+    return {
+      ...athlete,
+      image:
+        athlete.image ||
+        athlete.avatar ||
+        athlete.profileImage ||
+        mockImages[index % mockImages.length],
+    };
+  });
 
-    if (typeof opportunity.applicationsCount === "number") {
-      return opportunity.applicationsCount;
-    }
+  /* =====================================================
+     WORKING ATHLETE SEARCH
+     
+     Searches through:
+     - Athlete name
+     - Sport
+     - Position
+     - Role
+     - Level
+     - Location
+     ===================================================== */
 
-    if (Array.isArray(opportunity.applications)) {
-      return opportunity.applications.length;
-    }
+  const filteredAthletes = visualAthletes.filter((athlete) => {
+    const query = searchQuery.trim().toLowerCase();
 
-    if (Array.isArray(applications)) {
-      const matching = applications.filter(
-        (application) =>
-          String(
-            application.opportunityId || application.opportunity?.id
-          ) === String(opportunity.id)
-      );
+    if (!query) return true;
 
-      return matching.length || null;
-    }
+    const searchableText = [
+      athlete.name,
+      athlete.sport,
+      athlete.position,
+      athlete.role,
+      athlete.level,
+      athlete.location,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
 
-    return null;
-  };
+    return searchableText.includes(query);
+  });
 
   return (
     <section className="min-h-full w-full bg-[#2A3C2E] font-['Inter'] text-[#F7F5ED]">
-      {/* HERO HEADER */}
+      {/* =====================================================
+          HERO
+      ===================================================== */}
+
       <header className="relative mb-8 overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#2C337F] via-[#172554] to-[#0F172A] px-6 py-6 shadow-[0_15px_40px_rgba(0,0,0,0.18)] sm:px-8 sm:py-7">
         <div className="absolute -right-20 -top-24 h-64 w-64 rounded-full bg-[#3B82F6]/15 blur-3xl" />
+
         <div className="absolute bottom-[-100px] left-[35%] h-48 w-48 rounded-full bg-[#2C337F]/30 blur-3xl" />
 
         <div className="relative">
@@ -297,75 +613,80 @@ export default function AcademyOverviewSection({
           </h1>
 
           <p className="mt-1.5 max-w-xl text-xs leading-5 text-[#F7F5ED]/65">
-            Find emerging sporting talent and build your academy's next
-            generation of athletes.
+            Find emerging sporting talent and build your academy's
+            next generation of athletes.
           </p>
         </div>
       </header>
 
-      {/* SEARCH */}
-      <div className="relative overflow-hidden rounded-2xl border border-[#F2FF65]/15 bg-gradient-to-r from-[#315038] via-[#223F31] to-[#2C337F] p-[1px] shadow-[0_12px_35px_rgba(0,0,0,0.15)]">
-        <div className="rounded-[15px] bg-[#315038]/90 p-4 backdrop-blur-md sm:p-5">
-          <div className="flex flex-col gap-3 lg:flex-row">
-            <label className="relative block flex-1">
-              <Search
-                size={17}
-                className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#F2FF65]/75"
-              />
+      {/* =====================================================
+          WORKING SEARCH
+      ===================================================== */}
 
-              <input
-                type="search"
-                placeholder="Search athletes by name, sport, skill or location"
-                className="w-full rounded-xl border border-white/10 bg-[#2A3C2E]/80 py-3 pl-11 pr-4 text-xs text-[#F7F5ED] outline-none placeholder:text-[#F7F5ED]/35 transition-all focus:border-[#F2FF65]/60 focus:ring-2 focus:ring-[#F2FF65]/10"
-              />
-            </label>
+      <div className="mx-auto max-w-3xl">
+        <label className="relative block">
+          <Search
+            size={18}
+            className="pointer-events-none absolute left-5 top-1/2 -translate-y-1/2 text-[#F2FF65]/70"
+          />
 
-            <div className="grid grid-cols-2 gap-3 sm:flex">
-              <select className="rounded-xl border border-white/10 bg-[#2A3C2E]/80 px-3 py-3 text-xs text-[#F7F5ED] outline-none focus:border-[#F2FF65]/60">
-                <option value="">All Sports</option>
-                <option value="football">Football</option>
-                <option value="cricket">Cricket</option>
-                <option value="athletics">Athletics</option>
-                <option value="badminton">Badminton</option>
-              </select>
+          <input
+            type="search"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search athletes, sports or skills..."
+            className="w-full rounded-full border border-white/10 bg-[#315038]/80 py-4 pl-12 pr-12 text-sm text-[#F7F5ED] shadow-[0_10px_30px_rgba(0,0,0,0.15)] outline-none placeholder:text-[#F7F5ED]/35 transition-all focus:border-[#F2FF65]/50 focus:ring-2 focus:ring-[#F2FF65]/10"
+          />
 
-              <select className="rounded-xl border border-white/10 bg-[#2A3C2E]/80 px-3 py-3 text-xs text-[#F7F5ED] outline-none focus:border-[#F2FF65]/60">
-                <option value="">Any Level</option>
-                <option value="national">National</option>
-                <option value="state">State</option>
-                <option value="professional">Professional</option>
-              </select>
-
-              <button className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#F2FF65]/35 bg-[#F2FF65] px-4 py-3 text-xs font-bold text-[#16251B] transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_25px_rgba(242,255,101,0.2)]">
-                <Filter size={15} />
-                <span className="hidden sm:inline">Filters</span>
-              </button>
-            </div>
-          </div>
-        </div>
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => setSearchQuery("")}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-[#F7F5ED]/40 transition hover:text-[#F2FF65]"
+              aria-label="Clear search"
+            >
+              <X size={17} />
+            </button>
+          )}
+        </label>
       </div>
 
-      {/* ATHLETES */}
-      <section className="mt-10">
-        <SectionHeader
-          title="Discover Athletes"
-          description="Athletes matched to your academy."
-          onViewAll={() => setActiveTab?.("athletes")}
-        />
+      {/* =====================================================
+          ATHLETES
+      ===================================================== */}
 
-        {athletes.length ? (
+      <section className="mt-10">
+        {/* VIEW ALL REMOVED */}
+
+        <div className="mb-5">
+          <div className="flex items-center gap-2">
+            <span className="h-4 w-1 rounded-full bg-[#F2FF65]" />
+
+            <h2 className="font-['Poppins'] text-lg font-semibold tracking-[-0.04em] text-[#F7F5ED] sm:text-xl">
+              Discover Athletes
+            </h2>
+          </div>
+
+          <p className="mt-1.5 pl-3 text-xs text-[#F7F5ED]/50">
+            Explore athletes and discover sporting talent.
+          </p>
+        </div>
+
+        {filteredAthletes.length ? (
           <div className="relative px-1 sm:px-2">
             <CarouselArrow
               direction="left"
               label="Previous athletes"
-              onClick={() => scrollCarousel(athleteCarouselRef, -1)}
+              onClick={() =>
+                scrollCarousel(athleteCarouselRef, -1)
+              }
             />
 
             <div
               ref={athleteCarouselRef}
               className="flex snap-x gap-5 overflow-x-auto px-1 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             >
-              {athletes.map((athlete) => (
+              {filteredAthletes.map((athlete) => (
                 <AthleteCard
                   key={athlete.id}
                   athlete={athlete}
@@ -377,87 +698,41 @@ export default function AcademyOverviewSection({
             <CarouselArrow
               direction="right"
               label="Next athletes"
-              onClick={() => scrollCarousel(athleteCarouselRef, 1)}
+              onClick={() =>
+                scrollCarousel(athleteCarouselRef, 1)
+              }
             />
           </div>
         ) : (
           <div className="flex min-h-[220px] items-center rounded-2xl border border-white/10 bg-gradient-to-br from-[#315038] to-[#166534] px-6">
             <div>
-              <UserRound
+              <Search
                 size={24}
                 className="mb-4 text-[#F2FF65]"
               />
 
               <h3 className="font-['Poppins'] text-base font-semibold text-[#F7F5ED]">
-                No athletes to show yet
+                No athletes found
               </h3>
 
               <p className="mt-2 text-xs text-[#F7F5ED]/55">
-                Athlete profiles will appear here when available.
+                Try searching for a different athlete, sport or skill.
               </p>
             </div>
           </div>
         )}
       </section>
 
-      {/* OPPORTUNITIES */}
-      <section className="mt-12">
-        <SectionHeader
-          title="Your Opportunities"
-          description="Manage your live and draft academy opportunities."
-          onViewAll={() => setActiveTab?.("opportunities")}
+      {/* =====================================================
+          ATHLETE PROFILE MODAL
+      ===================================================== */}
+
+      {selectedAthlete && (
+        <AthleteProfileModal
+          athlete={selectedAthlete}
+          onClose={() => setSelectedAthlete(null)}
         />
-
-        {opportunities.length ? (
-          <div className="relative px-1 sm:px-2">
-            <CarouselArrow
-              direction="left"
-              label="Previous opportunities"
-              onClick={() =>
-                scrollCarousel(opportunityCarouselRef, -1)
-              }
-            />
-
-            <div
-              ref={opportunityCarouselRef}
-              className="flex snap-x gap-5 overflow-x-auto px-1 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-            >
-              {opportunities.map((opportunity) => (
-                <OpportunityCard
-                  key={opportunity.id}
-                  opportunity={opportunity}
-                  applicationCount={getApplicationCount(opportunity)}
-                  onClick={handleOpportunityClick}
-                />
-              ))}
-            </div>
-
-            <CarouselArrow
-              direction="right"
-              label="Next opportunities"
-              onClick={() =>
-                scrollCarousel(opportunityCarouselRef, 1)
-              }
-            />
-          </div>
-        ) : (
-          <div className="flex min-h-[190px] flex-col justify-center rounded-2xl border border-white/10 bg-gradient-to-br from-[#0F172A] to-[#2C337F] px-6">
-            <BriefcaseBusiness
-              size={24}
-              className="mb-4 text-[#F2FF65]"
-            />
-
-            <h3 className="font-['Poppins'] text-base font-semibold text-[#F7F5ED]">
-              No opportunities yet
-            </h3>
-
-            <p className="mt-2 text-xs text-[#F7F5ED]/55">
-              Your academy opportunities will appear here.
-            </p>
-          </div>
-        )}
-      </section>
+      )}
     </section>
   );
 }
-
